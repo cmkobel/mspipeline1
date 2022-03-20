@@ -39,10 +39,9 @@ configfile: "config.yaml"
 config_batch = config["batch"]
 config_d_files = config["batch_parameters"][config_batch]["d_files"]
 config_database_glob = config["batch_parameters"][config_batch]["database_glob"]
+config_database_glob_read = glob.glob(config_database_glob)
 config_samples = config["batch_parameters"][config_batch]["samples"]
 
-
-config_database_glob_read = glob.glob(config_database_glob)
 
 
 # Present configuration
@@ -64,7 +63,7 @@ rule all:
 rule database:
     input: glob.glob(config_database_glob)
     output: "output/{config_batch}/database.what"
-    conda: "envs/java.yaml"
+    conda: "envs/openjdk.yaml"
     threads: 8
     shell: """
 

@@ -1,0 +1,14 @@
+# config file for the job execution on cluster 
+
+__default__:
+    account: "nn9864k"
+    partition: "normal"
+    #cpus-per-task: 1
+    time: "1:00:00"
+    mem: 1028
+    #output: "logs/{rule}-%j.out"
+    output: "logs/{rule}.out"
+    #error: "logs/{rule}-%j.err"
+    error: "logs/{rule}.err"
+
+
