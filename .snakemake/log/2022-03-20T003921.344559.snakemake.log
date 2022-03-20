@@ -1,2 +1,0 @@
-SyntaxError in line 50 of /cluster/projects/nn9864k/cmkobel/01_proteinextest/MS_pipeline1/snakefile:
-f-string: did you forget parentheses around the comprehension target?

@@ -1,2 +1,0 @@
-SyntaxError in line 121 of /cluster/projects/nn9864k/cmkobel/01_proteinextest/MS_pipeline1/snakefile:
-No rule keywords allowed after run/shell/script/notebook/wrapper/template_engine/cwl in rule database. (snakefile, line 121)

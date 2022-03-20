@@ -1,3 +1,0 @@
-NameError in line 55 of /cluster/projects/nn9864k/cmkobel/01_proteinextest/MS_pipeline1/snakefile:
-name 'stop' is not defined
-  File "/cluster/projects/nn9864k/cmkobel/01_proteinextest/MS_pipeline1/snakefile", line 55, in <module>

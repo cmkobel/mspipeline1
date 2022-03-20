@@ -1,4 +1,0 @@
-SystemExit in line 73 of /cluster/projects/nn9864k/cmkobel/01_proteinextest/MS_pipeline1/snakefile:
-None
-  File "/cluster/projects/nn9864k/cmkobel/01_proteinextest/MS_pipeline1/snakefile", line 73, in <module>
-  File "/cluster/projects/nn9864k/cmkobel/miniconda3/envs/smk/lib/python3.10/_sitebuiltins.py", line 26, in __call__

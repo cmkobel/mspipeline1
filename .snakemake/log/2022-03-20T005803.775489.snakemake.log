@@ -1,7 +1,0 @@
-Building DAG of jobs...
-MissingInputException in line 59 of /cluster/projects/nn9864k/cmkobel/01_proteinextest/MS_pipeline1/snakefile:
-Missing input files for rule database:
-    output: output/200315_test/database.what
-    wildcards: config_batch=200315_test
-    affected files:
-        /cluster/projects/nn9864k/shared/supacow/yannas_pilot_database/finaldb/*
