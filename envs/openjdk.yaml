@@ -1,4 +1,4 @@
-name: java
+name: openjdk
 channels:
   - conda-forge
 dependencies:

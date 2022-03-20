@@ -70,6 +70,7 @@ rule database:
 
         touch {output}
 
+        # Næste trin: få det til at køre på slurm. 
         """
 
 
