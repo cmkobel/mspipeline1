@@ -58,20 +58,51 @@ print()
 
 # Define default workflow
 rule all:
-    input: expand("output/{config_batch}/database.what", config_batch = config_batch)
+    input: expand("output/{config_batch}/database/philosopher_database.fas", config_batch = config_batch)
 
 rule database:
     input: glob.glob(config_database_glob)
-    output: "output/{config_batch}/database.what"
-    conda: "envs/openjdk.yaml"
-    benchmark: "output/{config_batch}/benchmarks/database.tab"
+    output: "output/{config_batch}/database/philosopher_database.fas"
+    #benchmark: "output/{config_batch}/benchmarks/database.tab"
     threads: 8
+    params:
+        philosopher = config["philosopher_executable"],
+        msfragger = config["msfragger_jar"]
     shell: """
 
-        touch {output}
 
-        # Næste trin: få det til at køre på slurm. 
+
+        # Cat all database source files into one.
+        cat {input} > output/{config_batch}/database/cat_database_sources.faa
+
+
+
+        #touch {output}
+
+        # As philosopher can't specify output files, we need to change dir.
+        cd output/{config_batch}/database
+
+
+        {params.philosopher} workspace \
+            --nocheck \
+            --clean 
+
+        {params.philosopher} workspace \
+            --nocheck \
+            --init 
+
+        rm *.fas || echo "nothing to delete" # Remove all previous databases if any.
+        {params.philosopher} database \
+            --custom cat_database_sources.faa \
+            --nodecoys #temp speedup
+            #--contam  #temp speedup
+
+        # Manually rename the philosopher output
+        mv *.fas philosopher_database.fas
+
         """
+
+
 
 
 

@@ -7,8 +7,10 @@ __default__:
     time: "1:00:00"
     mem: 1024
     #output: "logs/{rule}-%j.out"
-    output: "logs/{rule}.out"
+    output: "logs/{rule}.out.txt"
     #error: "logs/{rule}-%j.err"
-    error: "logs/{rule}.err"
+    error: "logs/{rule}.err.txt"
 
 
+database:
+    mem: 65536
