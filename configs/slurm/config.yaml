@@ -1,0 +1,36 @@
+# [--snakefile FILE] 
+cores: 2048
+# [--local-cores N] 
+#configfile: "configs/workflow.yaml"
+configfile: "config.yaml"
+
+# [--directory DIR] 
+keep-going: true 
+batch: "run_main=1/500" 
+rerun-incomplete: true
+# [--shadow-prefix DIR] 
+# [--reason] 
+# [--latency-wait SECONDS] 
+# [--max-jobs-per-second MAX_JOBS_PER_SECOND] 
+# [--greediness GREEDINESS] 
+# [--runtime-profile FILE] 
+show-failed-logs: false
+drmaa: "
+    --mem={cluster.mem} 
+    --cpus-per-task={cluster.cpus-per-task} 
+    --time={cluster.time} 
+    --account={cluster.account}
+    --error={cluster.error} 
+    --output={cluster.output}
+"
+
+cluster-config: "configs/slurm/cluster.yaml" 
+
+
+# [--jobscript SCRIPT] 
+jobname: "{name}.{jobid}.snakejob.sh" 
+use-conda: False
+use-singularity: True
+singularity-prefix: "/faststorage/home/cmkobel/singularity_images/"
+# [--conda-prefix DIR] 
+

@@ -1,0 +1,3 @@
+KeyError in line 41 of /cluster/projects/nn9864k/cmkobel/01_proteinextest/MS_pipeline1/snakefile:
+'200315_test'
+  File "/cluster/projects/nn9864k/cmkobel/01_proteinextest/MS_pipeline1/snakefile", line 41, in <module>

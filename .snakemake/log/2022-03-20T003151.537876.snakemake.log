@@ -1,0 +1,3 @@
+NameError in line 41 of /cluster/projects/nn9864k/cmkobel/01_proteinextest/MS_pipeline1/snakefile:
+name 'title' is not defined
+  File "/cluster/projects/nn9864k/cmkobel/01_proteinextest/MS_pipeline1/snakefile", line 41, in <module>

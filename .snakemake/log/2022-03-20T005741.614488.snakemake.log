@@ -1,0 +1,4 @@
+Building DAG of jobs...
+WildcardError in line 56 of /cluster/projects/nn9864k/cmkobel/01_proteinextest/MS_pipeline1/snakefile:
+Wildcards in input files cannot be determined from output files:
+'config_batch'

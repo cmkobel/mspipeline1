@@ -1,0 +1,4 @@
+Building DAG of jobs...
+WorkflowError:
+Failed to open source file /cluster/projects/nn9864k/cmkobel/01_proteinextest/MS_pipeline1/envs/java.yaml
+FileNotFoundError: [Errno 2] No such file or directory: '/cluster/projects/nn9864k/cmkobel/01_proteinextest/MS_pipeline1/envs/java.yaml'

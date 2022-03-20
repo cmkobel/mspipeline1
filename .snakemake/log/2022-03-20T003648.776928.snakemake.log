@@ -1,0 +1,3 @@
+WorkflowError in line 37 of /cluster/projects/nn9864k/cmkobel/01_proteinextest/MS_pipeline1/snakefile:
+Config file is not valid JSON or YAML. In case of YAML, make sure to not mix whitespace and tab indentation.
+  File "/cluster/projects/nn9864k/cmkobel/01_proteinextest/MS_pipeline1/snakefile", line 37, in <module>

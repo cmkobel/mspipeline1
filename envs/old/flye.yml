@@ -1,0 +1,9 @@
+name: flye
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - flye
+  - python=3.7
+  - porechop
+  - samtools
