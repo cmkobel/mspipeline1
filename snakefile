@@ -64,6 +64,7 @@ rule database:
     input: glob.glob(config_database_glob)
     output: "output/{config_batch}/database.what"
     conda: "envs/openjdk.yaml"
+    benchmark: "output/{config_batch}/benchmarks/database.tab"
     threads: 8
     shell: """
 

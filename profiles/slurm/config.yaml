@@ -1,6 +1,7 @@
 # [--snakefile FILE] 
 cores: 2048
 # [--local-cores N] 
+local-cores: 2
 #configfile: "configs/workflow.yaml"
 configfile: "config.yaml"
 jobs: 8
@@ -31,12 +32,10 @@ cluster: "sbatch --account {cluster.account} --time {cluster.time} --partition {
 #cluster: "sbatch -A {cluster.account} -t {cluster.time} -p {cluster.partition} --mem {cluster.mem} --error={cluster.error} --output={cluster.output}"
 
 
-
-# [--jobscript SCRIPT] 
 jobname: "{name}.{jobid}.snakejob.sh" 
 use-conda: true
+conda-prefix: "conda_base/"
 #use-singularity: True
 #singularity-prefix: "/faststorage/home/cmkobel/singularity_images/"
-conda-prefix: "conda_base/"
-# [--conda-prefix DIR] 
+
 
