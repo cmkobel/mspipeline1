@@ -14,3 +14,6 @@ __default__:
 
 database:
     mem: 65536
+
+msfragger:
+    mem: 65536

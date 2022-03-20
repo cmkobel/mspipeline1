@@ -58,7 +58,9 @@ print()
 
 # Define default workflow
 rule all:
-    input: expand("output/{config_batch}/database/philosopher_database.fas", config_batch = config_batch)
+    input: expand(["output/{config_batch}/database/philosopher_database.fas", \
+                   "output/{config_batch}/msfragger/output.what"], \
+                   config_batch = config_batch)
 
 rule database:
     input: glob.glob(config_database_glob)
@@ -103,6 +105,25 @@ rule database:
         """
 
 
+
+
+rule msfragger:
+    input: "output/{config_batch}/database/philosopher_database.fas"
+    output: "output/{config_batch}/msfragger/output.what"
+    threads: 8
+    params:
+        config_d_files = config_d_files
+    conda: "envs/openjdk.yaml"
+    shell: """
+        java \
+            -Xmx65G \
+            -jar /cluster/projects/nn9864k/shared/bin/MSFrager/bin/MSFragger-3.2/MSFragger-3.2.jar \
+            --num_threads {threads} \
+            --database_name {input}  {params.config_d_files}/*d
+
+
+        touch {output}
+        """
 
 
 
