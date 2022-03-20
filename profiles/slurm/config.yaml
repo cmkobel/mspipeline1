@@ -37,5 +37,5 @@ use-conda: true
 conda-prefix: "conda_base/"
 #use-singularity: True
 #singularity-prefix: "/faststorage/home/cmkobel/singularity_images/"
-
+cluster-cancel: true
 

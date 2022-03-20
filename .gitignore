@@ -2,3 +2,4 @@ output/
 trash/
 .snakemake/
 conda_base/
+logs/

@@ -37,22 +37,31 @@ print("                                                                   ")
 # Import configuration
 configfile: "config.yaml"
 config_batch = config["batch"]
-config_d_files = config["batch_parameters"][config_batch]["d_files"]
+config_d_base = config["batch_parameters"][config_batch]["d_base"]
 config_database_glob = config["batch_parameters"][config_batch]["database_glob"]
 config_database_glob_read = glob.glob(config_database_glob)
 config_samples = config["batch_parameters"][config_batch]["samples"]
 
 
+# Populate dataframe
+df = pd.DataFrame(data = {'sample':  config_samples.keys(),
+                          'barcode': config_samples.values()})
+
+df["path"] = config_d_base + "/" + df["barcode"]
+#pd.DataFrame.from_dict({'sample': config_samples.keys()})
+
+print(df)
+print("//")
+
+#print(df["path"].tolist()) # Debug
+
 
 # Present configuration
 print(f"config_batch:         '{config_batch}'")
-print(f"config_d_files:       '{config_d_files}'")
+print(f"config_d_base:       '{config_d_base}'")
 print(f"config_database_glob: '{config_database_glob}'")
 for i, j in enumerate(config_database_glob_read):
     print(f"  {i+1}) {j}")
-print(f"config_samples:")
-for i, j in config_samples.items():
-    print(f"  {i}: {j}")
 print()
 
 
@@ -60,7 +69,8 @@ print()
 rule all:
     input: expand(["output/{config_batch}/database/philosopher_database.fas", \
                    "output/{config_batch}/msfragger/output.what"], \
-                   config_batch = config_batch)
+                   config_batch = config_batch, \
+                   sample = df["sample"])
 
 rule database:
     input: glob.glob(config_database_glob)
@@ -108,18 +118,21 @@ rule database:
 
 
 rule msfragger:
-    input: "output/{config_batch}/database/philosopher_database.fas"
+    input:
+        database = ["output/{config_batch}/database/philosopher_database.fas"],
+        d_files = df["path"].tolist()
     output: "output/{config_batch}/msfragger/output.what"
     threads: 8
     params:
-        config_d_files = config_d_files
+        config_d_base = config_d_base
     conda: "envs/openjdk.yaml"
     shell: """
         java \
-            -Xmx65G \
+            -Xmx64G \
             -jar /cluster/projects/nn9864k/shared/bin/MSFrager/bin/MSFragger-3.2/MSFragger-3.2.jar \
             --num_threads {threads} \
-            --database_name {input}  {params.config_d_files}/*d
+            --database_name {input.database} \
+            {input.d_files}
 
 
         touch {output}
