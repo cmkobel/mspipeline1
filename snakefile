@@ -42,6 +42,14 @@ config_database_glob = config["batch_parameters"][config_batch]["database_glob"]
 config_database_glob_read = glob.glob(config_database_glob)
 config_samples = config["batch_parameters"][config_batch]["samples"]
 
+# Present configuration
+print(f"config_batch:         '{config_batch}'")
+print(f"config_d_base:        '{config_d_base}'")
+print(f"config_database_glob: '{config_database_glob}:'")
+for i, j in enumerate(config_database_glob_read):
+    print(f"  {i+1}) {j}")
+print()
+
 
 # Populate dataframe
 df = pd.DataFrame(data = {'sample':  config_samples.keys(),
@@ -55,14 +63,6 @@ print("//")
 
 #print(df["path"].tolist()) # Debug
 
-
-# Present configuration
-print(f"config_batch:         '{config_batch}'")
-print(f"config_d_base:       '{config_d_base}'")
-print(f"config_database_glob: '{config_database_glob}'")
-for i, j in enumerate(config_database_glob_read):
-    print(f"  {i+1}) {j}")
-print()
 
 
 # Define default workflow
@@ -78,8 +78,7 @@ rule database:
     #benchmark: "output/{config_batch}/benchmarks/database.tab"
     threads: 8
     params:
-        philosopher = config["philosopher_executable"],
-        msfragger = config["msfragger_jar"]
+        philosopher = config["philosopher_executable"]
     shell: """
 
 
@@ -121,21 +120,36 @@ rule msfragger:
     input:
         database = ["output/{config_batch}/database/philosopher_database.fas"],
         d_files = df["path"].tolist()
-    output: "output/{config_batch}/msfragger/output.what"
+    output: 
+        msfragger_version = "output/{config_batch}/msfragger/msfragger_version.txt",
+        untouchable = "output/{config_batch}/msfragger/output.what"
+    #shadow: "shallow" # Can't use shadow as it isn't a subdir.
     threads: 8
     params:
-        config_d_base = config_d_base
+        config_d_base = config_d_base,
+        msfragger_jar = config["msfragger_jar"]
     conda: "envs/openjdk.yaml"
     shell: """
+
+        # We can't manage the output path of MSFragger, so we need to symlink it to the directory where we want the output to reside.
+        # And no, we can't use snakemake-shadow, as it only works on relative subdirs.
+
+
         java \
             -Xmx64G \
-            -jar /cluster/projects/nn9864k/shared/bin/MSFrager/bin/MSFragger-3.2/MSFragger-3.2.jar \
+            -jar {params.msfragger_jar} \
+            --version > {output.msfragger_version}
+
+        java \
+            -Xmx64G \
+            -jar {params.msfragger_jar} \
             --num_threads {threads} \
             --database_name {input.database} \
+            --output_location "output/{wildcards.config_batch}/msfragger/" \
             {input.d_files}
 
 
-        touch {output}
+        touch {output.untouchable}
         """
 
 
