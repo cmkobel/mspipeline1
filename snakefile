@@ -67,15 +67,16 @@ print("//")
 
 # Define default workflow
 rule all:
-    input: expand(["output/{config_batch}/database/philosopher_database.fas", \
-                   "output/{config_batch}/msfragger/output.what", \
-                   "output/{config_batch}/annotate/done.flag"], \
+    input: expand(["output/{config_batch}/incremental_results/philosopher_database.fas", \
+                   "output/{config_batch}/incremental_results/msfragger.done"], \
                    config_batch = config_batch, \
                    sample = df["sample"])
 
-rule database:
+rule philosopher_database:
     input: glob.glob(config_database_glob)
-    output: "output/{config_batch}/database/philosopher_database.fas"
+    output: 
+        database = "output/{config_batch}/incremental_results/philosopher_database.fas",
+        flag = touch("output/{config_batch}/incremental_results/philosopher_database.done")
     #benchmark: "output/{config_batch}/benchmarks/database.tab"
     threads: 8
     params:
@@ -85,14 +86,11 @@ rule database:
 
 
         # Cat all database source files into one.
-        cat {input} > output/{config_batch}/database/cat_database_sources.faa
+        cat {input} > output/{config_batch}/incremental_results/cat_database_sources.faa
 
-
-
-        #touch {output}
 
         # As philosopher can't specify output files, we need to change dir.
-        cd output/{config_batch}/database
+        cd output/{config_batch}/incremental_results
 
 
         {params.philosopher} workspace \
@@ -109,21 +107,24 @@ rule database:
             --nodecoys #temp speedup
             #--contam  #temp speedup
 
-        # Manually rename the philosopher output
+        # Manually rename the philosopher output so we can grab it later
         mv *.fas philosopher_database.fas
+
+
+        ls * > philosopher_database.done
+
 
         """
 
 
 
-
 rule msfragger:
     input:
-        database = ["output/{config_batch}/database/philosopher_database.fas"],
+        database = "output/{config_batch}/incremental_results/philosopher_database.fas",
         d_files = df["path"].tolist()
     output: 
-        msfragger_version = "output/{config_batch}/msfragger/msfragger_version.txt",
-        untouchable = "output/{config_batch}/msfragger/output.what"
+        msfragger_version = "output/{config_batch}/incremental_results/msfragger_version.txt",
+        untouchable = touch("output/{config_batch}/incremental_results/msfragger.done")
     #shadow: "shallow" # Can't use shadow as it isn't a subdir.
     threads: 8
     params:
@@ -146,24 +147,26 @@ rule msfragger:
             -jar {params.msfragger_jar} \
             --num_threads {threads} \
             --database_name {input.database} \
-            --output_location "output/{wildcards.config_batch}/msfragger/" \
+            --output_location "output/{wildcards.config_batch}/incremental_results/" \
             {input.d_files}
 
 
-        touch {output.untouchable}
+        ls output/{wildcards.config_batch}/incremental_results > output/{wildcards.config_batch}/incremental_results/msfragger.done
+
         """
+
 
 
 
 rule annotate_questionmark:
     input: 
-        database = "output/{config_batch}/database/philosopher_database.fas"
-    output: "output/{config_batch}/annotate/done.flag"
+        database = "output/{config_batch}/incremental_results/philosopher_database.fas"
+    output: 
+        flag: touch("output/{config_batch}/incremental_results/annotate.done")
     params:
         philosopher = config["philosopher_executable"]
     shell: """
-        touch {output}
-        cd output/{config_batch}/annotate
+        cd output/{config_batch}/incremental_results
 
         {params.philosopher} workspace \
             --nocheck \
@@ -186,13 +189,14 @@ rule annotate_questionmark:
             --ppm \
             --accmass \
             --database ../../../{input.database} \
-            ../msfragger/*pepXML
+            ../../../incremental_results/*.pepXML
+
+
+        ls * > annotate.done
 
 
 
     """
-
-
 
 
 
