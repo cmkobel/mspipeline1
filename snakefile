@@ -68,7 +68,8 @@ print("//")
 # Define default workflow
 rule all:
     input: expand(["output/{config_batch}/database/philosopher_database.fas", \
-                   "output/{config_batch}/msfragger/output.what"], \
+                   "output/{config_batch}/msfragger/output.what", \
+                   "output/{config_batch}/annotate/done.flag"], \
                    config_batch = config_batch, \
                    sample = df["sample"])
 
@@ -151,6 +152,50 @@ rule msfragger:
 
         touch {output.untouchable}
         """
+
+
+
+rule annotate_questionmark:
+    input: 
+        database = "output/{config_batch}/database/philosopher_database.fas"
+    output: "output/{config_batch}/annotate/done.flag"
+    params:
+        philosopher = config["philosopher_executable"]
+    shell: """
+        touch {output}
+        cd output/{config_batch}/annotate
+
+        {params.philosopher} workspace \
+            --nocheck \
+            --clean
+
+        {params.philosopher} workspace \
+            --nocheck \
+            --init
+
+        echo "Annotating database ..."
+        {params.philosopher} database \
+            --annotate ../../../{input.database}
+
+        
+        echo "Peptideprophet ..."
+        {params.philosopher} peptideprophet \
+            --nonparam \
+            --expectscore \
+            --decoyprobs \
+            --ppm \
+            --accmass \
+            --database ../../../{input.database} \
+            ../msfragger/*pepXML
+
+
+
+    """
+
+
+
+
+
 
 
 

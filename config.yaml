@@ -1,7 +1,8 @@
 # Nesvilab doesn't like to make software freely available, so you have to specify the paths to philosopher and MSFragger
-philosopher_executable: "/cluster/projects/nn9864k/shared/bin/MSFrager/bin/philosopher"
+#philosopher_executable: "/cluster/projects/nn9864k/shared/bin/MSFrager/bin/philosopher"
 #msfragger_jar: "/cluster/projects/nn9864k/shared/bin/MSFrager/bin/MSFragger-3.2/MSFragger-3.2.jar"
-msfragger_jar: "/cluster/projects/nn9864k/shared/proprietary_software/MSFragger-3.4/MSFragger-3.4.jar"
+msfragger_jar: "/cluster/projects/nn9864k/shared/bin/MSFragger-3.4/MSFragger-3.4.jar"
+philosopher_executable: "/cluster/projects/nn9864k/shared/bin/philosopher_v4.1.1_linux_amd64/philosopher"
 
 
 # Pick a title
