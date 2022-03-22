@@ -243,6 +243,16 @@ rule peptideprophet:
             peptideprophet-{wildcards.sample}.pep.xml
 
 
+        echo "Filter ..." 
+        {params.philosopher} filter \
+            --sequential \
+            --razor \
+            --mapmods \
+            --pepxml peptideprophet-{wildcards.sample}.pep.xml \
+            --protxml proteinprophet-{wildcards.sample}.prot.xml
+
+        # Assuming that philosopher filter works in place
+
     
     """
 
