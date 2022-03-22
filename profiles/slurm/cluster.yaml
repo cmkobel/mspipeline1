@@ -5,7 +5,7 @@ __default__:
     partition: "normal"
     #cpus-per-task: 1
     time: "1:00:00"
-    mem: 1024
+    mem: 2048
     output: "logs/{rule}-%j.out.txt"
     #output: "logs/{rule}.out.txt"
     error: "logs/{rule}-%j.err.txt"
@@ -17,3 +17,6 @@ database:
 
 msfragger:
     mem: 65536
+
+ionquant:
+    mem: 32768

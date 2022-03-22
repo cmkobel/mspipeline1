@@ -1,6 +1,8 @@
     
-# alias snakeslurm='mkdir -p logs/old; mv logs/*.{err,out} logs/old 2> /dev/null; snakemake --profile configs/slurm'
+# alias smk='mv logs/*.txt logs/old 2> /dev/null; snakemake --profile profiles/slurm'
 
+
+__author__: "Carl Mathias Kobel & Arturo Vera De Ponce Leon"
 
 
 
@@ -76,13 +78,15 @@ print("//")
 # TODO: icremental_results should be renamed to "batch_results" or "prepare" or "prepare_batch"
 # TODO: fix the problem that means that I can't have snakemake running batch first and then per-sample. Maybe I need to use lambda?
 #       Well, asscom2 really is the other way around. It first takes samples, and then goes into samples. 
+# TODO: Ask Arturo about the weird bug that is also mentioned here https://github.com/Nesvilab/FragPipe/issues/4#issuecomment-309045306
 
 # Define default workflow
 rule all:
     input: expand(["output/{config_batch}/incremental_results/philosopher_database.fas", \
                    "output/{config_batch}/incremental_results/{basename}.pepXML", \
                    "output/{config_batch}/samples/{sample}/annotate.done", \
-                   "output/{config_batch}/samples/{sample}/peptideprophet-{sample}.pep.xml"], \
+                   "output/{config_batch}/samples/{sample}/peptideprophet-{sample}.pep.xml", \
+                   "output/{config_batch}/samples/{sample}/ionquant.done"], \
                    config_batch = config_batch, \
                    sample = df["sample"], \
                    basename = df["basename"])
@@ -153,6 +157,7 @@ rule msfragger:
         # We can't manage the output path of MSFragger, so we need to symlink it to the directory where we want the output to reside.
         # And no, we can't use snakemake-shadow, as it only works on relative subdirs.
 
+        >&2 echo "MSFragger ..."
         java \
             -Xmx64G \
             -jar {params.msfragger_jar} \
@@ -190,7 +195,7 @@ rule annotate:
             --nocheck \
             --init
 
-        echo "Annotating database ..."
+        >&2 echo "Annotating database ..."
         {params.philosopher} database \
             --annotate ../../../../{input.database}
 
@@ -208,8 +213,13 @@ rule peptideprophet:
         flag = "output/{config_batch}/samples/{sample}/annotate.done",
         #pepXML = "output/{config_batch}/incremental_results/{basename}.pepXML"
         pepXML = lambda wildcards: "output/{config_batch}/incremental_results/" + df[df["sample"]==wildcards.sample]["basename"].values[0] + ".pepXML"
-    output:
-        peptide = "output/{config_batch}/samples/{sample}/peptideprophet-{sample}.pep.xml"
+    output: ["output/{config_batch}/samples/{sample}/ion.tsv", \
+        "output/{config_batch}/samples/{sample}/peptideprophet-{sample}.pep.xml", \
+        "output/{config_batch}/samples/{sample}/peptide.tsv", \
+        "output/{config_batch}/samples/{sample}/protein.fas", \
+        "output/{config_batch}/samples/{sample}/proteinprophet-{sample}.prot.xml", \
+        "output/{config_batch}/samples/{sample}/protein.tsv", \
+        "output/{config_batch}/samples/{sample}/psm.tsv"]
         #protein = "output/{config_batch}/samples/{sample}/proteinprophet-{sample}.prot.xml"
     params:
         philosopher = config["philosopher_executable"]
@@ -223,7 +233,7 @@ rule peptideprophet:
 
 
         
-        echo "Peptideprophet ..."
+        >&2 echo "Peptideprophet ..."
         {params.philosopher} peptideprophet \
             --nonparam \
             --expectscore \
@@ -237,13 +247,13 @@ rule peptideprophet:
 
 
 
-        echo "Proteinprophet ..."
+        >&2 echo "Proteinprophet ..."
         {params.philosopher} proteinprophet \
             --output proteinprophet-{wildcards.sample} \
             peptideprophet-{wildcards.sample}.pep.xml
 
 
-        echo "Filter ..." 
+        >&2 echo "Filter ..." 
         {params.philosopher} filter \
             --sequential \
             --razor \
@@ -252,21 +262,45 @@ rule peptideprophet:
             --protxml proteinprophet-{wildcards.sample}.prot.xml
 
         # Assuming that philosopher filter works in place
-
+        # TODO: Ask Arturo if that is true.
+        >&2 echo "Report ..."
         {params.philosopher} report
 
-    
+        
     """
 
 
+rule ionquant:
+    input:
+        irrelevant = ["output/{config_batch}/samples/{sample}/ion.tsv", \
+            "output/{config_batch}/samples/{sample}/peptideprophet-{sample}.pep.xml", \
+            "output/{config_batch}/samples/{sample}/peptide.tsv", \
+            "output/{config_batch}/samples/{sample}/protein.fas", \
+            "output/{config_batch}/samples/{sample}/proteinprophet-{sample}.prot.xml", \
+            "output/{config_batch}/samples/{sample}/protein.tsv"], 
+        psm = "output/{config_batch}/samples/{sample}/psm.tsv",
+    output: touch("output/{config_batch}/samples/{sample}/ionquant.done")
+    threads: 8
+    params:
+        ionquant_jar = config["ionquant_jar"],
+        spectral = lambda wildcards: df[df["sample"]==wildcards.sample]["path"].values[0]
+
+    shell: """
 
 
+        >&2 echo "Ionquant ..."
+        java \
+            -Xmx32G \
+            -jar {params.ionquant_jar} \
+            --threads {threads} \
+            --specdir {params.spectral} \
+            --psm {input.psm}
+
+    """
+        
 
 
-
-
-
-
+print(df["path"].tolist())
 
 
 print("*/")
