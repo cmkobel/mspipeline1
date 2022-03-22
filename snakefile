@@ -16,21 +16,24 @@ import re
 
 
 print("/*")
-print("                                                                   ")
-print("                                                                   ")
-print("                             ___......__             _             ")
-print("                         _.-'           ~-_       _.=a~~-_         ")
-print(" --=====-.-.-_----------~   .--.       _   -.__.-~ ( ___===>       ")
-print("               '''--...__  (    \\ \\\\\\ { )       _.-~           ")
-print("                         =_ ~_  \\\\-~~~//~~~~-=-~                 ")
-print("                          |-=-~_ \\\\   \\\\                       ")
-print("                          |_/   =. )   ~}                          ")
-print("                          |}      ||                               ")
-print("                         //       ||                               ")
-print("                       _//        {{                               ")
-print("                    '='~'          \\\\_    =                      ")
-print("                                    ~~'                            ")
-print("                                                                   ")
+print("                                                                  ______________ ")
+print("                                                                 < MS_pipeline1 >")
+print("                                                                  -------------- ")
+print("                             ___......__             _            /              ")
+print("                         _.-'           ~-_       _.=a~~-_       /               ")
+print(" --=====-.-.-_----------~   .--.       _   -.__.-~ ( ___===>                     ")
+print("               '''--...__  (    \\ \\\\\\ { )       _.-~                         ")
+print("                         =_ ~_  \\\\-~~~//~~~~-=-~                               ")
+print("                          |-=-~_ \\\\   \\\\                                     ")
+print("                          |_/   =. )   ~}                                        ")
+print("                          |}      ||                                             ")
+print("                         //       ||                                             ")
+print("                       _//        {{                                             ")
+print("                    '='~'          \\\\_    =                                    ")
+print("                                    ~~'                                          ")
+print("                                                                                 ")
+
+
 
 
 
@@ -55,8 +58,12 @@ print()
 df = pd.DataFrame(data = {'sample':  config_samples.keys(),
                           'barcode': config_samples.values()})
 
+df["basename"] = [re.sub(".d$", "", barcode) for barcode in df["barcode"]]
 df["path"] = config_d_base + "/" + df["barcode"]
-#pd.DataFrame.from_dict({'sample': config_samples.keys()})
+
+
+#df["pepXML"] = "output/" + config_batch + "/incremental_results/" + df["basename"]
+
 
 print(df)
 print("//")
@@ -65,12 +72,18 @@ print("//")
 
 
 
+# TODO: icremental_results should be renamed to batch_results
+# TODO: fix the problem that means that I can't have snakemake running batch first and then per-sample. Maybe I need to use lambda?
+#       Well, asscom2 really is the other way around. It first takes samples, and then goes into samples. 
+
 # Define default workflow
 rule all:
     input: expand(["output/{config_batch}/incremental_results/philosopher_database.fas", \
-                   "output/{config_batch}/incremental_results/msfragger.done"], \
+                   "output/{config_batch}/incremental_results/{basename}.pepXML", \
+                   "output/{config_batch}/samples/{sample}/annotate.done"], \
                    config_batch = config_batch, \
-                   sample = df["sample"])
+                   sample = df["sample"], \
+                   basename = df["basename"])
 
 rule philosopher_database:
     input: glob.glob(config_database_glob)
@@ -90,6 +103,7 @@ rule philosopher_database:
 
 
         # As philosopher can't specify output files, we need to change dir.
+        mkdir -p output/{config_batch}/incremental_results
         cd output/{config_batch}/incremental_results
 
 
@@ -104,8 +118,7 @@ rule philosopher_database:
         rm *.fas || echo "nothing to delete" # Remove all previous databases if any.
         {params.philosopher} database \
             --custom cat_database_sources.faa \
-            --nodecoys #temp speedup
-            #--contam  #temp speedup
+            --contam 
 
         # Manually rename the philosopher output so we can grab it later
         mv *.fas philosopher_database.fas
@@ -120,11 +133,13 @@ rule philosopher_database:
 
 rule msfragger:
     input:
-        database = "output/{config_batch}/incremental_results/philosopher_database.fas",
+        database = "output/{config_batch}/incremental_results/philosopher_database.fas",  
         d_files = df["path"].tolist()
     output: 
-        msfragger_version = "output/{config_batch}/incremental_results/msfragger_version.txt",
-        untouchable = touch("output/{config_batch}/incremental_results/msfragger.done")
+        #msfragger_version = "output/{config_batch}/incremental_results/msfragger_version.txt",
+        #untouchable = touch("output/{config_batch}/incremental_results/msfragger.done"),
+        #pepXMLs = expand("output/{config_batch}/incremental_results/{pepXMLs}", config_batch = config_batch, pepXMLs = df["pepXML"])
+        pepXMLs = "output/{config_batch}/incremental_results/{basename}.pepXML"
     #shadow: "shallow" # Can't use shadow as it isn't a subdir.
     threads: 8
     params:
@@ -135,12 +150,6 @@ rule msfragger:
 
         # We can't manage the output path of MSFragger, so we need to symlink it to the directory where we want the output to reside.
         # And no, we can't use snakemake-shadow, as it only works on relative subdirs.
-
-
-        java \
-            -Xmx64G \
-            -jar {params.msfragger_jar} \
-            --version > {output.msfragger_version}
 
         java \
             -Xmx64G \
@@ -153,20 +162,23 @@ rule msfragger:
 
         ls output/{wildcards.config_batch}/incremental_results > output/{wildcards.config_batch}/incremental_results/msfragger.done
 
+
+        # makes a .pepindex and a pepXML for each sample.
+
         """
 
 
 
-
-rule annotate_questionmark:
+rule annotate:
     input: 
         database = "output/{config_batch}/incremental_results/philosopher_database.fas"
     output: 
-        flag: touch("output/{config_batch}/incremental_results/annotate.done")
+        flag = touch("output/{config_batch}/samples/{sample}/annotate.done")
     params:
         philosopher = config["philosopher_executable"]
     shell: """
-        cd output/{config_batch}/incremental_results
+        mkdir -p output/{config_batch}/samples/{wildcards.sample}
+        cd output/{config_batch}/samples/{wildcards.sample}
 
         {params.philosopher} workspace \
             --nocheck \
@@ -178,9 +190,26 @@ rule annotate_questionmark:
 
         echo "Annotating database ..."
         {params.philosopher} database \
-            --annotate ../../../{input.database}
+            --annotate ../../../../{input.database}
 
         
+        
+
+    """
+
+
+
+# For each sample
+rule peptideprophet:
+    input:
+        pepXML = "output/{config_batch}/incremental_results/{basename}.pepXML"
+        flag = "output/{config_batch}/samples/{sample}/annotate.done"
+    output:
+        = touch("output/{config_batch}/samples/peptideprophet.done")
+    shell: """
+
+        cd output/{wildcards.config_batch}/samples/{wildcards.sample}
+
         echo "Peptideprophet ..."
         {params.philosopher} peptideprophet \
             --nonparam \
@@ -188,16 +217,19 @@ rule annotate_questionmark:
             --decoyprobs \
             --ppm \
             --accmass \
-            --database ../../../{input.database} \
-            ../../../incremental_results/*.pepXML
+            --database ../../../../{input.database} \
+            {input.pepXML}
 
 
         ls * > annotate.done
 
-
+        
+        echo "Proteinprophet ..."
+        {params.philosopher} proteinprophet \
+            --output proteinprophet \
+            interact-*.pep.xml
 
     """
-
 
 
 
