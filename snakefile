@@ -273,14 +273,15 @@ rule peptideprophet:
 rule ionquant:
     input:
         irrelevant = ["output/{config_batch}/samples/{sample}/ion.tsv", \
-            "output/{config_batch}/samples/{sample}/peptideprophet-{sample}.pep.xml", \
             "output/{config_batch}/samples/{sample}/peptide.tsv", \
             "output/{config_batch}/samples/{sample}/protein.fas", \
             "output/{config_batch}/samples/{sample}/proteinprophet-{sample}.prot.xml", \
             "output/{config_batch}/samples/{sample}/protein.tsv"], 
         psm = "output/{config_batch}/samples/{sample}/psm.tsv",
+        pepxml = "output/{config_batch}/samples/{sample}/peptideprophet-{sample}.pep.xml"
     output: touch("output/{config_batch}/samples/{sample}/ionquant.done")
     threads: 8
+    conda: "envs/openjdk.yaml"
     params:
         ionquant_jar = config["ionquant_jar"],
         spectral = lambda wildcards: df[df["sample"]==wildcards.sample]["path"].values[0]
@@ -294,7 +295,8 @@ rule ionquant:
             -jar {params.ionquant_jar} \
             --threads {threads} \
             --specdir {params.spectral} \
-            --psm {input.psm}
+            --psm {input.psm} \
+            {input.pepxml}
 
     """
         
