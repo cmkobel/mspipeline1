@@ -253,6 +253,8 @@ rule peptideprophet:
 
         # Assuming that philosopher filter works in place
 
+        {params.philosopher} report
+
     
     """
 
