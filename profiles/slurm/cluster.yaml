@@ -6,10 +6,10 @@ __default__:
     #cpus-per-task: 1
     time: "1:00:00"
     mem: 1024
-    #output: "logs/{rule}-%j.out"
-    output: "logs/{rule}.out.txt"
-    #error: "logs/{rule}-%j.err"
-    error: "logs/{rule}.err.txt"
+    output: "logs/{rule}-%j.out.txt"
+    #output: "logs/{rule}.out.txt"
+    error: "logs/{rule}-%j.err.txt"
+    #error: "logs/{rule}.err.txt"
 
 
 database:

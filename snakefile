@@ -16,11 +16,12 @@ import re
 
 
 print("/*")
-print("                                                                  ______________ ")
-print("                                                                 < MS_pipeline1 >")
-print("                                                                  -------------- ")
-print("                             ___......__             _            /              ")
-print("                         _.-'           ~-_       _.=a~~-_       /               ")
+print("                                             ______________     ")
+print("                                            < MS_pipeline1 >    ")
+print("                                             --------------     ")
+print("                                                          \\      ")
+print("                             ___......__             _     \\                     ")
+print("                         _.-'           ~-_       _.=a~~-_                       ")
 print(" --=====-.-.-_----------~   .--.       _   -.__.-~ ( ___===>                     ")
 print("               '''--...__  (    \\ \\\\\\ { )       _.-~                         ")
 print("                         =_ ~_  \\\\-~~~//~~~~-=-~                               ")
@@ -72,7 +73,7 @@ print("//")
 
 
 
-# TODO: icremental_results should be renamed to batch_results
+# TODO: icremental_results should be renamed to "batch_results" or "prepare" or "prepare_batch"
 # TODO: fix the problem that means that I can't have snakemake running batch first and then per-sample. Maybe I need to use lambda?
 #       Well, asscom2 really is the other way around. It first takes samples, and then goes into samples. 
 
@@ -80,7 +81,8 @@ print("//")
 rule all:
     input: expand(["output/{config_batch}/incremental_results/philosopher_database.fas", \
                    "output/{config_batch}/incremental_results/{basename}.pepXML", \
-                   "output/{config_batch}/samples/{sample}/annotate.done"], \
+                   "output/{config_batch}/samples/{sample}/annotate.done", \
+                   "output/{config_batch}/samples/{sample}/peptideprophet-{sample}.pep.xml"], \
                    config_batch = config_batch, \
                    sample = df["sample"], \
                    basename = df["basename"])
@@ -202,14 +204,23 @@ rule annotate:
 # For each sample
 rule peptideprophet:
     input:
-        pepXML = "output/{config_batch}/incremental_results/{basename}.pepXML"
-        flag = "output/{config_batch}/samples/{sample}/annotate.done"
-    output:
-        = touch("output/{config_batch}/samples/peptideprophet.done")
+        database = "output/{config_batch}/incremental_results/philosopher_database.fas",
+        flag = "output/{config_batch}/samples/{sample}/annotate.done",
+        #pepXML = "output/{config_batch}/incremental_results/{basename}.pepXML"
+        pepXML = lambda wildcards: "output/{config_batch}/incremental_results/" + df[df["sample"]==wildcards.sample]["basename"].values[0] + ".pepXML"
+    output: touch("output/{config_batch}/samples/{sample}/peptideprophet-{sample}.pep.xml")
+    params:
+        philosopher = config["philosopher_executable"]
     shell: """
 
+        # Since the output location of philosopher is controlled by the input location, we should copy the input file.
+        cp {input.pepXML} output/{wildcards.config_batch}/samples/{wildcards.sample}/{wildcards.sample}.pepXML || echo "file exists already"
+
+        # Because of the workspace, we're forced to change dir
         cd output/{wildcards.config_batch}/samples/{wildcards.sample}
 
+
+        
         echo "Peptideprophet ..."
         {params.philosopher} peptideprophet \
             --nonparam \
@@ -217,18 +228,18 @@ rule peptideprophet:
             --decoyprobs \
             --ppm \
             --accmass \
+            --output peptideprophet \
             --database ../../../../{input.database} \
-            {input.pepXML}
+            {wildcards.sample}.pepXML
+            #../../../../{input.pepXML}
 
 
-        ls * > annotate.done
 
-        
         echo "Proteinprophet ..."
         {params.philosopher} proteinprophet \
             --output proteinprophet \
-            interact-*.pep.xml
-
+            peptideprophet-{wildcards.sample}.pep.xml
+    
     """
 
 
