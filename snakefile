@@ -208,7 +208,9 @@ rule peptideprophet:
         flag = "output/{config_batch}/samples/{sample}/annotate.done",
         #pepXML = "output/{config_batch}/incremental_results/{basename}.pepXML"
         pepXML = lambda wildcards: "output/{config_batch}/incremental_results/" + df[df["sample"]==wildcards.sample]["basename"].values[0] + ".pepXML"
-    output: touch("output/{config_batch}/samples/{sample}/peptideprophet-{sample}.pep.xml")
+    output:
+        peptide = "output/{config_batch}/samples/{sample}/peptideprophet-{sample}.pep.xml"
+        #protein = "output/{config_batch}/samples/{sample}/proteinprophet-{sample}.prot.xml"
     params:
         philosopher = config["philosopher_executable"]
     shell: """
@@ -237,10 +239,15 @@ rule peptideprophet:
 
         echo "Proteinprophet ..."
         {params.philosopher} proteinprophet \
-            --output proteinprophet \
+            --output proteinprophet-{wildcards.sample} \
             peptideprophet-{wildcards.sample}.pep.xml
+
+
     
     """
+
+
+
 
 
 
