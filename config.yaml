@@ -1,11 +1,14 @@
 # Nesvilab doesn't like to make software freely available, so you have to specify the paths to philosopher and MSFragger
-#philosopher_executable: "/cluster/projects/nn9864k/shared/bin/MSFrager/bin/philosopher"
-#msfragger_jar: "/cluster/projects/nn9864k/shared/bin/MSFrager/bin/MSFragger-3.2/MSFragger-3.2.jar"
+
+
 philosopher_executable: "/cluster/projects/nn9864k/shared/bin/philosopher_v4.1.1_linux_amd64/philosopher"
 msfragger_jar: "/cluster/projects/nn9864k/shared/bin/MSFragger-3.4/MSFragger-3.4.jar"
-#ionquant_jar: "/cluster/projects/nn9864k/shared/bin/IonQuant/IonQuant-1.7.17.jar"
 ionquant_jar: "/cluster/projects/nn9864k/shared/bin/MSFragger-3.4/ext/IonQuant-1.7.17.jar"
+crystalc_jar: "/cluster/projects/nn9864k/shared/bin/CrystalC-1.4.2/CrystalC-1.4.2.jar"
 
+#philosopher_executable: "/Users/kartoffel/MS_pipeline1_local/assets/proprietary_software/philosopher"
+#msfragger_jar: "/Users/kartoffel/MS_pipeline1_local/assets/proprietary_software/MSFragger-3.4.jar"
+#ionquant_jar: "/Users/kartoffel/MS_pipeline1_local/assets/proprietary_software/IonQuant-1.7.17.jar"
 
 
 # Pick a title
@@ -15,17 +18,23 @@ batch: "200315_test"
 # Define 
 batch_parameters:
   "200315_test":
-    d_base: "/cluster/projects/nn9864k/shared/supacow/raw_data/MS_spectra/200315_proteomics_test/timsTOFfiles/original" # This data is also available at NIRD, but I made a copy just to mess around and make sure I don't accidentally delete something important.
+    d_base: "/cluster/projects/nn9864k/shared/supacow/raw_data/uplc-msms-timstof/220302_proteomics_test/timsTOFfiles" # This data is also available at NIRD, but I made a copy just to mess around and make sure I don't accidentally delete something important.
+    
     #database_glob: "/cluster/projects/nn9864k/shared/supacow/yannas_pilot_database/finaldb/*" # All files are treated with the same database(s). I'm not sure yet, if snakemake can handle globs..
-    database_glob: "/cluster/projects/nn9864k/shared/supacow/yannas_pilot_database/finaldb/cp_cow_genome.faa" # All files are treated with the same database(s). I'm not sure yet, if snakemake can handle globs..
+    database_glob: "/cluster/projects/nn9864k/shared/supacow/yannas_pilot_database/finaldb/cp_cow_genome.faa" # Debug: faster with only one file, and this one is the smallest.
+
+    # Setup for local testing on branch local_dev
+    # d_base: "/Users/kartoffel/MS_pipeline1_local/test_data/timsTOFfiles"
+    # database_glob: "/Users/kartoffel/MS_pipeline1_local/test_data/database/finaldb/cp_cow_genome.faa"
+
 
     samples:
-      #"s01": "20220302_A1_Slot1-01_1_1592.d"
-      #"s02": "20220302_A2_Slot1-02_1_1593.d"
+      "s01": "20220302_A1_Slot1-01_1_1592.d"
+      "s02": "20220302_A2_Slot1-02_1_1593.d"
       #"s03": "20220302_A3_Slot1-03_1_1594.d"
       #"s04": "20220302_A4_Slot1-04_1_1595.d"
-      "s05": "20220302_A5_Slot1-05_1_1596.d"
-      "s06": "20220302_A6_Slot1-06_1_1597.d"
+      #"s05": "20220302_A5_Slot1-05_1_1596.d"
+      #"s06": "20220302_A6_Slot1-06_1_1597.d"
 
 
 

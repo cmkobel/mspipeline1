@@ -68,7 +68,7 @@ df["basename"] = [re.sub(".d$", "", barcode) for barcode in df["barcode"]]
 df["path"] = config_d_base + "/" + df["barcode"]
 
 
-#df["pepXML"] = "output/" + config_batch + "/incremental_results/" + df["basename"]
+#df["pepXML"] = "output/" + config_batch + "/philosopher_workspace/" + df["basename"]
 
 
 print(df)
@@ -85,8 +85,9 @@ print("//")
 
 # Define default workflow
 rule all:
-    input: expand(["output/{config_batch}/incremental_results/philosopher_database.fas", \
-                   "output/{config_batch}/incremental_results/{basename}.pepXML", \
+    input: expand(["output/{config_batch}/philosopher_workspace/philosopher_database.fas", \
+                   "output/{config_batch}/msfragger/{basename}.pepXML", \
+                   "output/{config_batch}/crystalc/{basename}.pepXML", \
                    "output/{config_batch}/samples/{sample}/annotate.done", \
                    "output/{config_batch}/samples/{sample}/peptideprophet-{sample}.pep.xml", \
                    "output/{config_batch}/samples/{sample}/ionquant.done"], \
@@ -94,11 +95,13 @@ rule all:
                    sample = df["sample"], \
                    basename = df["basename"])
 
+# TODO: Rename incremental results to philosopher_database
+# TODO: Move this rule down under msfragger and crystalc so it starts looking more like the tutorial I bookmarked.
 rule philosopher_database:
     input: glob.glob(config_database_glob)
     output: 
-        database = "output/{config_batch}/incremental_results/philosopher_database.fas",
-        flag = touch("output/{config_batch}/incremental_results/philosopher_database.done")
+        database = "output/{config_batch}/philosopher_workspace/philosopher_database.fas",
+        flag = touch("output/{config_batch}/philosopher_workspace/philosopher_database.done") # This flag is redundant but nice to have.
     #benchmark: "output/{config_batch}/benchmarks/database.tab"
     threads: 8
     params:
@@ -108,12 +111,12 @@ rule philosopher_database:
 
 
         # Cat all database source files into one.
-        cat {input} > output/{config_batch}/incremental_results/cat_database_sources.faa
+        cat {input} > output/{config_batch}/philosopher_workspace/cat_database_sources.faa
 
 
         # As philosopher can't specify output files, we need to change dir.
-        mkdir -p output/{config_batch}/incremental_results
-        cd output/{config_batch}/incremental_results
+        mkdir -p output/{config_batch}/philosopher_workspace
+        cd output/{config_batch}/philosopher_workspace
 
 
         {params.philosopher} workspace \
@@ -142,14 +145,15 @@ rule philosopher_database:
 
 rule msfragger:
     input:
-        database = "output/{config_batch}/incremental_results/philosopher_database.fas",  
+        database = "output/{config_batch}/philosopher_workspace/philosopher_database.fas",  
         d_files = df["path"].tolist()
     output: 
-        #msfragger_version = "output/{config_batch}/incremental_results/msfragger_version.txt",
-        #untouchable = touch("output/{config_batch}/incremental_results/msfragger.done"),
-        #pepXMLs = expand("output/{config_batch}/incremental_results/{pepXMLs}", config_batch = config_batch, pepXMLs = df["pepXML"])
-        pepXMLs = "output/{config_batch}/incremental_results/{basename}.pepXML"
+        #msfragger_version = "output/{config_batch}/philosopher_workspace/msfragger_version.txt",
+        #untouchable = touch("output/{config_batch}/philosopher_workspace/msfragger.done"),
+        #pepXMLs = expand("output/{config_batch}/philosopher_workspace/{pepXMLs}", config_batch = config_batch, pepXMLs = df["pepXML"])
+        pepXMLs = "output/{config_batch}/msfragger/{basename}.pepXML"
     #shadow: "shallow" # Can't use shadow as it isn't a subdir.
+    shadow: "minimal" # The setting shadow: "minimal" only symlinks the inputs to the rule. Once the rule successfully executes, the output file will be moved if necessary to the real path as indicated by output.
     threads: 8
     params:
         config_d_base = config_d_base,
@@ -166,22 +170,56 @@ rule msfragger:
             -jar {params.msfragger_jar} \
             --num_threads {threads} \
             --database_name {input.database} \
-            --output_location "output/{wildcards.config_batch}/incremental_results/" \
+            --output_location "output/{wildcards.config_batch}/msfragger/" \
             {input.d_files}
 
 
-        ls output/{wildcards.config_batch}/incremental_results > output/{wildcards.config_batch}/incremental_results/msfragger.done
+
+        ls output/{wildcards.config_batch}/msfragger > output/{wildcards.config_batch}/msfragger/msfragger.done
 
 
         # makes a .pepindex and a pepXML for each sample.
+        # I feel like it also creates a .mgf and .mzBIN in the source directory where the .d-dirs reside
+        # Should I not move the .pepXML files? No, because I'm using the --output_location argument.
+        # The tutorial mentions something about moving some .tsv files after running msfragger, but I haven't seen any.
+        # TODO: run crystal-c
+
 
         """
+
+
+#print(df["basename"].tolist())
+print(df["basename"].values)
+# Nesvilabs software er en dårlig kombination med snakemake fordi der ikke kommer nogen output filerw
+# Hvordan får jeg snakemake til at expandere ud over alle samples. Jeg vil gerne køre den for hver. Måske står det længere nede i min kode.
+rule crystalc:
+    input: 
+        lambda wildcards: "output/{config_batch}/msfragger/" + df[df["sample"]==wildcards.sample]["basename"].values + ".pepXML"
+    output: 
+        #lambda wildcards: "output/{config_batch}/crystalc/" + df[df["sample"]==wildcards.sample]["basename"].values[0] + ".pepXML"
+        "output/{config_batch}/crystalc/{sample}.pepXML"
+
+    # Det her skal selvfølgelig testes og alt det der. Men til det behøver jeg nok ikke at genkøre hele msfragger. Jeg kan bare gemme output-mappen som noget bestemt, fx. msoutput, og så toggle frem og tilbage indtil koden virker pålidelig. 
+    params: 
+        crystalc_jar = config["crystalc_jar"]
+
+    shell: """
+    
+        java -Xmx64G \
+            -jar {params.crystalc_jar} \
+            --output_location "output/{wildcards.config_batch}/crystalc" \
+            {input}
+
+        # I would like to see if I can abstain from using the crystalcParameterPath at all
+
+    """
+
 
 
 
 rule annotate:
     input: 
-        database = "output/{config_batch}/incremental_results/philosopher_database.fas"
+        database = "output/{config_batch}/philosopher_workspace/philosopher_database.fas"
     output: 
         flag = touch("output/{config_batch}/samples/{sample}/annotate.done")
     params:
@@ -212,10 +250,10 @@ rule annotate:
 # For each sample
 rule peptideprophet:
     input:
-        database = "output/{config_batch}/incremental_results/philosopher_database.fas",
+        database = "output/{config_batch}/philosopher_workspace/philosopher_database.fas",
         flag = "output/{config_batch}/samples/{sample}/annotate.done",
-        #pepXML = "output/{config_batch}/incremental_results/{basename}.pepXML"
-        pepXML = lambda wildcards: "output/{config_batch}/incremental_results/" + df[df["sample"]==wildcards.sample]["basename"].values[0] + ".pepXML"
+        #pepXML = "output/{config_batch}/philosopher_workspace/{basename}.pepXML"
+        pepXML = lambda wildcards: "output/{config_batch}/crystalc/" + df[df["sample"]==wildcards.sample]["basename"].values[0] + ".pepXML"
     output: ["output/{config_batch}/samples/{sample}/ion.tsv", \
         "output/{config_batch}/samples/{sample}/peptideprophet-{sample}.pep.xml", \
         "output/{config_batch}/samples/{sample}/peptide.tsv", \
@@ -305,7 +343,7 @@ rule ionquant:
         
 
 
-print(df["path"].tolist())
+#print(df["path"].tolist())
 
 
 print("*/")

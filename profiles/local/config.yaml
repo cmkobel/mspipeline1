@@ -1,0 +1,19 @@
+
+cores: 8
+
+
+
+configfile: "config.yaml"
+jobs: 8
+
+
+keep-going: true 
+batch: "run_main=1/500" 
+#rerun-incomplete: true
+
+show-failed-logs: false
+
+
+use-conda: true
+conda-prefix: "conda_base/"
+
