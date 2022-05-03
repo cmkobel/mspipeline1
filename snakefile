@@ -84,6 +84,8 @@ print("//")
 #       Well, asscom2 really is the other way around. It first takes samples, and then goes into samples. 
 # TODO: Ask Arturo about the weird bug that is also mentioned here https://github.com/Nesvilab/FragPipe/issues/4#issuecomment-309045306
 
+# Jeg tror jeg er nødt til at køre med basenamme hele vejen igennem i stedet for sample. Ellers tror jeg ikke ionquant kan gennemskue situationen.
+
 # Define default workflow
 rule all:
     input: expand(["output/{config_batch}/msfragger/philosopher_database.fas", \
@@ -99,55 +101,6 @@ rule all:
 # TODO: Move this rule down under msfragger and crystalc so it starts looking more like the tutorial I bookmarked. Or even stick it so that the workspace is made in the crystalc directory, so that it takes udgangspunkt in the correct files.
 
 
-
-
-
-
-
-
-rule msfragger:
-    input:
-        database = "output/{config_batch}/msfragger/philosopher_database.fas",  
-        d_files = df["path"].tolist()
-    output: 
-        #msfragger_version = "output/{config_batch}/msfragger/msfragger_version.txt",
-        #untouchable = touch("output/{config_batch}/msfragger/msfragger.done"),
-        #pepXMLs = expand("output/{config_batch}/msfragger/{pepXMLs}", config_batch = config_batch, pepXMLs = df["pepXML"])
-        pepXMLs = "output/{config_batch}/msfragger/{basename}.pepXML"
-    #shadow: "shallow" # Can't use shadow as it isn't a subdir.
-    shadow: "minimal" # The setting shadow: "minimal" only symlinks the inputs to the rule. Once the rule successfully executes, the output file will be moved if necessary to the real path as indicated by output.
-    threads: 8
-    params:
-        config_d_base = config_d_base,
-        msfragger_jar = config["msfragger_jar"]
-    conda: "envs/openjdk.yaml"
-    shell: """
-
-        # We can't manage the output path of MSFragger, so we need to symlink it to the directory where we want the output to reside.
-        # And no, we can't use snakemake-shadow, as it only works on relative subdirs.
-
-        >&2 echo "MSFragger ..."
-        java \
-            -Xmx64G \
-            -jar {params.msfragger_jar} \
-            --num_threads {threads} \
-            --database_name {input.database} \
-            --output_location "output/{wildcards.config_batch}/msfragger/" \
-            {input.d_files}
-
-
-
-        ls output/{wildcards.config_batch}/msfragger > output/{wildcards.config_batch}/msfragger/msfragger.done
-
-
-        # makes a .pepindex and a pepXML for each sample.
-        # I feel like it also creates a .mgf and .mzBIN in the source directory where the .d-dirs reside
-        # Should I not move the .pepXML files? No, because I'm using the --output_location argument.
-        # The tutorial mentions something about moving some .tsv files after running msfragger, but I haven't seen any.
-        # TODO: run crystal-c
-
-
-        """
 
 
 rule philosopher_database:
@@ -200,6 +153,55 @@ rule philosopher_database:
         """
 
 
+
+
+
+# I'm considering if msfragger should run individually for each sample ?
+rule msfragger:
+    input:
+        database = "output/{config_batch}/msfragger/philosopher_database.fas",  
+        d_files = df["path"].tolist()
+    output: 
+        #msfragger_version = "output/{config_batch}/msfragger/msfragger_version.txt",
+        #untouchable = touch("output/{config_batch}/msfragger/msfragger.done"),
+        #pepXMLs = expand("output/{config_batch}/msfragger/{pepXMLs}", config_batch = config_batch, pepXMLs = df["pepXML"])
+        pepXMLs = "output/{config_batch}/msfragger/{basename}.pepXML"
+    #shadow: "shallow" # Can't use shadow as it isn't a subdir.
+    shadow: "minimal" # The setting shadow: "minimal" only symlinks the inputs to the rule. Once the rule successfully executes, the output file will be moved if necessary to the real path as indicated by output.
+    threads: 8
+    params:
+        config_d_base = config_d_base,
+        msfragger_jar = config["msfragger_jar"]
+    conda: "envs/openjdk.yaml"
+    shell: """
+
+        # We can't manage the output path of MSFragger, so we need to symlink it to the directory where we want the output to reside.
+        # And no, we can't use snakemake-shadow, as it only works on relative subdirs.
+
+        >&2 echo "MSFragger ..."
+        java \
+            -Xmx64G \
+            -jar {params.msfragger_jar} \
+            --num_threads {threads} \
+            --database_name {input.database} \
+            --output_location "output/{wildcards.config_batch}/msfragger/" \
+            {input.d_files}
+
+
+
+        ls output/{wildcards.config_batch}/msfragger > output/{wildcards.config_batch}/msfragger/msfragger.done
+
+
+        # makes a .pepindex and a pepXML for each sample.
+        # I feel like it also creates a .mgf and .mzBIN in the source directory where the .d-dirs reside
+        # Should I not move the .pepXML files? No, because I'm using the --output_location argument.
+        # The tutorial mentions something about moving some .tsv files after running msfragger, but I haven't seen any.
+        # TODO: run crystal-c
+
+
+        """
+
+
 # crystalc has been disabled because I cannot get it running.
 #rule crystalc:
 #    input: "output/{config_batch}/msfragger/{basename}.pepXML"
@@ -225,6 +227,10 @@ rule philosopher_database:
 
 
 
+
+# The reason for all the subdirectories beneath is that I want to make a dir for each sample, and they all need a "workspace"
+# Wouldn't it be better to annotate the database, and then copy it to each dir? No, because the binary files in each subdir are different, so that wouldn't make sense. There is going to be _a lot_ of output files for each sample further down the line, so we want to segregate early on.
+# Running this job only takes a split second any way, keeping it in its own rule makes things easy to debug. So that is it.
 rule annotate:
     input: 
         database = "output/{config_batch}/msfragger/philosopher_database.fas"
@@ -315,6 +321,8 @@ rule peptideprophet:
         >&2 echo "Report ..."
         {params.philosopher} report
 
+
+
         
     """
 
@@ -343,15 +351,65 @@ rule ionquant:
             -Xmx32G \
             -jar {params.ionquant_jar} \
             --threads {threads} \
-            --specdir {params.spectral} \
+            --specdir {params.spectral}/.. \
             --psm {input.psm} \
             {input.pepxml}
+
+
 
     """
         
 
+# Usage:
+#     java -jar IonQuant.jar <options> --specdir <one directory to the spectral files> <.pepXML files>
+#     OR
+#     java -jar IonQuant.jar <options> --filelist <path to filelist file>
+# Options:
+ #     --specdir <string>     # Directory containing the spectral files (d/mzml/mzxml/raw/quantindex). One --specdir indicates one spectral directory and can have multiple --specdir.
+#     --threads <integer>    # Number of threads. 0 = all logical cores. Default: 0
+#     --mztol <float>        # MS1 tolerance in PPM. Default: 10.0
+#     --imtol <float>        # 1/K0 tolerance. Default: 0.05
+#     --rttol <float>        # Retention time tolerance. Unit: min. Default: 0.4
+#     --seedmz 0/1           # M/Z used as the start point of tracing. 0 = calculated M/Z; 1 = observed M/Z. Default: 0
+ #     --psm <string>         # Path to Philosopher's psm.tsv. One --psm indicates one psm.tsv and can have multiple --psm. Optional. Default: <blank>
+#     --multidir <string>    # Output directory for the multi-experimental result. Optional. Default: <blank>
+#     --normalization 0/1    # Normalize the intensities across all runs. Default: 1
+#     --minisotopes 1/2/3    # Minimum isotopes required in feature extraction. Default: 2
+#     --minscans <integer>   # Minimum MS1 scans required in feature extraction. Default: 3
+#     --minions <integer>    # Minimum ions required in quantifying proteins. Only for MaxLFQ intensity. Default: 2
+#     --excludemods <string> # Excluded modifications in quantifying peptide sequences and proteins. Format: <amino acid><mass>;... Default: <blank>
+#     --maxlfq 0/1           # Use MaxLFQ algorithm to calculate intensities. 0 = no, 1 = yes. Default: 1
+#     --minexps <int>        # Minimum experiments in picking an ion for quantifying proteins. Only for intensity, not for MaxLFQ intensity. Default: 2
+#     --minfreq <float>      # Minimum required frequency of an ion being selected for protein quantification. Only for intensity, not for MaxLFQ intensity. Default: 0.5
+#     --tp <int>             # Number of ions used in quantifying each protein. If 0, using all ions. For intensity, not for MaxLFQ intensity. Default: 3
+#     --mbr 0/1              # Perform match-between-runs. Default: 0
+#     --mbrrttol <float>     # Retention time tolerance used in match-between-runs. Unit: min. Default: 1.0
+#     --mbrimtol <float>     # 1/K0 tolerance used in match-between-runs. Default: 0.05
+#     --mbrtoprun <integer>  # Maximum number of donor runs for each acceptor run. Default: 100000
+#     --mbrmincorr <float>   # Minimum correlation coefficient between a donor run and its acceptor run. Default: 0
+#     --ionmobility 0/1      # The data has ion mobility information or not (for conventional LC-MS data). Default: 0
+#     --ionfdr <float>       # Transferred ion false discovery rate threshold. Default: 0.01
+#     --peptidefdr <float>   # Transferred peptide false discovery rate threshold. Default: 1
+#     --proteinfdr <float>   # Transferred protein false discovery rate threshold. Default: 1
+#     --light <string>       # Light labelling mass. Format: <amino acids><mass>;<amino acids><mass>;... Optional. Default: <blank>
+#     --medium <string>      # Medium labelling mass. Format: <amino acids><mass>;<amino acids><mass>;... Optional. Default: <blank>
+#     --heavy <string>       # Heavy labelling mass. Format: <amino acids><mass>;<amino acids><mass>;... Optional. Default: <blank>
+#     --requantify 0/1       # Re-quantify unidentified feature based on identified feature. Only activate when --light, --medium, or --heavy is not empty. Default: 1
+#     --writeindex 0/1       # Write indexed file on disk for further usage. 0 = no, 1 = yes. Default: 0
+#     --locprob <float>      # Localization probability threshold. Default: 0
+#     --filelist <string>    # A file list file containing --specdir, --psm, and --pepxml. Default: <blank>
 
-#print(df["path"].tolist())
+
+
+
+
+print(df["path"].tolist())
 
 
 print("*/")
+
+
+# TODO: 
+#   a) get ionquant working
+#   b) put msfragger into segregated jobs for each sample. (Uses a bit more resources, but is much faster!)
+
