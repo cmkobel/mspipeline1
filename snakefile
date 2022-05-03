@@ -69,7 +69,7 @@ df["path"] = config_d_base + "/" + df["barcode"]
 
 
 
-#df["pepXML"] = "output/" + config_batch + "/msfragger/" + df["basename"]
+
 
 
 print(df)
@@ -289,7 +289,7 @@ rule peptideprophet:
             --output peptideprophet \
             --database ../../../../{input.database} \
             {wildcards.basename}.pepXML
-            #../../../../{input.pepXML}
+
 
 
 
@@ -317,7 +317,7 @@ rule peptideprophet:
         
     """
 
-
+# TODO: This rule ought to output the abundances named in the samples name and not the basename?
 rule ionquant:
     input:
         irrelevant = ["output/{config_batch}/samples/{basename}/ion.tsv", \
@@ -335,6 +335,9 @@ rule ionquant:
     params:
         ionquant_jar = config["ionquant_jar"],
         #spectral = lambda wildcards: df[df["sample"]==wildcards.sample]["path"].values[0]
+        #spectral = lambda wildcards: df[df["basename"]==wildcards.basename]["path"].values[0]
+        config_d_base = config_d_base
+
 
     shell: """
 
@@ -345,8 +348,7 @@ rule ionquant:
             -jar {params.ionquant_jar} \
             --threads {threads} \
             --psm {input.psm} \
-            --multidir output/{config_batch}/samples/{wildcards.basename} \
-            --specdir /cluster/projects/nn9864k/shared/supacow/raw_data/uplc-msms-timstof/220302_proteomics_test/timsTOFfiles \
+            --specdir {params.config_d_base} \
             {input.pepxml} 
             # address to msfragger pepXML file
 
