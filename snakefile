@@ -20,12 +20,12 @@ import pandas as pd
 import re
 
 
-print("/*")
-print("                                             ______________     ")
-print("                                            < MS_pipeline1 >    ")
-print("                                             --------------     ")
-print("                                                          \\      ")
-print("                             ___......__             _     \\                     ")
+print("/*                                                                               ")
+print("                                             ______________                      ")
+print("                                            < MS_pipeline1 >                     ")
+print("                                             --------------                      ")
+print("                                                          \\                     ")
+print("                             ___......__             _     \\                    ")
 print("                         _.-'           ~-_       _.=a~~-_                       ")
 print(" --=====-.-.-_----------~   .--.       _   -.__.-~ ( ___===>                     ")
 print("               '''--...__  (    \\ \\\\\\ { )       _.-~                         ")
@@ -79,30 +79,24 @@ print("//")
 
 
 
-# TODO: icremental_results should be renamed to "batch_results" or "prepare" or "prepare_batch"
-# TODO: fix the problem that means that I can't have snakemake running batch first and then per-sample. Maybe I need to use lambda?
-#       Well, asscom2 really is the other way around. It first takes samples, and then goes into samples. 
-# TODO: Ask Arturo about the weird bug that is also mentioned here https://github.com/Nesvilab/FragPipe/issues/4#issuecomment-309045306
 
-# Jeg tror jeg er nødt til at køre med basenamme hele vejen igennem i stedet for sample. Ellers tror jeg ikke ionquant kan gennemskue situationen.
+
+# TODO: Ask Arturo about the weird bug that is also mentioned here https://github.com/Nesvilab/FragPipe/issues/4#issuecomment-309045306
 
 # Define default workflow
 rule all:
     input: expand(["output/{config_batch}/msfragger/philosopher_database.fas", \
                    "output/{config_batch}/msfragger/{basename}.pepXML", \
-                   "output/{config_batch}/samples/{sample}/annotate.done", \
-                   "output/{config_batch}/samples/{sample}/peptideprophet-{sample}.pep.xml", \
-                   "output/{config_batch}/samples/{sample}/ionquant.done"], \
+                   "output/{config_batch}/samples/{basename}/annotate.done", \
+                   "output/{config_batch}/samples/{basename}/peptideprophet-{basename}.pep.xml", \
+                   "output/{config_batch}/samples/{basename}/{basename}_quant.csv"], \
                    config_batch = config_batch, \
                    sample = df["sample"], \
                    basename = df["basename"])
 
-# TODO: Rename incremental results to philosopher_database
-# TODO: Move this rule down under msfragger and crystalc so it starts looking more like the tutorial I bookmarked. Or even stick it so that the workspace is made in the crystalc directory, so that it takes udgangspunkt in the correct files.
 
 
-
-
+# Build a database of the known amino acid sequences.
 rule philosopher_database:
     input: glob.glob(config_database_glob)
     output: 
@@ -156,17 +150,14 @@ rule philosopher_database:
 
 
 
-# I'm considering if msfragger should run individually for each sample ?
+# I'm considering if msfragger should run individually for each sample: It seems to be fundamentally impossible. 
+# TODO: Run a test without shadow: minimal.
 rule msfragger:
     input:
         database = "output/{config_batch}/msfragger/philosopher_database.fas",  
         d_files = df["path"].tolist()
-    output: 
-        #msfragger_version = "output/{config_batch}/msfragger/msfragger_version.txt",
-        #untouchable = touch("output/{config_batch}/msfragger/msfragger.done"),
-        #pepXMLs = expand("output/{config_batch}/msfragger/{pepXMLs}", config_batch = config_batch, pepXMLs = df["pepXML"])
+    output:
         pepXMLs = "output/{config_batch}/msfragger/{basename}.pepXML"
-    #shadow: "shallow" # Can't use shadow as it isn't a subdir.
     shadow: "minimal" # The setting shadow: "minimal" only symlinks the inputs to the rule. Once the rule successfully executes, the output file will be moved if necessary to the real path as indicated by output.
     threads: 8
     params:
@@ -202,7 +193,7 @@ rule msfragger:
         """
 
 
-# crystalc has been disabled because I cannot get it running.
+# crystalc has been disabled because the documentation is incomplete.
 #rule crystalc:
 #    input: "output/{config_batch}/msfragger/{basename}.pepXML"
 #    output: "output/{config_batch}/crystalc/{basename}.pepXML"
@@ -235,12 +226,12 @@ rule annotate:
     input: 
         database = "output/{config_batch}/msfragger/philosopher_database.fas"
     output: 
-        flag = touch("output/{config_batch}/samples/{sample}/annotate.done")
+        flag = touch("output/{config_batch}/samples/{basename}/annotate.done")
     params:
         philosopher = config["philosopher_executable"]
     shell: """
-        mkdir -p output/{config_batch}/samples/{wildcards.sample}
-        cd output/{config_batch}/samples/{wildcards.sample}
+        mkdir -p output/{config_batch}/samples/{wildcards.basename}
+        cd output/{config_batch}/samples/{wildcards.basename}
 
         {params.philosopher} workspace \
             --nocheck \
@@ -265,26 +256,26 @@ rule annotate:
 rule peptideprophet:
     input:
         database = "output/{config_batch}/msfragger/philosopher_database.fas",
-        flag = "output/{config_batch}/samples/{sample}/annotate.done",
-        #pepXML = "output/{config_batch}/msfragger/{basename}.pepXML"
-        pepXML = lambda wildcards: "output/{config_batch}/msfragger/" + df[df["sample"]==wildcards.sample]["basename"].values[0] + ".pepXML"
-    output: ["output/{config_batch}/samples/{sample}/ion.tsv", \
-        "output/{config_batch}/samples/{sample}/peptideprophet-{sample}.pep.xml", \
-        "output/{config_batch}/samples/{sample}/peptide.tsv", \
-        "output/{config_batch}/samples/{sample}/protein.fas", \
-        "output/{config_batch}/samples/{sample}/proteinprophet-{sample}.prot.xml", \
-        "output/{config_batch}/samples/{sample}/protein.tsv", \
-        "output/{config_batch}/samples/{sample}/psm.tsv"]
-        #protein = "output/{config_batch}/samples/{sample}/proteinprophet-{sample}.prot.xml"
+        flag = "output/{config_batch}/samples/{basename}/annotate.done",
+        #pepXML = lambda wildcards: "output/{config_batch}/msfragger/" + df[df["sample"]==wildcards.sample]["basename"].values[0] + ".pepXML"
+        pepXML = "output/{config_batch}/msfragger/{basename}.pepXML"
+    output: ["output/{config_batch}/samples/{basename}/ion.tsv", \
+        "output/{config_batch}/samples/{basename}/peptideprophet-{basename}.pep.xml", \
+        "output/{config_batch}/samples/{basename}/peptide.tsv", \
+        "output/{config_batch}/samples/{basename}/protein.fas", \
+        "output/{config_batch}/samples/{basename}/proteinprophet-{basename}.prot.xml", \
+        "output/{config_batch}/samples/{basename}/protein.tsv", \
+        "output/{config_batch}/samples/{basename}/psm.tsv"]
+        #protein = "output/{config_batch}/samples/{basename}/proteinprophet-{basename}.prot.xml"
     params:
         philosopher = config["philosopher_executable"]
     shell: """
 
         # Since the output location of philosopher is controlled by the input location, we should copy the input file.
-        cp {input.pepXML} output/{wildcards.config_batch}/samples/{wildcards.sample}/{wildcards.sample}.pepXML || echo "file exists already"
+        cp {input.pepXML} output/{wildcards.config_batch}/samples/{wildcards.basename}/{wildcards.basename}.pepXML || echo "file exists already"
 
         # Because of the workspace, we're forced to change dir
-        cd output/{wildcards.config_batch}/samples/{wildcards.sample}
+        cd output/{wildcards.config_batch}/samples/{wildcards.basename}
 
 
         
@@ -297,15 +288,15 @@ rule peptideprophet:
             --accmass \
             --output peptideprophet \
             --database ../../../../{input.database} \
-            {wildcards.sample}.pepXML
+            {wildcards.basename}.pepXML
             #../../../../{input.pepXML}
 
 
 
         >&2 echo "Proteinprophet ..."
         {params.philosopher} proteinprophet \
-            --output proteinprophet-{wildcards.sample} \
-            peptideprophet-{wildcards.sample}.pep.xml
+            --output proteinprophet-{wildcards.basename} \
+            peptideprophet-{wildcards.basename}.pep.xml
 
 
         >&2 echo "Filter ..." 
@@ -313,8 +304,8 @@ rule peptideprophet:
             --sequential \
             --razor \
             --mapmods \
-            --pepxml peptideprophet-{wildcards.sample}.pep.xml \
-            --protxml proteinprophet-{wildcards.sample}.prot.xml
+            --pepxml peptideprophet-{wildcards.basename}.pep.xml \
+            --protxml proteinprophet-{wildcards.basename}.prot.xml
 
         # Assuming that philosopher filter works in place
         # TODO: Ask Arturo if that is true.
@@ -329,19 +320,21 @@ rule peptideprophet:
 
 rule ionquant:
     input:
-        irrelevant = ["output/{config_batch}/samples/{sample}/ion.tsv", \
-            "output/{config_batch}/samples/{sample}/peptide.tsv", \
-            "output/{config_batch}/samples/{sample}/protein.fas", \
-            "output/{config_batch}/samples/{sample}/proteinprophet-{sample}.prot.xml", \
-            "output/{config_batch}/samples/{sample}/protein.tsv"], 
-        psm = "output/{config_batch}/samples/{sample}/psm.tsv",
-        pepxml = "output/{config_batch}/samples/{sample}/peptideprophet-{sample}.pep.xml"
-    output: touch("output/{config_batch}/samples/{sample}/ionquant.done")
+        irrelevant = ["output/{config_batch}/samples/{basename}/ion.tsv", \
+            "output/{config_batch}/samples/{basename}/peptide.tsv", \
+            "output/{config_batch}/samples/{basename}/protein.fas", \
+            "output/{config_batch}/samples/{basename}/proteinprophet-{basename}.prot.xml", \
+            "output/{config_batch}/samples/{basename}/protein.tsv"], 
+        psm = "output/{config_batch}/samples/{basename}/psm.tsv",
+        #pepxml = "output/{config_batch}/samples/{basename}/peptideprophet-{basename}.pep.xml",
+        pepxml = "output/{config_batch}/msfragger/{basename}.pepXML"
+    output: #touch("output/{config_batch}/samples/{basename}/ionquant.done")
+        csv = "output/{config_batch}/samples/{basename}/{basename}_quant.csv"
     threads: 8
     conda: "envs/openjdk.yaml"
     params:
         ionquant_jar = config["ionquant_jar"],
-        spectral = lambda wildcards: df[df["sample"]==wildcards.sample]["path"].values[0]
+        #spectral = lambda wildcards: df[df["sample"]==wildcards.sample]["path"].values[0]
 
     shell: """
 
@@ -352,13 +345,20 @@ rule ionquant:
             -jar {params.ionquant_jar} \
             --threads {threads} \
             --psm {input.psm} \
+            --multidir output/{config_batch}/samples/{wildcards.basename} \
             --specdir /cluster/projects/nn9864k/shared/supacow/raw_data/uplc-msms-timstof/220302_proteomics_test/timsTOFfiles \
-            output/220315_test/msfragger/20220302_A1_Slot1-01_1_1592.pepXML 
+            {input.pepxml} 
+            # address to msfragger pepXML file
+
+
+            # TODO: Ask Arturo if it makes any sense that I'm not using the pepXML from peptideprophet, but the one directly from msfragger
 
             # Apparently, --specdir should point to the msfragger pepxmls. Maybe, I just need to point to the msfragger dir.
             # Or maybe I need to point directly to the file.
             # --specdir output/220315_test/msfragger/20220302_A1_Slot1-01_1_1592.pepXML 
             # Maybe the other pepxml is the culprit
+
+            mv output/{config_batch}/msfragger/{wildcards.basename}_quant.csv output/{config_batch}/samples/{wildcards.basename}/{wildcards.basename}_quant.csv
 
 
 
