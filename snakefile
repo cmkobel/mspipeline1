@@ -69,7 +69,7 @@ df["path"] = config_d_base + "/" + df["barcode"]
 
 
 
-#df["pepXML"] = "output/" + config_batch + "/philosopher_workspace/" + df["basename"]
+#df["pepXML"] = "output/" + config_batch + "/msfragger/" + df["basename"]
 
 
 print(df)
@@ -86,9 +86,8 @@ print("//")
 
 # Define default workflow
 rule all:
-    input: expand(["output/{config_batch}/philosopher_workspace/philosopher_database.fas", \
+    input: expand(["output/{config_batch}/msfragger/philosopher_database.fas", \
                    "output/{config_batch}/msfragger/{basename}.pepXML", \
-                   "output/{config_batch}/crystalc/{basename}.pepXML", \
                    "output/{config_batch}/samples/{sample}/annotate.done", \
                    "output/{config_batch}/samples/{sample}/peptideprophet-{sample}.pep.xml", \
                    "output/{config_batch}/samples/{sample}/ionquant.done"], \
@@ -98,60 +97,22 @@ rule all:
 
 # TODO: Rename incremental results to philosopher_database
 # TODO: Move this rule down under msfragger and crystalc so it starts looking more like the tutorial I bookmarked. Or even stick it so that the workspace is made in the crystalc directory, so that it takes udgangspunkt in the correct files.
-rule philosopher_database:
-    input: glob.glob(config_database_glob)
-    output: 
-        database = "output/{config_batch}/philosopher_workspace/philosopher_database.fas",
-        flag = touch("output/{config_batch}/philosopher_workspace/philosopher_database.done") # This flag is redundant but nice to have.
-    #benchmark: "output/{config_batch}/benchmarks/database.tab"
-    threads: 8
-    params:
-        philosopher = config["philosopher_executable"]
-    shell: """
 
 
 
-        # Cat all database source files into one.
-        cat {input} > output/{config_batch}/philosopher_workspace/cat_database_sources.faa
 
 
-        # As philosopher can't specify output files, we need to change dir.
-        mkdir -p output/{config_batch}/philosopher_workspace
-        cd output/{config_batch}/philosopher_workspace
-
-
-        {params.philosopher} workspace \
-            --nocheck \
-            --clean 
-
-        {params.philosopher} workspace \
-            --nocheck \
-            --init 
-
-        rm *.fas || echo "nothing to delete" # Remove all previous databases if any.
-        {params.philosopher} database \
-            --custom cat_database_sources.faa \
-            --contam 
-
-        # Manually rename the philosopher output so we can grab it later
-        mv *.fas philosopher_database.fas
-
-
-        ls * > philosopher_database.done
-
-
-        """
 
 
 
 rule msfragger:
     input:
-        database = "output/{config_batch}/philosopher_workspace/philosopher_database.fas",  
+        database = "output/{config_batch}/msfragger/philosopher_database.fas",  
         d_files = df["path"].tolist()
     output: 
-        #msfragger_version = "output/{config_batch}/philosopher_workspace/msfragger_version.txt",
-        #untouchable = touch("output/{config_batch}/philosopher_workspace/msfragger.done"),
-        #pepXMLs = expand("output/{config_batch}/philosopher_workspace/{pepXMLs}", config_batch = config_batch, pepXMLs = df["pepXML"])
+        #msfragger_version = "output/{config_batch}/msfragger/msfragger_version.txt",
+        #untouchable = touch("output/{config_batch}/msfragger/msfragger.done"),
+        #pepXMLs = expand("output/{config_batch}/msfragger/{pepXMLs}", config_batch = config_batch, pepXMLs = df["pepXML"])
         pepXMLs = "output/{config_batch}/msfragger/{basename}.pepXML"
     #shadow: "shallow" # Can't use shadow as it isn't a subdir.
     shadow: "minimal" # The setting shadow: "minimal" only symlinks the inputs to the rule. Once the rule successfully executes, the output file will be moved if necessary to the real path as indicated by output.
@@ -189,6 +150,56 @@ rule msfragger:
         """
 
 
+rule philosopher_database:
+    input: glob.glob(config_database_glob)
+    output: 
+        database = "output/{config_batch}/msfragger/philosopher_database.fas",
+        flag = touch("output/{config_batch}/msfragger/philosopher_database.done") # This flag is redundant but nice to have.
+    #benchmark: "output/{config_batch}/benchmarks/database.tab"
+    threads: 8
+    params:
+        philosopher = config["philosopher_executable"]
+    shell: """
+
+        # Show help for debugging
+        {params.philosopher} database \
+            --help 
+
+        # Cat all database source files into one.
+        cat {input} > output/{config_batch}/msfragger/cat_database_sources.faa
+
+
+        # As philosopher can't specify output files, we need to change dir.
+        mkdir -p output/{config_batch}/msfragger
+        cd output/{config_batch}/msfragger
+
+
+        {params.philosopher} workspace \
+            --nocheck \
+            --clean 
+
+        {params.philosopher} workspace \
+            --nocheck \
+            --init 
+
+        rm *.fas || echo "nothing to delete" # Remove all previous databases if any.
+        {params.philosopher} database \
+            --custom cat_database_sources.faa \
+            --contam 
+
+        # Manually rename the philosopher output so we can grab it later
+        mv *-decoys-contam-cat_database_sources.faa.fas philosopher_database.fas
+
+        # clean up 
+        rm cat_database_sources.faa
+
+
+        ls -lt * > philosopher_database.done
+
+
+        """
+
+
 # crystalc has been disabled because I cannot get it running.
 #rule crystalc:
 #    input: "output/{config_batch}/msfragger/{basename}.pepXML"
@@ -216,7 +227,7 @@ rule msfragger:
 
 rule annotate:
     input: 
-        database = "output/{config_batch}/philosopher_workspace/philosopher_database.fas"
+        database = "output/{config_batch}/msfragger/philosopher_database.fas"
     output: 
         flag = touch("output/{config_batch}/samples/{sample}/annotate.done")
     params:
@@ -247,10 +258,10 @@ rule annotate:
 # For each sample
 rule peptideprophet:
     input:
-        database = "output/{config_batch}/philosopher_workspace/philosopher_database.fas",
+        database = "output/{config_batch}/msfragger/philosopher_database.fas",
         flag = "output/{config_batch}/samples/{sample}/annotate.done",
-        #pepXML = "output/{config_batch}/philosopher_workspace/{basename}.pepXML"
-        pepXML = lambda wildcards: "output/{config_batch}/crystalc/" + df[df["sample"]==wildcards.sample]["basename"].values[0] + ".pepXML"
+        #pepXML = "output/{config_batch}/msfragger/{basename}.pepXML"
+        pepXML = lambda wildcards: "output/{config_batch}/msfragger/" + df[df["sample"]==wildcards.sample]["basename"].values[0] + ".pepXML"
     output: ["output/{config_batch}/samples/{sample}/ion.tsv", \
         "output/{config_batch}/samples/{sample}/peptideprophet-{sample}.pep.xml", \
         "output/{config_batch}/samples/{sample}/peptide.tsv", \
