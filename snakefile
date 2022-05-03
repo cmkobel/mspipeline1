@@ -68,6 +68,7 @@ df["basename"] = [re.sub(".d$", "", barcode) for barcode in df["barcode"]]
 df["path"] = config_d_base + "/" + df["barcode"]
 
 
+
 #df["pepXML"] = "output/" + config_batch + "/philosopher_workspace/" + df["basename"]
 
 
@@ -96,7 +97,7 @@ rule all:
                    basename = df["basename"])
 
 # TODO: Rename incremental results to philosopher_database
-# TODO: Move this rule down under msfragger and crystalc so it starts looking more like the tutorial I bookmarked.
+# TODO: Move this rule down under msfragger and crystalc so it starts looking more like the tutorial I bookmarked. Or even stick it so that the workspace is made in the crystalc directory, so that it takes udgangspunkt in the correct files.
 rule philosopher_database:
     input: glob.glob(config_database_glob)
     output: 
@@ -188,32 +189,28 @@ rule msfragger:
         """
 
 
-#print(df["basename"].tolist())
-print(df["basename"].values)
-# Nesvilabs software er en dårlig kombination med snakemake fordi der ikke kommer nogen output filerw
-# Hvordan får jeg snakemake til at expandere ud over alle samples. Jeg vil gerne køre den for hver. Måske står det længere nede i min kode.
-rule crystalc:
-    input: 
-        lambda wildcards: "output/{config_batch}/msfragger/" + df[df["sample"]==wildcards.sample]["basename"].values + ".pepXML"
-    output: 
-        #lambda wildcards: "output/{config_batch}/crystalc/" + df[df["sample"]==wildcards.sample]["basename"].values[0] + ".pepXML"
-        "output/{config_batch}/crystalc/{sample}.pepXML"
-
-    # Det her skal selvfølgelig testes og alt det der. Men til det behøver jeg nok ikke at genkøre hele msfragger. Jeg kan bare gemme output-mappen som noget bestemt, fx. msoutput, og så toggle frem og tilbage indtil koden virker pålidelig. 
-    params: 
-        crystalc_jar = config["crystalc_jar"]
-
-    shell: """
-    
-        java -Xmx64G \
-            -jar {params.crystalc_jar} \
-            --output_location "output/{wildcards.config_batch}/crystalc" \
-            {input}
-
-        # I would like to see if I can abstain from using the crystalcParameterPath at all
-
-    """
-
+# crystalc has been disabled because I cannot get it running.
+#rule crystalc:
+#    input: "output/{config_batch}/msfragger/{basename}.pepXML"
+#    output: "output/{config_batch}/crystalc/{basename}.pepXML"
+#    params: 
+#        crystalc_jar = config["crystalc_jar"]
+#    conda: "envs/openjdk.yaml"
+#    shell: """
+#
+#        >&2 echo "Shifting crystalc ..."
+#    
+#        java -Xmx64G \
+#            -jar {params.crystalc_jar} \
+#            --output_location output/{config_batch}/crystalc \
+#            assets/crystalc.params \
+#            {input}
+#
+#        #Since the documentiation is so rubbish for crystalc, I will not use it for now and 
+#
+#        # I would like to see if I can abstain from using the crystalcParameterPath at all
+#
+#    """
 
 
 
