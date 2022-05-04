@@ -19,6 +19,7 @@ Install snakemake by following the [instructions in the official documentation](
 Set up the profiles/slurm/ configuration so that it matches your execution environment. There is also a profile for local execution without a job management system (profiles/local/)
 
 
+
 ## Usage
 
 #### 1) Update config.yaml
@@ -38,6 +39,8 @@ Finally, run the pipeline in your command line with:
 $ snakemake --profile profiles/slurm/ 
 ```
 
+Below is an example graph for a run involving two samples.
+<img width="1465" alt="Screenshot 2022-05-04 at 15 41 50" src="https://user-images.githubusercontent.com/5913696/166693733-063ff92c-cd72-40fd-b49a-48d0fb1f897a.png">
 
 
 
