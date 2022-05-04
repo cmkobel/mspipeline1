@@ -20,3 +20,7 @@ msfragger:
 
 ionquant:
     mem: 32768
+
+
+peptideprophet: 
+    mem: 65536

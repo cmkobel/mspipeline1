@@ -40,6 +40,7 @@ print("                                    ~~'                                  
 print("                                                                                 ")
 
 
+# TODO: It looks like there is a problem with annotate. Should it really be running for each sample individually? I would think that once per batch should be plentiful.
 
 
 
@@ -81,14 +82,15 @@ print()
 
 # Define default workflow
 rule all:
-    input: expand(["output/{config_batch}/msfragger/philosopher_database.fas", \
-                   "output/{config_batch}/msfragger/{basename}.pepXML", \
+    input: expand(["output/{config_batch}/msfragger/{basename}.pepXML", \
                    "output/{config_batch}/samples/{basename}/annotate.done", \
                    "output/{config_batch}/samples/{basename}/peptideprophet-{basename}.pep.xml", \
                    "output/{config_batch}/samples/{basename}/{basename}_quant.csv"], \
                    config_batch = config_batch, \
                    sample = df["sample"], \
                    basename = df["basename"])
+
+#"output/{config_batch}/msfragger/philosopher_database.fas", 
 
 
 
@@ -97,7 +99,6 @@ rule philosopher_database:
     input: glob.glob(config_database_glob)
     output: 
         database = "output/{config_batch}/msfragger/philosopher_database.fas",
-        flag = touch("output/{config_batch}/msfragger/philosopher_database.done") # This flag is redundant but nice to have.
     #benchmark: "output/{config_batch}/benchmarks/database.tab"
     threads: 8
     params:
@@ -134,10 +135,41 @@ rule philosopher_database:
         rm cat_database_sources.faa
 
 
-        ls -lt * > philosopher_database.done
-
-
         """
+
+
+
+
+# The reason for all the subdirectories beneath is that I want to make a dir for each sample, and they all need a "workspace"
+# Wouldn't it be better to annotate the database, and then copy it to each dir? No, because the binary files in each subdir are different, so that wouldn't make sense. There is going to be _a lot_ of output files for each sample further down the line, so we want to segregate early on.
+# Running this job only takes a split second any way, keeping it in its own rule makes things easy to debug. So that is it.
+rule annotate:
+    input: 
+        database = "output/{config_batch}/msfragger/philosopher_database.fas"
+    output: 
+        flag = touch("output/{config_batch}/samples/{basename}/annotate.done")
+    params:
+        philosopher = config["philosopher_executable"]
+    shell: """
+        mkdir -p output/{config_batch}/samples/{wildcards.basename}
+        cd output/{config_batch}/samples/{wildcards.basename}
+
+        {params.philosopher} workspace \
+            --nocheck \
+            --clean
+
+        {params.philosopher} workspace \
+            --nocheck \
+            --init
+
+        >&2 echo "Annotating database ..."
+        {params.philosopher} database \
+            --annotate ../../../../{input.database}
+
+        
+        
+
+    """
 
 
 
@@ -188,42 +220,8 @@ rule msfragger:
 
 
 
-
-# The reason for all the subdirectories beneath is that I want to make a dir for each sample, and they all need a "workspace"
-# Wouldn't it be better to annotate the database, and then copy it to each dir? No, because the binary files in each subdir are different, so that wouldn't make sense. There is going to be _a lot_ of output files for each sample further down the line, so we want to segregate early on.
-# Running this job only takes a split second any way, keeping it in its own rule makes things easy to debug. So that is it.
-rule annotate:
-    input: 
-        database = "output/{config_batch}/msfragger/philosopher_database.fas"
-    output: 
-        flag = touch("output/{config_batch}/samples/{basename}/annotate.done")
-    params:
-        philosopher = config["philosopher_executable"]
-    shell: """
-        mkdir -p output/{config_batch}/samples/{wildcards.basename}
-        cd output/{config_batch}/samples/{wildcards.basename}
-
-        {params.philosopher} workspace \
-            --nocheck \
-            --clean
-
-        {params.philosopher} workspace \
-            --nocheck \
-            --init
-
-        >&2 echo "Annotating database ..."
-        {params.philosopher} database \
-            --annotate ../../../../{input.database}
-
-        
-        
-
-    """
-
-
-
 # For each sample
-rule peptideprophet:
+rule prophet_filter:
     input:
         database = "output/{config_batch}/msfragger/philosopher_database.fas",
         flag = "output/{config_batch}/samples/{basename}/annotate.done",
@@ -303,8 +301,6 @@ rule ionquant:
     conda: "envs/openjdk.yaml"
     params:
         ionquant_jar = config["ionquant_jar"],
-        #spectral = lambda wildcards: df[df["sample"]==wildcards.sample]["path"].values[0]
-        #spectral = lambda wildcards: df[df["basename"]==wildcards.basename]["path"].values[0]
         config_d_base = config_d_base # I think this one is global, thus does not need to be params-linked.
 
 
@@ -340,3 +336,7 @@ rule ionquant:
 
 print("*/") # This is a language specific comment close tag that helps when you export the workflow as a graph
 
+
+
+# TODO: Go through the whole pipeline one job at a time, and make sure that all outputs are managed in the rules.
+# TODO: Export the dag and put it into the readme with a bit of documentation.
