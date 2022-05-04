@@ -9,7 +9,8 @@ jobs: 8
 
 # [--directory DIR] 
 keep-going: true 
-batch: "run_main=1/500" 
+#batch: "run_main=1/500" # removed due to warning: --batch may not be combined with --forceall, because recomputed upstream jobs in subsequent batches may render already obtained results outdated.
+
 rerun-incomplete: true
 # [--shadow-prefix DIR] 
 # [--reason] 
