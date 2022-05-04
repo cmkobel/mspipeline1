@@ -23,15 +23,13 @@ batch_parameters:
     #database_glob: "/cluster/projects/nn9864k/shared/supacow/yannas_pilot_database/finaldb/*" # All files are treated with the same database(s). I'm not sure yet, if snakemake can handle globs..
     database_glob: "/cluster/projects/nn9864k/shared/supacow/yannas_pilot_database/finaldb/cp_cow_genome.faa" # Debug: faster with only one file, and this one is the smallest.
 
-    # Setup for local testing on branch local_dev
-    # d_base: "/Users/kartoffel/MS_pipeline1_local/test_data/timsTOFfiles"
-    # database_glob: "/Users/kartoffel/MS_pipeline1_local/test_data/database/finaldb/cp_cow_genome.faa"
+
 
 
     samples:
       "s01": "20220302_A1_Slot1-01_1_1592.d"
-      "s02": "20220302_A2_Slot1-02_1_1593.d"
-      #"s03": "20220302_A3_Slot1-03_1_1594.d"
+      #"s02": "20220302_A2_Slot1-02_1_1593.d"
+      "s03": "20220302_A3_Slot1-03_1_1594.d"
       #"s04": "20220302_A4_Slot1-04_1_1595.d"
       #"s05": "20220302_A5_Slot1-05_1_1596.d"
       #"s06": "20220302_A6_Slot1-06_1_1597.d"
