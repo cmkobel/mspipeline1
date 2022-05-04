@@ -27,9 +27,9 @@ Because nesvilab doesn't make their executables easily publicly available, you n
 
 Currently the pipeline only supports inputting .d-files (bruker). Create an item in batch_parameters where you define `d_base` which is the base directory where all .d-files reside. Define `database_glob` which is a path (or glob) to the fasta-amino acid files that you want to include in the target protein database.
 
-Define items under the "samples" key which link sample names to the .d-files.
+Define items under the `samples` key which link sample names to the .d-files.
 
-Lastly, set the root "batch" key to point at the batch that you want to run.
+Lastly, set the root `batch` key to point at the batch that you want to run.
 
 Finally, run the pipeline with:
 ```
