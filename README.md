@@ -31,6 +31,8 @@ Define items under the `samples` key which link sample names to the .d-files.
 
 Lastly, set the root `batch` key to point at the batch that you want to run.
 
+#### 2) Run
+
 Finally, run the pipeline with:
 ```
 snakemake --profile profiles/slurm/ 
