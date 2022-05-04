@@ -25,7 +25,7 @@ Set up the profiles/slurm/ configuration so that it matches your execution envir
 Because nesvilab doesn't make their executables easily publicly available, you need to tell the pipeline where to find them on your system. Update addresses to [philosopher_executable](https://github.com/nesvilab/philosopher/releases/latest), [msfragger_jar](https://github.com/Nesvilab/MSFragger/wiki/Preparing-MSFragger#Downloading-MSFragger) and [ionquant_jar](https://github.com/Nesvilab/IonQuant#download). 
 
 
-Currently the pipeline only supports inputting .d-files ([bruker](https://en.wikipedia.org/wiki/Mass_spectrometry_data_format#Proprietary_formats)). Create an item in batch_parameters where you define `d_base` which is the base directory where all .d-files reside. Define `database_glob` which is a path (or glob) to the fasta-amino acid files that you want to include in the target protein database.
+Currently the pipeline only supports inputting .d-files ([agilent/bruker](https://en.wikipedia.org/wiki/Mass_spectrometry_data_format#Proprietary_formats)). Create an item in batch_parameters where you define `d_base` which is the base directory where all .d-files reside. Define `database_glob` which is a path (or glob) to the fasta-amino acid files that you want to include in the target protein database.
 
 Define items under the `samples` key which link sample names to the .d-files.
 
