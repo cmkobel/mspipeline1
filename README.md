@@ -16,7 +16,7 @@ Prerequisites:
 
 Install snakemake by following the [instructions in the official documentation](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html).
 
-Set up the profiles/slurm/ configuration so that it matches your execution environment. There is also a profile for local execution (profiles/local/)
+Set up the profiles/slurm/ configuration so that it matches your execution environment. There is also a profile for local execution without a job management system (profiles/local/)
 
 
 ## Usage
