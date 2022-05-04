@@ -65,7 +65,7 @@ df = pd.DataFrame(data = {'sample':  config_samples.keys(),
                           'barcode': config_samples.values()})
 
 df["basename"] = [re.sub(".d$", "", barcode) for barcode in df["barcode"]]
-df["path"] = config_d_base + "/" + df["barcode"]
+#df["path"] = config_d_base + "/" + df["barcode"]
 
 
 
@@ -74,14 +74,10 @@ df["path"] = config_d_base + "/" + df["barcode"]
 
 print(df)
 print("//")
-
-#print(df["path"].tolist()) # Debug
-
+print()
 
 
 
-
-# TODO: Ask Arturo about the weird bug that is also mentioned here https://github.com/Nesvilab/FragPipe/issues/4#issuecomment-309045306
 
 # Define default workflow
 rule all:
@@ -108,9 +104,6 @@ rule philosopher_database:
         philosopher = config["philosopher_executable"]
     shell: """
 
-        # Show help for debugging
-        {params.philosopher} database \
-            --help 
 
         # Cat all database source files into one.
         cat {input} > output/{config_batch}/msfragger/cat_database_sources.faa
@@ -150,12 +143,11 @@ rule philosopher_database:
 
 
 
-# I'm considering if msfragger should run individually for each sample: It seems to be fundamentally impossible. 
-# TODO: Run a test without shadow: minimal.
+# TODO: Test the implications of using shadow: "minimal"
 rule msfragger:
     input:
         database = "output/{config_batch}/msfragger/philosopher_database.fas",  
-        d_files = df["path"].tolist()
+        d_files = (config_d_base + "/" + df["barcode"]).tolist()
     output:
         pepXMLs = "output/{config_batch}/msfragger/{basename}.pepXML"
     shadow: "minimal" # The setting shadow: "minimal" only symlinks the inputs to the rule. Once the rule successfully executes, the output file will be moved if necessary to the real path as indicated by output.
@@ -187,34 +179,12 @@ rule msfragger:
         # I feel like it also creates a .mgf and .mzBIN in the source directory where the .d-dirs reside
         # Should I not move the .pepXML files? No, because I'm using the --output_location argument.
         # The tutorial mentions something about moving some .tsv files after running msfragger, but I haven't seen any.
-        # TODO: run crystal-c
+        # These output files should in theory be mitigated by using the shadow rule?
+
 
 
         """
 
-
-# crystalc has been disabled because the documentation is incomplete.
-#rule crystalc:
-#    input: "output/{config_batch}/msfragger/{basename}.pepXML"
-#    output: "output/{config_batch}/crystalc/{basename}.pepXML"
-#    params: 
-#        crystalc_jar = config["crystalc_jar"]
-#    conda: "envs/openjdk.yaml"
-#    shell: """
-#
-#        >&2 echo "Shifting crystalc ..."
-#    
-#        java -Xmx64G \
-#            -jar {params.crystalc_jar} \
-#            --output_location output/{config_batch}/crystalc \
-#            assets/crystalc.params \
-#            {input}
-#
-#        #Since the documentiation is so rubbish for crystalc, I will not use it for now and 
-#
-#        # I would like to see if I can abstain from using the crystalcParameterPath at all
-#
-#    """
 
 
 
@@ -257,7 +227,6 @@ rule peptideprophet:
     input:
         database = "output/{config_batch}/msfragger/philosopher_database.fas",
         flag = "output/{config_batch}/samples/{basename}/annotate.done",
-        #pepXML = lambda wildcards: "output/{config_batch}/msfragger/" + df[df["sample"]==wildcards.sample]["basename"].values[0] + ".pepXML"
         pepXML = "output/{config_batch}/msfragger/{basename}.pepXML"
     output: ["output/{config_batch}/samples/{basename}/ion.tsv", \
         "output/{config_batch}/samples/{basename}/peptideprophet-{basename}.pep.xml", \
@@ -274,11 +243,11 @@ rule peptideprophet:
         # Since the output location of philosopher is controlled by the input location, we should copy the input file.
         cp {input.pepXML} output/{wildcards.config_batch}/samples/{wildcards.basename}/{wildcards.basename}.pepXML || echo "file exists already"
 
+
         # Because of the workspace, we're forced to change dir
         cd output/{wildcards.config_batch}/samples/{wildcards.basename}
 
 
-        
         >&2 echo "Peptideprophet ..."
         {params.philosopher} peptideprophet \
             --nonparam \
@@ -290,7 +259,7 @@ rule peptideprophet:
             --database ../../../../{input.database} \
             {wildcards.basename}.pepXML
 
-
+        # Be noted that the warning about a missing file is not critical: https://github.com/cmkobel/MS_pipeline1/issues/2
 
 
         >&2 echo "Proteinprophet ..."
@@ -312,12 +281,12 @@ rule peptideprophet:
         >&2 echo "Report ..."
         {params.philosopher} report
 
-
-
         
     """
 
-# TODO: This rule ought to output the abundances named in the samples name and not the basename?
+
+
+# TODO: This rule ought to output the abundances named in the samples name and not the basename? I don't really see any neat way to do that 
 rule ionquant:
     input:
         irrelevant = ["output/{config_batch}/samples/{basename}/ion.tsv", \
@@ -336,7 +305,7 @@ rule ionquant:
         ionquant_jar = config["ionquant_jar"],
         #spectral = lambda wildcards: df[df["sample"]==wildcards.sample]["path"].values[0]
         #spectral = lambda wildcards: df[df["basename"]==wildcards.basename]["path"].values[0]
-        config_d_base = config_d_base
+        config_d_base = config_d_base # I think this one is global, thus does not need to be params-linked.
 
 
     shell: """
@@ -369,16 +338,5 @@ rule ionquant:
         
 
 
-
-
-
-print(df["path"].tolist())
-
-
-print("*/")
-
-
-# TODO: 
-#   a) get ionquant working
-#   b) put msfragger into segregated jobs for each sample. (Uses a bit more resources, but is much faster!)
+print("*/") # This is a language specific comment close tag that helps when you export the workflow as a graph
 
