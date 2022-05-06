@@ -1,28 +1,54 @@
 # MS_pipeline1
 
 
+```
+                                             ______________ 
+                                            < MS_pipeline1 >
+                                             -------------- 
+                                                          \ 
+                             ___......__             _     \
+                         _.-'           ~-_       _.=a~~-_  
+ --=====-.-.-_----------~   .--.       _   -.__.-~ ( ___===>
+               '''--...__  (    \ \\\ { )       _.-~        
+                         =_ ~_  \\-~~~//~~~~-=-~            
+                          |-=-~_ \\   \\                    
+                          |_/   =. )   ~}                   
+                          |}      ||                        
+                         //       ||                        
+                       _//        {{                        
+                    '='~'          \\_    =                 
+                                    ~~'    
+```
+
+
+
 
 This is a very simple pipeline to transform .d files with an appropriate database into sane protein calls with abundances.
 
+This pipeline can be seen as an enhanced version of https://fragpipe.nesvilab.org/docs/tutorial_linux.html
 
 The workflow is based on msfragger and aims to keep a tidy tree of output files.
 
 
 ## Installation
 
-Prerequisites: 
-  -  A conda/miniconda3 environment
+1) Prerequisites:
 
+  - A conda/miniconda3 environment
+  - A conda environment with snakemake installed. You can install snakemake by following the [instructions in the official documentation](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html).
 
-Install snakemake by following the [instructions in the official documentation](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html).
+2) Clone this repo
 
-Set up the profiles/slurm/ configuration so that it matches your execution environment. There is also a profile for local execution without a job management system (profiles/local/)
+3) Set up the profiles/slurm/ configuration so that it matches your execution environment. There is also a profile for local execution without a job management system (profiles/local/)
 
 
 
 ## Usage
 
 #### 1) Update config.yaml
+
+The file config.yaml contains all the parameters needed for this pipeline to run successfully. You should update the parameters so they reflect which samples you wish to process.
+
 Because nesvilab doesn't make their executables easily publicly available, you need to tell the pipeline where to find them on your system. Update addresses for the keys `philosopher_executable`, `msfragger_jar` and `ionquant_jar` which can be downloaded [here](https://github.com/nesvilab/philosopher/releases/latest), [here](https://github.com/Nesvilab/MSFragger/wiki/Preparing-MSFragger#Downloading-MSFragger) and [here](https://github.com/Nesvilab/IonQuant#download), respectively. 
 
 
@@ -42,6 +68,10 @@ $ snakemake --profile profiles/slurm/
 Below is an example graph for a run involving six samples.
 <img width="1466" alt="Screenshot 2022-05-06 at 11 18 15" src="https://user-images.githubusercontent.com/5913696/167104044-77e8d2d7-20cd-4334-91bc-a730b2867e41.png">
 
+
+## Future
+
+This pipeline might involve an R-markdown performing trivial QC.
 
 
 
