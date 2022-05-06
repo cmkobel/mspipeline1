@@ -178,12 +178,23 @@ rule annotate:
 # This rule links the input files so that msfragger won't write arbitrary files to the original raw sample backup location.
 # I find that msfragger writes some files (...calibrated.mgf and .mzBIN). I would like to keep these files together with the rest of the pipeline outputs.
 # All samples are handled by a single job.
+# Jeg er sgu lidt bange for hvordan jeg får snakemake til 
 #rule link_input:
 #    input:
+#        #d_files = (config_d_base + "/" + df["barcode"]),
 #        d_files = (config_d_base + "/" + df["barcode"]).tolist()
-#    output:
-#        "output/{"
 #
+#    output:
+#        linked_d_files = "output/{config_d_base}/msfragger/" + df["barcode"]
+#
+#    shell:"""
+#
+#        ln -s {input} {output}
+#
+#
+#        """
+#
+
 
 
 
@@ -197,7 +208,8 @@ rule msfragger:
         #pepXML = "output/{config_batch}/msfragger/{sample}.pepXML", 
         #pepXMLs = lambda wildcards: "output/{config_batch}/msfragger/" + df[df["sample" == wildcards.sample]]["basename"] + ".pepXML"
         #pepXMLs = expand("output/{config_batch}/msfragger/{sample}.pepXML", sample = df["sample"], config_batch = config_batch)
-        pepXMLs = "output/{config_batch}/msfragger/" + df["basename"] + ".pepXML"
+        pepXMLs = "output/{config_batch}/msfragger/" + df["basename"] + ".pepXML",
+        scans = "output/{config_batch}/msfragger/scans.txt"
         #touch = touch("output/{config_batch}/msfra")
 
     # Use shadow to get rid of the pepindex files
@@ -206,6 +218,7 @@ rule msfragger:
     params:
         config_d_base = config_d_base,
         msfragger_jar = config["msfragger_jar"],
+        n_samples = len(df.index)
         #basename_out =  lambda wildcards: "output/{config_batch}/msfragger/" + df[df["sample" == wildcards.sample]]["basename"] + ".pepXML"
 
     conda: "envs/openjdk.yaml"
@@ -221,8 +234,11 @@ rule msfragger:
             --num_threads {threads} \
             --database_name {input.database} \
             --output_location "output/{wildcards.config_batch}/msfragger/" \
-            {input.d_files}
+            {input.d_files} \
+            | grep "Checking spectral files..." -A {params.n_samples} \
+            > output/{wildcards.config_batch}/msfragger/scans.txt
 
+        # The last line extracts the number of lines that corresponds to the number of samples, to extract the total number of scans.
 
 
 
