@@ -10,8 +10,9 @@ The workflow is based on msfragger and aims to keep a tidy tree of output files.
 
 ## Installation
 
-1) Prerequisites: 
-  -  A conda/miniconda3 environment
+1) Prerequisites:
+
+A conda/miniconda3 environment
 
 
 2) Install snakemake by following the [instructions in the official documentation](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html).
