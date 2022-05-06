@@ -12,15 +12,12 @@ __default__:
     #error: "logs/{rule}.err.txt"
 
 
-database:
+msfragger:
     mem: 65536
 
-msfragger:
+
+prophet_filter: 
     mem: 65536
 
 ionquant:
     mem: 32768
-
-
-peptideprophet: 
-    mem: 65536

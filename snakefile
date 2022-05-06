@@ -84,7 +84,9 @@ print()
 rule all:
     input: expand(["output/{config_batch}/msfragger/{basename}.pepXML", \
                    "output/{config_batch}/samples/{sample}/annotate.done", \
-                   "output/{config_batch}/samples/{sample}/peptideprophet-{sample}.pep.xml"], \
+                   "output/{config_batch}/samples/{sample}/peptideprophet-{sample}.pep.xml", \
+                   "output/{config_batch}/samples/{sample}/protein.tsv", \
+                   "output/{config_batch}/samples/{sample}/{sample}_quant.csv"], \
                    config_batch = config_batch, \
                    sample = df["sample"], \
                    basename = df["basename"])
@@ -314,15 +316,17 @@ rule ionquant:
             "output/{config_batch}/samples/{sample}/proteinprophet-{sample}.prot.xml", \
             "output/{config_batch}/samples/{sample}/protein.tsv"], 
         psm = "output/{config_batch}/samples/{sample}/psm.tsv",
-        #pepxml = "output/{config_batch}/samples/{sample}/peptideprophet-{sample}.pep.xml",
-        pepxml = "output/{config_batch}/msfragger/{sample}.pepXML"
+        pepXML = lambda wildcards: "output/" + config_batch + "/msfragger/" + df[df["sample"] == wildcards.sample]["basename"] + ".pepXML",
+
     output: #touch("output/{config_batch}/samples/{sample}/ionquant.done")
         csv = "output/{config_batch}/samples/{sample}/{sample}_quant.csv"
     threads: 8
     conda: "envs/openjdk.yaml"
     params:
         ionquant_jar = config["ionquant_jar"],
-        config_d_base = config_d_base # I think this one is global, thus does not need to be params-linked.
+        config_d_base = config_d_base, # I think this one is global, thus does not need to be params-linked.
+        basename = lambda wildcards: df[df["sample"] == wildcards.sample]["basename"].values[0]
+
 
 
     shell: """
@@ -335,7 +339,7 @@ rule ionquant:
             --threads {threads} \
             --psm {input.psm} \
             --specdir {params.config_d_base} \
-            {input.pepxml} 
+            {input.pepXML} 
             # address to msfragger pepXML file
 
 
@@ -346,7 +350,10 @@ rule ionquant:
             # --specdir output/220315_test/msfragger/20220302_A1_Slot1-01_1_1592.pepXML 
             # Maybe the other pepxml is the culprit
 
-            mv output/{config_batch}/msfragger/{wildcards.sample}_quant.csv output/{config_batch}/samples/{wildcards.sample}/{wildcards.sample}_quant.csv
+            #mv output/{config_batch}/msfragger/{wildcards.sample}_quant.csv output/{config_batch}/samples/{wildcards.sample}/{wildcards.sample}_quant.csv
+            mv output/{config_batch}/msfragger/{params.basename}_quant.csv output/{config_batch}/samples/{wildcards.sample}/{wildcards.sample}_quant.csv
+
+
 
 
 
