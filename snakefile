@@ -235,10 +235,12 @@ rule msfragger:
             --database_name {input.database} \
             --output_location "output/{wildcards.config_batch}/msfragger/" \
             {input.d_files} \
+            | tee logs/msfragger_teed.out.txt \
             | grep "Checking spectral files..." -A {params.n_samples} \
             > output/{wildcards.config_batch}/msfragger/scans.txt
 
         # The last line extracts the number of lines that corresponds to the number of samples, to extract the total number of scans.
+        # Without tee, the stdout would be lost.
 
 
 
