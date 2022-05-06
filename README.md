@@ -12,14 +12,12 @@ The workflow is based on msfragger and aims to keep a tidy tree of output files.
 
 1) Prerequisites:
 
-A conda/miniconda3 environment
+  - A conda/miniconda3 environment
+  - A conda environment with snakemake installed. You can install snakemake by following the [instructions in the official documentation](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html).
 
+2) Clone this repo
 
-2) Install snakemake by following the [instructions in the official documentation](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html).
-
-3) Clone this repo
-
-4) Set up the profiles/slurm/ configuration so that it matches your execution environment. There is also a profile for local execution without a job management system (profiles/local/)
+3) Set up the profiles/slurm/ configuration so that it matches your execution environment. There is also a profile for local execution without a job management system (profiles/local/)
 
 
 
