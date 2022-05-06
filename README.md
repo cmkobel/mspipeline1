@@ -39,8 +39,9 @@ Finally, run the pipeline in your command line with:
 $ snakemake --profile profiles/slurm/ 
 ```
 
-Below is an example graph for a run involving two samples.
-<img width="1465" alt="Screenshot 2022-05-04 at 15 41 50" src="https://user-images.githubusercontent.com/5913696/166693733-063ff92c-cd72-40fd-b49a-48d0fb1f897a.png">
+Below is an example graph for a run involving six samples.
+<img width="1466" alt="Screenshot 2022-05-06 at 11 18 15" src="https://user-images.githubusercontent.com/5913696/167104044-77e8d2d7-20cd-4334-91bc-a730b2867e41.png">
+
 
 
 
