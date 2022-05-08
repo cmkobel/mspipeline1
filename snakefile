@@ -175,25 +175,27 @@ rule annotate:
     """
 
 
-# This rule links the input files so that msfragger won't write arbitrary files to the original raw sample backup location.
+# I don't like how msfragger writes in the input file directory. So I made this rule to (soft) link the files to where I actually want the output to be.
 # I find that msfragger writes some files (...calibrated.mgf and .mzBIN). I would like to keep these files together with the rest of the pipeline outputs.
 # All samples are handled by a single job.
 # Jeg er sgu lidt bange for hvordan jeg får snakemake til 
-#rule link_input:
-#    input:
-#        #d_files = (config_d_base + "/" + df["barcode"]),
-#        d_files = (config_d_base + "/" + df["barcode"]).tolist()
-#
-#    output:
-#        linked_d_files = "output/{config_d_base}/msfragger/" + df["barcode"]
-#
-#    shell:"""
-#
-#        ln -s {input} {output}
-#
-#
-#        """
-#
+rule link_input:
+    input:
+        #d_files = (config_d_base + "/" + df["barcode"]),
+        d_files = directory((config_d_base + "/" + df["barcode"]).tolist())
+
+    output:
+        linked_d_files = directory("output/{config_batch}/msfragger/" + df["barcode"]), # Not needed when we have the linked_flag file.
+        linked_flag = touch("output/{config_batch}/msfragger/link_input.done"),
+    params:
+        dir = "output/{config_batch}/msfragger"
+
+    shell:"""
+
+        ln -s {input.d_files} {params.dir}
+
+        """
+
 
 
 
@@ -202,18 +204,21 @@ rule annotate:
 # TODO: Test the implications of using shadow: "minimal"
 rule msfragger:
     input:
+        linked_flag = "output/{config_batch}/msfragger/link_input.done",
+
         database = "output/{config_batch}/msfragger/philosopher_database.fas",  
-        d_files = (config_d_base + "/" + df["barcode"]).tolist()
+        #d_files = (config_d_base + "/" + df["barcode"]).tolist() # deprecated
+        d_files = ("output/{config_batch}/msfragger/" + df["barcode"]).tolist()
     output:
         #pepXML = "output/{config_batch}/msfragger/{sample}.pepXML", 
         #pepXMLs = lambda wildcards: "output/{config_batch}/msfragger/" + df[df["sample" == wildcards.sample]]["basename"] + ".pepXML"
         #pepXMLs = expand("output/{config_batch}/msfragger/{sample}.pepXML", sample = df["sample"], config_batch = config_batch)
         pepXMLs = "output/{config_batch}/msfragger/" + df["basename"] + ".pepXML",
-        scans = "output/{config_batch}/msfragger/scans.txt"
         #touch = touch("output/{config_batch}/msfra")
 
     # Use shadow to get rid of the pepindex files
-    shadow: "minimal" # The setting shadow: "minimal" only symlinks the inputs to the rule. Once the rule successfully executes, the output file will be moved if necessary to the real path as indicated by output.
+    #shadow: "minimal" # The setting shadow: "minimal" only symlinks the inputs to the rule. Once the rule successfully executes, the output file will be moved if necessary to the real path as indicated by output.
+    # Shadow doesn't work well with tee, as tee needs access to the log directory
     threads: 8
     params:
         config_d_base = config_d_base,
@@ -235,9 +240,9 @@ rule msfragger:
             --database_name {input.database} \
             --output_location "output/{wildcards.config_batch}/msfragger/" \
             {input.d_files} \
-            | tee logs/msfragger_teed.out.txt \
-            | grep "Checking spectral files..." -A {params.n_samples} \
-            > output/{wildcards.config_batch}/msfragger/scans.txt
+            > output/{wildcards.config_batch}/msfragger/msfragger.out.txt
+
+   
 
         # The last line extracts the number of lines that corresponds to the number of samples, to extract the total number of scans.
         # Without tee, the stdout would be lost.
