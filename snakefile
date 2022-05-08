@@ -97,6 +97,14 @@ rule all:
 
 
 
+
+
+
+
+
+
+
+
 # Build a database of the known amino acid sequences.
 rule philosopher_database:
     input: glob.glob(config_database_glob)
@@ -186,17 +194,31 @@ rule link_input:
 
     output:
         linked_d_files = directory("output/{config_batch}/msfragger/" + df["barcode"]), # Not needed when we have the linked_flag file.
+        dir = directory("output/{config_batch}/msfragger"),
         linked_flag = touch("output/{config_batch}/msfragger/link_input.done"),
-    params:
-        dir = "output/{config_batch}/msfragger"
+    #params:
+    #    dir = "output/{config_batch}/msfragger" # Why not make this as an actual output instead.
 
     shell:"""
 
-        ln -s {input.d_files} {params.dir}
+        ln -s {input.d_files} {output.dir}
 
         """
 
 
+
+
+
+
+rule metadata:
+    input: "output/{config_batch}/msfragger/link_input.done"
+    output: "output/{config_batch}/metadata.tsv"
+    params: dataframe = df.to_csv(None, index_label = "index", sep = "\t")
+    shell: """
+
+        echo '''{params.dataframe}''' > {output}
+    
+    """
 
 
 
@@ -214,6 +236,7 @@ rule msfragger:
         #pepXMLs = lambda wildcards: "output/{config_batch}/msfragger/" + df[df["sample" == wildcards.sample]]["basename"] + ".pepXML"
         #pepXMLs = expand("output/{config_batch}/msfragger/{sample}.pepXML", sample = df["sample"], config_batch = config_batch)
         pepXMLs = "output/{config_batch}/msfragger/" + df["basename"] + ".pepXML",
+        stdout = "output/{config_batch}/msfragger/msfragger.out.txt"
         #touch = touch("output/{config_batch}/msfra")
 
     # Use shadow to get rid of the pepindex files
@@ -240,7 +263,7 @@ rule msfragger:
             --database_name {input.database} \
             --output_location "output/{wildcards.config_batch}/msfragger/" \
             {input.d_files} \
-            > output/{wildcards.config_batch}/msfragger/msfragger.out.txt
+            | tee output/{wildcards.config_batch}/msfragger/msfragger.out.txt
 
    
 
@@ -377,11 +400,28 @@ rule ionquant:
             mv output/{config_batch}/msfragger/{params.basename}_quant.csv output/{config_batch}/samples/{wildcards.sample}/{wildcards.sample}_quant.csv
 
 
-
-
-
-
     """
+
+rule rmarkdown:
+    input:
+        metadata = "output/{config_batch}/metadata.tsv",
+        psms = "output/{config_batch}/samples/{sample}/psm.tsv",
+        quants = "output/{config_batch}/samples/{sample}/{sample}_quant.csv", # This simply makes it only run if rule ionquant was successful.
+    output:
+        "output/{config_batch}/QC.html"
+    conda: "envs/r-markdown.yaml"
+    shell: """
+        #Rscript --what scripts/QC.Rmd {input.metadata}
+
+        #cp scripts/QC.Rmd QC.Rmd
+
+        Rscript -e 'library(rmarkdown); rmarkdown::render("scripts/QC.rmd", "html_document")'
+
+        #rm rmarkdown_template.rmd
+        #mv rmarkdown_template.html ../{output}
+
+"""
+
         
 
 

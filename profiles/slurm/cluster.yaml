@@ -14,6 +14,7 @@ __default__:
 
 msfragger:
     mem: 65536
+    time: "04:00:00"
 
 
 prophet_filter: 
