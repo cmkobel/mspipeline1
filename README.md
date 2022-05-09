@@ -65,8 +65,8 @@ Finally, run the pipeline in your command line with:
 $ snakemake --profile profiles/slurm/ 
 ```
 
-Below is an example graph for a run involving six samples.
-<img width="1466" alt="Screenshot 2022-05-06 at 11 18 15" src="https://raw.githubusercontent.com/cmkobel/MS_pipeline1/main/assets/dag.png">
+Below is an example graph for a run involving two samples.
+<img width="1280" alt="dag_" src="https://user-images.githubusercontent.com/5913696/167369344-f5ffc0fa-a050-4d38-a430-17125dc312bc.png">
 
 
 ## Future
