@@ -4,7 +4,7 @@ __default__:
     account: "nn9864k"
     partition: "normal"
     #cpus-per-task: 1
-    time: "1:00:00"
+    time: "01:00:00"
     mem: 2048
     output: "logs/{rule}-%j.out.txt"
     #output: "logs/{rule}.out.txt"
@@ -12,9 +12,18 @@ __default__:
     #error: "logs/{rule}.err.txt"
 
 
+
+annotate: 
+    mem: 32768
+    time: "02:00:00"
+
+philosopher_database:
+    mem: 16384
+    time: "02:00:00"
+
 msfragger:
-    mem: 65536
-    time: "04:00:00"
+    mem: 131072
+    time: "08:00:00"
 
 
 prophet_filter: 

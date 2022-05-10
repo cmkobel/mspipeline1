@@ -14,7 +14,7 @@ keep-going: true
 rerun-incomplete: true
 # [--shadow-prefix DIR] 
 # [--reason] 
-latency-wait: 60
+latency-wait: 120
 # [--max-jobs-per-second MAX_JOBS_PER_SECOND] 
 # [--greediness GREEDINESS] 
 # [--runtime-profile FILE] 

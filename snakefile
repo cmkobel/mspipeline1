@@ -117,31 +117,39 @@ rule philosopher_database:
     shell: """
 
 
+        >&2 echo "Catting database files ..."
         # Cat all database source files into one.
         cat {input} > output/{config_batch}/msfragger/cat_database_sources.faa
 
 
+        >&2 echo "Change dir ..."
         # As philosopher can't specify output files, we need to change dir.
         mkdir -p output/{config_batch}/msfragger
         cd output/{config_batch}/msfragger
 
-
+        >&2 echo "Philosopher workspace clean ..."
         {params.philosopher} workspace \
             --nocheck \
             --clean 
 
+        >&2 echo "Philosopher workspace init ..."
         {params.philosopher} workspace \
             --nocheck \
             --init 
 
+        >&2 echo "Removing previous .fas ..."
         rm *.fas || echo "nothing to delete" # Remove all previous databases if any.
+
+        >&2 echo "Philosopher database ..."
         {params.philosopher} database \
             --custom cat_database_sources.faa \
             --contam 
 
+        >&2 echo "Move output ..."
         # Manually rename the philosopher output so we can grab it later
         mv *-decoys-contam-cat_database_sources.faa.fas philosopher_database.fas
 
+        >&2 echo "Clean up ..."
         # clean up 
         rm cat_database_sources.faa
 
@@ -204,7 +212,6 @@ rule link_input:
         ln -s {input.d_files} {output.dir}
 
         """
-
 
 
 
