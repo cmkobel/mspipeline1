@@ -9,17 +9,19 @@ ionquant_jar: "/cluster/projects/nn9864k/shared/bin/MSFragger-3.4/ext/IonQuant-1
 
 
 
-# Define 
+# Define parameters
+# d_base points to the base of the d files.
+# database_glob points to the database that the targets are made of. We can only search for proteins that we already know. I wonder if that is why we're doing transcriptomics, because we don't know how the DNA is redundantly translated?
+# samples is a dictionary that points to all the samples within 
 batch_parameters:
-  "220315_test":
+  "220315_test": # We did a test with 2 Digesta, 2 Liver and 2 Wall. I forgot which is which. 
+
     d_base: "/cluster/projects/nn9864k/shared/supacow/raw_data/uplc-msms-timstof/220302_proteomics_test/timsTOFfiles" # This data is also available at NIRD, but I made a copy just to mess around and make sure I don't accidentally delete something important.
-    
-    #database_glob: "/cluster/projects/nn9864k/shared/supacow/yannas_pilot_database/finaldb/*" # All files are treated with the same database(s). I'm not sure yet, if snakemake can handle globs..
-    #database_glob: "/cluster/projects/nn9864k/shared/supacow/yannas_pilot_database/finaldb/cp_cow_genome.faa" # Debug: faster with only one file, and this one is the smallest.
-    database_glob: "/cluster/projects/nn9864k/cmkobel/01_proteinextest/aa_databases/03_yannas_and_pruned_protozoans/*"
+  
+    database_glob: "/cluster/projects/nn9864k/cmkobel/01_proteinextest/aa_databases/03_yannas_and_pruned_protozoans/*" # This one should be proper and thorough
+    database_glob: "/cluster/projects/nn9864k/cmkobel/01_proteinextest/aa_databases/00_digesta_fast_debug/*" # Just a small fast debbuging one.
 
-
-
+  
     samples:
       "s01": "20220302_A1_Slot1-01_1_1592.d"
       "s02": "20220302_A2_Slot1-02_1_1593.d"
@@ -31,8 +33,88 @@ batch_parameters:
 
 
 
+  "220506_digesta": # This batch is purely for developing and debugging the pipeline.
+
+    d_base: "/cluster/projects/nn9864k/shared/supacow/raw_data/uplc-msms-timstof/220506_metaP_rumen_digesta_T6/20220525_CMK" # This data is also available at NIRD, but I made a copy just to mess around and make sure I don't accidentally delete something important.
+
+  
+    # A bit of debugging first:
+    #database_glob: "/cluster/projects/nn9864k/shared/supacow/yannas_pilot_database/finaldb/*" # All files are treated with the same database(s). I'm not sure yet, if snakemake can handle globs..
+    #database_glob: "/cluster/projects/nn9864k/shared/supacow/yannas_pilot_database/finaldb/cp_cow_genome.faa" # Debug: faster with only one file, and this one is the smallest.
+
+    database_glob: "" # This one is good for debugging ?
+    database_glob: "/cluster/projects/nn9864k/cmkobel/01_proteinextest/aa_databases/03_yannas_and_pruned_protozoans/*" # This one is proper and thorough
+  
+    samples: 
+      'P1': '20220506_A1_Slot1-01_1_1939.d'       # A 1
+      'P2': '20220506_A2_Slot1-02_1_1940.d'       # A 2
+      'P3': '20220506_A3_Slot1-03_1_1941.d'       # A 3
+      'P4': '20220506_A4_Slot1-04_1_1942.d'       # A 4
+      'P5': '20220506_A5_Slot1-05_1_1943.d'       # A 5
+      'P6': '20220506_A6_Slot1-06_1_1944.d'       # A 6
+      'P7': '20220506_A7_Slot1-07_1_1945.d'       # A 7
+      'P8': '20220506_A8_Slot1-08_1_1946.d'       # A 8
+      'P8v2': '20220506_A9_Slot1-09_1_1947.d'     # A 9
+      'P9': '20220506_A10_Slot1-10_1_1948.d'      # A10
+      'P10': '20220506_A11_Slot1-11_1_1949.d'     # A11
+      'P11': '20220506_A12_Slot1-12_1_1950.d'     # A12
+      
+      'P12': '20220506_B1_Slot1-13_1_1951.d'      # B 1
+      'P13': '20220506_B2_Slot1-14_1_1952.d'      # B 2
+      'P14': '20220506_B3_Slot1-15_1_1953.d'      # B 3
+      'P15': '20220506_B4_Slot1-16_1_1954.d'      # B 4
+      'P16': '20220506_B5_Slot1-17_1_1955.d'      # B 5
+      'P17': '20220506_B6_Slot1-18_1_1956.d'      # B 6
+      'P18': '20220506_B7_Slot1-19_1_1957.d'      # B 7
+      'P19': '20220506_B8_Slot1-20_1_1958.d'      # B 8
+      'P20': '20220506_B9_Slot1-21_1_1959.d'      # B 9
+      'P21': '20220506_B10_Slot1-22_1_1960.d'     # B10
+      'P22': '20220506_B11_Slot1-23_1_1961.d'     # B11
+      'P23': '20220506_B12_Slot1-24_1_1962.d'     # B12
+      
+      'P24': '20220506_C1_Slot1-25_1_1963.d'      # C 1
+      'P25': '20220506_C2_Slot1-26_1_1964.d'      # C 2
+      'P26': '20220506_C3_Slot1-27_1_1965.d'      # C 3
+      'P27': '20220506_C4_Slot1-28_1_1966.d'      # C 4
+      'P28': '20220506_C5_Slot1-29_1_1967.d'      # C 5
+      'P29': '20220506_C6_Slot1-30_1_1968.d'      # C 6
+      'P30': '20220506_C7_Slot1-31_1_1969.d'      # C 7
+      'P31': '20220506_C8_Slot1-32_1_1970.d'      # C 8
+      'D01': '20220506_C9_Slot1-33_1_1971.d'      # C 9
+      'P32': '20220506_C10_Slot1-34_1_1972.d'     # C10
+      'D02': '20220506_C11_Slot1-35_1_1973.d'     # C11
+      'D06': '20220506_C12_Slot1-36_1_1974.d'     # C12
+      
+      'unknown': '20220506_D1_Slot1-37_1_1975.d'  # D 1
+      'D08': '20220506_D2_Slot1-38_1_1976.d'      # D 2
+      'D15': '20220506_D3_Slot1-39_1_1977.d'      # D 3
+      'D16': '20220506_D4_Slot1-40_1_1978.d'      # D 4
+      'D21': '20220506_D5_Slot1-41_1_1979.d'      # D 5
+      'D25': '20220506_D6_Slot1-42_1_1980.d'      # D 6
+      'D28': '20220506_D7_Slot1-43_1_1981.d'      # D 7
+      'D29': '20220506_D8_Slot1-44_1_1982.d'      # D 8
+      'D35': '20220506_D9_Slot1-45_1_1983.d'      # D 9
+      'D42': '20220506_D10_Slot1-46_1_1984.d'     # D10
+      'D43': '20220506_D11_Slot1-47_1_1985.d'     # D11
+      'D45': '20220506_D12_Slot1-48_1_1986.d'     # D12
+      
+      'D48': '20220506_E1_Slot1-49_1_1987.d'      # E 1
+      'D51': '20220506_E2_Slot1-50_1_1988.d'      # E 2
+      'D55': '20220506_E3_Slot1-51_1_1989.d'      # E 3
+      'D59': '20220506_E4_Slot1-52_1_1990.d'      # E 4
+      'D60': '20220506_E5_Slot1-53_1_1991.d'      # E 5
+      'D61': '20220506_E6_Slot1-54_1_1992.d'      # E 6
+      'D63': '20220506_E7_Slot1-55_1_1993.d'      # E 7
+      'D67': '20220506_E8_Slot1-56_1_1994.d'      # E8
+      'D75': '20220506_E9_Slot1-57_1_1995.d'      # E9
+      'D76': '20220506_E10_Slot1-58_1_1996.d'     # E10
+
+
+
+
 # Pick a title
 batch: "220315_test"
+#batch: "220506_digesta"
 
 
 

@@ -5,10 +5,6 @@
 __author__: "Carl Mathias Kobel & Arturo Vera De Ponce Leon"
 
 
-
-# who wrote this
-
-
 import os
 from datetime import datetime
 import time
@@ -43,6 +39,10 @@ print("                                                                         
 # TODO: It looks like there is a problem with annotate. Should it really be running for each sample individually? I would think that once per batch should be plentiful.
 
 
+# I don't know what happened to directory in the new snakemake version
+# I could simply remove the directory() calls, but I want to keep them for now - doesn't hurt.
+def directory(x):
+    return x
 
 # Import configuration
 configfile: "config.yaml"

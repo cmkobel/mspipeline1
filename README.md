@@ -25,7 +25,7 @@
 
 This is a very simple pipeline to transform .d files with an appropriate database into sane protein calls with abundances.
 
-This pipeline can be seen as an enhanced version of https://fragpipe.nesvilab.org/docs/tutorial_linux.html
+This pipeline can be seen as a snakemake wrapped version of https://fragpipe.nesvilab.org/docs/tutorial_linux.html
 
 The workflow is based on msfragger and aims to keep a tidy tree of output files.
 
