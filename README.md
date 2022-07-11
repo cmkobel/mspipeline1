@@ -66,7 +66,7 @@ $ snakemake --profile profiles/slurm/
 ```
 
 Below is an example graph for a run involving two samples.
-<img width="696" alt="Screen Shot 2022-07-11 at 14 37 30" src="https://user-images.githubusercontent.com/5913696/178265830-fc4eedce-8bc4-4724-81da-23b0d64a3baa.png">
+<img width="1317" alt="Screen Shot 2022-07-11 at 14 45 47" src="https://user-images.githubusercontent.com/5913696/178267323-043228fa-bc77-49a5-ac73-e86a6f9fc0d8.png">
 
 ## Future
 
