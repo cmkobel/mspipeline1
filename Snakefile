@@ -22,7 +22,7 @@ import re
 
 print("/*                                                                               ")
 print("                                             ______________                      ")
-print("                                            < MS_pipeline1 >                     ")
+print("                                            < MS-pipeline1 >                     ")
 print("                                             --------------                      ")
 print("                                                          \\                     ")
 print("                             ___......__             _     \\                    ")
