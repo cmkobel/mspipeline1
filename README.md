@@ -66,12 +66,12 @@ $ snakemake --profile profiles/slurm/
 ```
 
 Below is an example graph for a run involving two samples.
-<img width="600" alt="dag_" src="https://user-images.githubusercontent.com/5913696/167369344-f5ffc0fa-a050-4d38-a430-17125dc312bc.png">
-
+<img width="696" alt="Screen Shot 2022-07-11 at 14 37 30" src="https://user-images.githubusercontent.com/5913696/178265830-fc4eedce-8bc4-4724-81da-23b0d64a3baa.png">
 
 ## Future
 
 This pipeline might involve an R-markdown performing trivial QC.
+
 
 
 
