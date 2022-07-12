@@ -35,6 +35,7 @@ cluster: "sbatch --account {cluster.account} --time {cluster.time} --partition {
 
 jobname: "{name}.{jobid}.snakejob.sh" 
 use-conda: true
+conda-frontend: 'mamba'
 conda-prefix: "conda_base/"
 #use-singularity: True
 #singularity-prefix: "/faststorage/home/cmkobel/singularity_images/"

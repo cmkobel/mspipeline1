@@ -41,8 +41,7 @@ print("                                                                         
 
 # I don't know what happened to directory in the new snakemake version
 # I could simply remove the directory() calls, but I want to keep them for now - doesn't hurt.
-def directory(x):
-    return x
+
 
 # Import configuration
 configfile: "config.yaml"
@@ -82,7 +81,8 @@ print()
 
 # Define default workflow
 rule all:
-    input: expand(["output/{config_batch}/msfragger/{basename}.pepXML", \
+    input: expand(["output/{config_batch}/metadata.tsv", \
+                   "output/{config_batch}/msfragger/{basename}.pepXML", \
                    "output/{config_batch}/samples/{sample}/annotate.done", \
                    "output/{config_batch}/samples/{sample}/peptideprophet-{sample}.pep.xml", \
                    "output/{config_batch}/samples/{sample}/protein.tsv", \
@@ -110,7 +110,7 @@ rule philosopher_database:
     input: glob.glob(config_database_glob)
     output: 
         database = "output/{config_batch}/msfragger/philosopher_database.fas",
-    #benchmark: "output/{config_batch}/benchmarks/database.tab"
+    benchmark: "output/{config_batch}/benchmarks/philosopher_database.tsv"
     threads: 8
     params:
         philosopher = config["philosopher_executable"]
@@ -157,11 +157,27 @@ rule philosopher_database:
         """
 
 
+# I don't like how msfragger writes in the input file directory. So I made this rule to (soft) link the files to where I actually want the output to be.
+# I find that msfragger writes some files (...calibrated.mgf and .mzBIN). I would like to keep these files together with the rest of the pipeline outputs.
+# Each sample is handled by a single job.
+rule link_input:
+    input:
+        d_files = directory((config_d_base + "/" + df["barcode"]).tolist()) # Using directory() on an input yields a warning. But it seems to work great nonetheless.
+    output:
+        linked_d_files = directory("output/{config_batch}/msfragger/" + df["barcode"]), # Not needed when we have the linked_flag file.
+        dir = directory("output/{config_batch}/msfragger"),
+        linked_flag = touch("output/{config_batch}/msfragger/link_input.done")
+    shell:"""
+
+        ln -s {input.d_files} {output.dir}
+
+        """
+
 
 
 # The reason for all the subdirectories beneath is that I want to make a dir for each sample, and they all need a "workspace"
 # Wouldn't it be better to annotate the database, and then copy it to each dir? No, because the binary files in each subdir are different, so that wouldn't make sense. There is going to be _a lot_ of output files for each sample further down the line, so we want to segregate early on.
-# Running this job only takes a split second any way, keeping it in its own rule makes things easy to debug. So that is it.
+# Running this job only takes a split second any way, keeping it in its own rule makes things easy to debug. So that is it. :)
 rule annotate:
     input: 
         database = "output/{config_batch}/msfragger/philosopher_database.fas"
@@ -191,32 +207,10 @@ rule annotate:
     """
 
 
-# I don't like how msfragger writes in the input file directory. So I made this rule to (soft) link the files to where I actually want the output to be.
-# I find that msfragger writes some files (...calibrated.mgf and .mzBIN). I would like to keep these files together with the rest of the pipeline outputs.
-# All samples are handled by a single job.
-# Jeg er sgu lidt bange for hvordan jeg får snakemake til 
-rule link_input:
-    input:
-        #d_files = (config_d_base + "/" + df["barcode"]),
-        d_files = directory((config_d_base + "/" + df["barcode"]).tolist())
-
-    output:
-        linked_d_files = directory("output/{config_batch}/msfragger/" + df["barcode"]), # Not needed when we have the linked_flag file.
-        dir = directory("output/{config_batch}/msfragger"),
-        linked_flag = touch("output/{config_batch}/msfragger/link_input.done"),
-    #params:
-    #    dir = "output/{config_batch}/msfragger" # Why not make this as an actual output instead.
-
-    shell:"""
-
-        ln -s {input.d_files} {output.dir}
-
-        """
 
 
 
-
-
+# I don't think rule metadata is pointing out anywhere right now.
 rule metadata:
     input: "output/{config_batch}/msfragger/link_input.done"
     output: "output/{config_batch}/metadata.tsv"
@@ -275,8 +269,7 @@ rule msfragger:
    
 
         # The last line extracts the number of lines that corresponds to the number of samples, to extract the total number of scans.
-        # Without tee, the stdout would be lost.
-
+        # Without tee, the stdout would be lost and not written in the snakemake logs.
 
 
 
