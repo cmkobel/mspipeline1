@@ -66,7 +66,7 @@ Lastly, set the root `batch` key to point at the batch that you want to run.
 
 Finally, run the pipeline in your command line with:
 ```
-$ snakemake --profile `profiles/slurm/`
+$ snakemake --profile profiles/slurm/
 ```
 
 Below is an example graph for a run involving two samples.
