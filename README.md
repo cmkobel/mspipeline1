@@ -38,12 +38,12 @@ Because it makes sure that all outputs are updated when you change input-paramet
 
 1) Prerequisites:
 
-  - A conda/miniconda3 environment
+  - A conda/miniconda3 environment.
   - A conda environment with snakemake installed. You can install snakemake by following the [instructions in the official documentation](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html).
 
-2) Clone this repo
+2) Clone this repo on the HPC/workstation/laptop where you want to work.
 
-3) Set up the profiles/slurm/ configuration so that it matches your execution environment. There is also a profile for local execution without a job management system (profiles/local/)
+3) Set up the profiles/slurm/ configuration so that it matches your execution environment. There is also a profile for local execution without a job management system (profiles/local/).
 
 
 
