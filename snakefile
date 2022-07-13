@@ -169,9 +169,9 @@ rule link_input:
     # input:
     #     d_files = directory((config_d_base + "/" + df["barcode"]).tolist()) # Instead I should probably use some kind of flag. This definition could be a param
     output:
-        linked_d_files = directory("output/{config_batch}/msfragger/" + df["barcode"]), # Not needed when we have the linked_flag file.
-        dir = directory("output/{config_batch}/msfragger"),
-        linked_flag = touch("output/{config_batch}/msfragger/link_input.done")
+        dir = directory("output/{config_batch}/msfragger"), 
+        linked_flag = touch("output/{config_batch}/msfragger/link_input.done"), # Might technically be unnecessary, but POIRAE
+        d_files = directory("output/{config_batch}/msfragger/" + df["barcode"]) # This line is necessary for msfragger to pick up on its input.
     params:
         d_files = (config_d_base + "/" + df["barcode"]).tolist() # Instead I should probably use some kind of flag. This definition could be a param
     shell:"""
@@ -241,6 +241,7 @@ rule msfragger:
         database = "output/{config_batch}/msfragger/philosopher_database.fas",  
         #d_files = (config_d_base + "/" + df["barcode"]).tolist() # deprecated
         d_files = ("output/{config_batch}/msfragger/" + df["barcode"]).tolist()
+
     output:
         #pepXML = "output/{config_batch}/msfragger/{sample}.pepXML", 
         #pepXMLs = lambda wildcards: "output/{config_batch}/msfragger/" + df[df["sample" == wildcards.sample]]["basename"] + ".pepXML"
