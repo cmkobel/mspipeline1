@@ -29,7 +29,7 @@ This pipeline can be seen as a snakemake wrapped version of https://fragpipe.nes
 
 The workflow is based on msfragger and aims to keep a tidy tree of output files.
 
-### Why should you use this pipeline
+### Why you should use this pipeline
 
 Because it makes sure that all outputs are updated when you change input-parameters. It also yells at you if something fails, and hopefully makes it a bit easier to find the error.
 
