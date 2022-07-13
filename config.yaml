@@ -1,9 +1,9 @@
 # Nesvilab doesn't like to make software freely available, so you have to specify the paths to philosopher and MSFragger
 
 
-philosopher_executable: "/cluster/projects/nn9864k/shared/bin/philosopher_v4.1.1_linux_amd64/philosopher"
-msfragger_jar: "/cluster/projects/nn9864k/shared/bin/MSFragger-3.4/MSFragger-3.4.jar"
-ionquant_jar: "/cluster/projects/nn9864k/shared/bin/MSFragger-3.4/ext/IonQuant-1.7.17.jar"
+philosopher_executable: "/faststorage/project/gBGC/bin/philosopher_v4.1.1_linux_amd64/philosopher"
+msfragger_jar: "/faststorage/project/gBGC/bin/MSFragger-3.4/MSFragger-3.4.jar"
+ionquant_jar: "/faststorage/project/gBGC/bin/MSFragger-3.4/ext/IonQuant-1.7.17.jar"
 
 
 
@@ -16,18 +16,18 @@ ionquant_jar: "/cluster/projects/nn9864k/shared/bin/MSFragger-3.4/ext/IonQuant-1
 batch_parameters:
   "220315_test": # We did a test with 2 Digesta, 2 Liver and 2 Wall. I forgot which is which. 
 
-    d_base: "/cluster/projects/nn9864k/shared/supacow/raw_data/uplc-msms-timstof/220302_proteomics_test/timsTOFfiles" # This data is also available at NIRD, but I made a copy just to mess around and make sure I don't accidentally delete something important.
+    d_base: "/faststorage/project/gBGC/supacow/raw_data/uplc-msms-timstof/220302_proteomics_test/timsTOFfiles/timsTOFfiles" # This data is also available at NIRD, but I made a copy just to mess around and make sure I don't accidentally delete something important.
   
-    database_glob: "/cluster/projects/nn9864k/cmkobel/01_proteinextest/aa_databases/03_yannas_and_pruned_protozoans/*" # This one should be proper and thorough
-    database_glob: "/cluster/projects/nn9864k/cmkobel/01_proteinextest/aa_databases/00_digesta_fast_debug/*" # Just a small fast debbuging one.
+    database_glob: "/faststorage/project/gBGC/supacow/01_proteomics/aa_databases/03_yannas_and_pruned_protozoans/*" # This one should be proper and thorough
+    database_glob: "/faststorage/project/gBGC/supacow/01_proteomics/aa_databases/00_digesta_fast_debug/*" # Just a small fast debbuging one.
 
   
     samples:
-      "s01": "20220302_A1_Slot1-01_1_1592.d"
-      "s02": "20220302_A2_Slot1-02_1_1593.d"
+      #"s01": "20220302_A1_Slot1-01_1_1592.d"
+      #"s02": "20220302_A2_Slot1-02_1_1593.d"
       #"s03": "20220302_A3_Slot1-03_1_1594.d"
-      #"s04": "20220302_A4_Slot1-04_1_1595.d"
-      #"s05": "20220302_A5_Slot1-05_1_1596.d"
+      "s04": "20220302_A4_Slot1-04_1_1595.d"
+      "s05": "20220302_A5_Slot1-05_1_1596.d"
       #"s06": "20220302_A6_Slot1-06_1_1597.d"
 
 
@@ -35,7 +35,7 @@ batch_parameters:
 
   "220506_digesta": # This batch is purely for developing and debugging the pipeline.
 
-    d_base: "/cluster/projects/nn9864k/shared/supacow/raw_data/uplc-msms-timstof/220506_metaP_rumen_digesta_T6/20220525_CMK" # This data is also available at NIRD, but I made a copy just to mess around and make sure I don't accidentally delete something important.
+    d_base: "/faststorage/project/gBGC/supacow/raw_data/uplc-msms-timstof/220506_metaP_rumen_digesta_T6/20220525_CMK" # This data is also available at NIRD, but I made a copy just to mess around and make sure I don't accidentally delete something important.
 
   
     # A bit of debugging first:
@@ -43,7 +43,7 @@ batch_parameters:
     #database_glob: "/cluster/projects/nn9864k/shared/supacow/yannas_pilot_database/finaldb/cp_cow_genome.faa" # Debug: faster with only one file, and this one is the smallest.
 
     database_glob: "" # This one is good for debugging ?
-    database_glob: "/cluster/projects/nn9864k/cmkobel/01_proteinextest/aa_databases/03_yannas_and_pruned_protozoans/*" # This one is proper and thorough
+    database_glob: "/faststorage/project/gBGC/supacow/01_proteomics/aa_databases/03_yannas_and_pruned_protozoans/*" # This one is proper and thorough
   
     samples: 
       'P1': '20220506_A1_Slot1-01_1_1939.d'       # A 1

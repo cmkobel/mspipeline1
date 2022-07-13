@@ -1,33 +1,17 @@
 # config file for the job execution on cluster 
 
 __default__:
-    account: "nn9864k"
-    partition: "normal"
-    #cpus-per-task: 1
-    time: "01:00:00"
-    mem: 2048
-    output: "logs/{rule}-%j.out.txt"
-    #output: "logs/{rule}.out.txt"
-    error: "logs/{rule}-%j.err.txt"
-    #error: "logs/{rule}.err.txt"
+    account: "gBGC"
+    cpus-per-task: "{threads}"
+    time: "12:00:00"
+    mem: 16384 # {mem_mb}
+    output: "logs/{rule}-%j.out.log"
+    #output: "logs/{rule}.out"
+
+    error: "logs/{rule}-%j.err.log"
+    #error: "logs/{rule}.err"
+
+prokka:
+    cpus-per-task: 4
 
 
-
-annotate: 
-    mem: 32768
-    time: "02:00:00"
-
-philosopher_database:
-    mem: 16384
-    time: "02:00:00"
-
-msfragger:
-    mem: 131072
-    time: "08:00:00"
-
-
-prophet_filter: 
-    mem: 65536
-
-ionquant:
-    mem: 32768

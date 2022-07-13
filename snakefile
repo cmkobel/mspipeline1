@@ -160,18 +160,38 @@ rule philosopher_database:
 # I don't like how msfragger writes in the input file directory. So I made this rule to (soft) link the files to where I actually want the output to be.
 # I find that msfragger writes some files (...calibrated.mgf and .mzBIN). I would like to keep these files together with the rest of the pipeline outputs.
 # Each sample is handled by a single job.
+
+# I have a warning that I need to take care of. I think it explains some of the problems I've had with the pipeline wanting to run over and over even no inputs have changed.
+#> The flag 'directory' used in rule link_input is only valid for outputs, not inputs.
+#> The flag 'directory' used in rule link_input is only valid for outputs, not inputs.
+
 rule link_input:
-    input:
-        d_files = directory((config_d_base + "/" + df["barcode"]).tolist()) # Using directory() on an input yields a warning. But it seems to work great nonetheless.
+    # input:
+    #     d_files = directory((config_d_base + "/" + df["barcode"]).tolist()) # Instead I should probably use some kind of flag. This definition could be a param
     output:
         linked_d_files = directory("output/{config_batch}/msfragger/" + df["barcode"]), # Not needed when we have the linked_flag file.
         dir = directory("output/{config_batch}/msfragger"),
         linked_flag = touch("output/{config_batch}/msfragger/link_input.done")
+    params:
+        d_files = (config_d_base + "/" + df["barcode"]).tolist() # Instead I should probably use some kind of flag. This definition could be a param
     shell:"""
 
-        ln -s {input.d_files} {output.dir}
+        ln -s {params.d_files} {output.dir}
 
         """
+
+
+
+# I don't think rule metadata is pointing out anywhere right now.
+rule metadata:
+    input: "output/{config_batch}/msfragger/link_input.done"
+    output: "output/{config_batch}/metadata.tsv"
+    params: dataframe = df.to_csv(None, index_label = "index", sep = "\t")
+    shell: """
+
+        echo '''{params.dataframe}''' > {output}
+    
+    """
 
 
 
@@ -209,17 +229,6 @@ rule annotate:
 
 
 
-
-# I don't think rule metadata is pointing out anywhere right now.
-rule metadata:
-    input: "output/{config_batch}/msfragger/link_input.done"
-    output: "output/{config_batch}/metadata.tsv"
-    params: dataframe = df.to_csv(None, index_label = "index", sep = "\t")
-    shell: """
-
-        echo '''{params.dataframe}''' > {output}
-    
-    """
 
 
 
@@ -264,7 +273,7 @@ rule msfragger:
             --database_name {input.database} \
             --output_location "output/{wildcards.config_batch}/msfragger/" \
             {input.d_files} \
-            | tee output/{wildcards.config_batch}/msfragger/msfragger.out.txt
+            | tee output/{wildcards.config_batch}/msfragger/msfragger.out.txt 
 
    
 
