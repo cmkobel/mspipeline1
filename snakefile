@@ -383,6 +383,9 @@ rule ionquant:
         config_d_base = config_d_base, # I think this one is global, thus does not need to be params-linked.
         basename = lambda wildcards: df[df["sample"] == wildcards.sample]["basename"].values[0]
 
+    resources:
+        mem_mb = 65536
+
 
 
     shell: """
