@@ -43,7 +43,7 @@ Because it makes sure that all outputs are updated when you change input-paramet
 
 2) Clone this repo on the HPC/workstation/laptop where you want to work.
 
-3) Set up the profiles/slurm/ configuration so that it matches your execution environment. There is also a profile for local execution without a job management system (profiles/local/).
+3) Set up the `profiles/slurm/` configuration so that it matches your execution environment. There is also a profile for local execution without a job management system (`profiles/local/`).
 
 
 
@@ -66,7 +66,7 @@ Lastly, set the root `batch` key to point at the batch that you want to run.
 
 Finally, run the pipeline in your command line with:
 ```
-$ snakemake --profile profiles/slurm/ 
+$ snakemake --profile `profiles/slurm/`
 ```
 
 Below is an example graph for a run involving two samples.
