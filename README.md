@@ -29,6 +29,10 @@ This pipeline can be seen as a snakemake wrapped version of https://fragpipe.nes
 
 The workflow is based on msfragger and aims to keep a tidy tree of output files.
 
+### Why should you use this pipeline
+
+Because it makes sure that all outputs are updated when you change input-parameters. It also yells at you if something fails, and hopefully makes it a bit easier to find the error.
+
 
 ## Installation
 
@@ -47,7 +51,7 @@ The workflow is based on msfragger and aims to keep a tidy tree of output files.
 
 #### 1) Update config.yaml
 
-The file config.yaml contains all the parameters needed for this pipeline to run successfully. You should update the parameters so they reflect which samples you wish to process.
+The file config.yaml contains all the parameters needed for this pipeline to run. You should update the parameters so they reflect which samples you wish to process.
 
 Because nesvilab doesn't make their executables easily publicly available, you need to tell the pipeline where to find them on your system. Update addresses for the keys `philosopher_executable`, `msfragger_jar` and `ionquant_jar` which can be downloaded [here](https://github.com/nesvilab/philosopher/releases/latest), [here](https://github.com/Nesvilab/MSFragger/wiki/Preparing-MSFragger#Downloading-MSFragger) and [here](https://github.com/Nesvilab/IonQuant#download), respectively. 
 
