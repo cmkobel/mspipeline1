@@ -75,6 +75,7 @@ Below is an example graph for a run involving two samples.
 ## Future
 
 This pipeline might involve an R-markdown performing trivial QC.
+Also, a test data set that accelerates the development cycle. 🚴‍♀️
 
 
 
