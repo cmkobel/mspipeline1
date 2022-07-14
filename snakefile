@@ -2,7 +2,9 @@
 # alias smk='mv logs/*.txt logs/old 2> /dev/null; snakemake --profile profiles/slurm'
 
 
-__author__: "Carl Mathias Kobel & Arturo Vera De Ponce Leon"
+__author__ =  "Carl Mathias Kobel & Arturo Vera De Ponce Leon"
+
+__version__ = "v1.0.0"
 
 
 import os
