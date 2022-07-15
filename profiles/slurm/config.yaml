@@ -5,7 +5,7 @@ cores: 2048
 #configfile: "configs/workflow.yaml"
 configfile: "config.yaml"
 jobs: 8
-
+retries: 2
 
 # [--directory DIR] 
 keep-going: true 
@@ -18,7 +18,8 @@ latency-wait: 120
 # [--max-jobs-per-second MAX_JOBS_PER_SECOND] 
 # [--greediness GREEDINESS] 
 # [--runtime-profile FILE] 
-show-failed-logs: false
+#show-failed-logs: false
+
 # drmaa: "
 #     --mem={cluster.mem} 
 #     --cpus-per-task={cluster.cpus-per-task} 

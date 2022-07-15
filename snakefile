@@ -386,7 +386,8 @@ rule ionquant:
         basename = lambda wildcards: df[df["sample"] == wildcards.sample]["basename"].values[0]
 
     resources:
-        mem_mb = 65536
+        #mem_mb = 65536
+        mem = lambda wildcards, attempt: 16384 * (2**attempt//2) # multiply by 1, 2, 4, 8
 
 
 
