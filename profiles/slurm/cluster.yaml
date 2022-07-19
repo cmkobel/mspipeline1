@@ -11,9 +11,9 @@ __default__:
     error: "logs/{rule}-%j.err.log"
     #error: "logs/{rule}.err"
 
-prokka:
-    cpus-per-task: 4
 
+msfragger:
+    mem: 32768
 
 ionquant:
     mem: 65536
