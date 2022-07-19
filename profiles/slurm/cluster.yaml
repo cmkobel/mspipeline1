@@ -12,9 +12,14 @@ __default__:
     #error: "logs/{rule}.err"
 
 
+philosopher_database:
+    mem: 32768 # use mem, not mem_mb
+
 msfragger:
     mem: 32768
 
 ionquant:
     mem: 65536
+
+
 

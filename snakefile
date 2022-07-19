@@ -51,7 +51,7 @@ print(f"config_database_glob: '{config_database_glob}:'")
 if len(config_database_glob) < 1:
     raise Exception("Raised exception: no glob targets in config_database_glob") # Not tested yet.
 for i, j in enumerate(config_database_glob_read):
-    print(f"  {i+1}) {j}")
+    print(f"  {i}) {j}")
 print()
 
 
@@ -120,9 +120,14 @@ rule philosopher_database:
         database = "output/{config_batch}/msfragger/philosopher_database.fas",
     benchmark: "output/{config_batch}/benchmarks/philosopher_database.tsv"
     threads: 8
+    #retries: 3
+    resources:
+        mem_mb = lambda wildcards, attempt: 32768 * (2**attempt//2), # multiply by 1, 2, 4, 8 # This is not yet tested.  # Shows up in the log snakemake stdout but doesn't burn through to slurm.
     params:
         philosopher = config["philosopher_executable"]
     shell: """
+
+        TMPDIR="/scratch/$SLURM_JOB_ID"
 
         >&2 echo "Catting database files ..."
         # Cat all database source files into one.

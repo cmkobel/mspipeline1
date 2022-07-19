@@ -18,7 +18,7 @@ batch_parameters:
   # We did a test with 2 Digesta, 2 Liver and 2 Wall. I forgot which is which. I'm sorry to admit, but I think I inadvertently must have deleted something. Probably the cause of some rogue nesvilab software.
   "220315_test": 
     d_base: "/faststorage/project/gBGC/supacow/raw_data/uplc-msms-timstof/220302_proteomics_test/timsTOFfiles/timsTOFfiles" # This data is also available at NIRD, but I made a copy just to mess around and make sure I don't accidentally delete something important.
-    database_glob: "/faststorage/project/gBGC/supacow/01_proteomics/aa_databases/00_digesta_fast_debug/*" # Just a small fast debbuging one.
+    database_glob: "/faststorage/project/gBGC/supacow/01_proteomics/aa_databases/aa_databases/00_digesta_fast_debug/*" # Just a small fast debbuging one.
     samples:
       #"s01": "20220302_A1_Slot1-01_1_1592.d"
       #"s02": "20220302_A2_Slot1-02_1_1593.d"
@@ -32,7 +32,7 @@ batch_parameters:
 
   "220506_DnnT6S_carl": # This batch is purely for developing and debugging the pipeline.
     d_base: "/faststorage/project/gBGC/supacow/raw_data/uplc-msms-timstof/220506_metaP_rumen_digesta_T6/20220525_CMK" # This data is also available at NIRD, but I made a copy just to mess around and make sure I don't accidentally delete something important.
-    database_glob: "/faststorage/project/gBGC/supacow/01_proteomics/aa_databases/03_yannas_and_pruned_protozoans/*" # This one is proper and thorough
+    database_glob: "/faststorage/project/gBGC/supacow/01_proteomics/aa_databases/aa_databases/03_yannas_and_pruned_protozoans/*" # This one is proper and thorough
     samples: 
       #'P1': '20220506_A1_Slot1-01_1_1939.d'       # A 1
       #'P2': '20220506_A2_Slot1-02_1_1940.d'       # A 2
@@ -106,7 +106,7 @@ batch_parameters:
 
 "220506_digesta_puchun": # This batch is purely for developing and debugging the pipeline.
     d_base: "/faststorage/project/gBGC/supacow/raw_data/uplc-msms-timstof/220506_metaP_rumen_digesta_T6/20220525_CMK" # This data is also available at NIRD, but I made a copy just to mess around and make sure I don't accidentally delete something important.
-    database_glob: "/faststorage/project/gBGC/supacow/01_proteomics/aa_databases/03_yannas_and_pruned_protozoans/*" # This one is proper and thorough
+    database_glob: "/faststorage/project/gBGC/supacow/01_proteomics/aa_databases/aa_databases/03_yannas_and_pruned_protozoans/*" # This one is proper and thorough
     samples: 
       'P1': '20220506_A1_Slot1-01_1_1939.d'       # A 1
       'P2': '20220506_A2_Slot1-02_1_1940.d'       # A 2
