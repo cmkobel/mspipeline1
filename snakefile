@@ -180,16 +180,16 @@ rule annotate:
         philosopher = config["philosopher_executable"]
     shell: """
 
+        TMPDIR="/scratch/$SLURM_JOB_ID"
+
+
         mkdir -p output/{config_batch}/samples/{wildcards.sample}
         cd output/{config_batch}/samples/{wildcards.sample}
 
-        {params.philosopher} workspace \
-            --nocheck \
-            --clean
+        {params.philosopher} workspace --nocheck --clean
 
-        {params.philosopher} workspace \
-            --nocheck \
-            --init
+        {params.philosopher} workspace --nocheck --init --temp $TMPDIR
+
 
         >&2 echo "Annotating database ..."
         {params.philosopher} database \
@@ -215,6 +215,8 @@ rule msfragger:
     # shadow: "minimal" # The setting shadow: "minimal" only symlinks the inputs to the rule. Once the rule successfully executes, the output file will be moved if necessary to the real path as indicated by output.
     # Shadow doesn't work well with tee, as tee needs access to the log directory. Too much complexity.
     threads: 8
+    resources:
+        mem_mb = 131072
     params:
         config_d_base = config_d_base,
         msfragger_jar = config["msfragger_jar"],
@@ -224,7 +226,7 @@ rule msfragger:
 
         >&2 echo "MSFragger ..."
         java \
-            -Xmx64G \
+            -Xmx128G \
             -jar {params.msfragger_jar} \
             --num_threads {threads} \
             --database_name {input.database} \
@@ -335,7 +337,7 @@ rule ionquant:
         basename = lambda wildcards: df[df["sample"] == wildcards.sample]["basename"].values[0]
     resources:
         #mem_mb = 65536
-        mem = lambda wildcards, attempt: 16384 * (2**attempt//2) # multiply by 1, 2, 4, 8 # This is not yet tested.
+        mem_mb = lambda wildcards, attempt: 16384 * (2**attempt//2) # multiply by 1, 2, 4, 8 # This is not yet tested.
     shell: """
 
         >&2 echo "Ionquant ..."

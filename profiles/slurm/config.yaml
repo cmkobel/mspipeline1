@@ -31,7 +31,7 @@ latency-wait: 120
 # "
 
 cluster-config: "profiles/slurm/cluster.yaml" 
-cluster: "sbatch --account {cluster.account} --time {cluster.time} --mem {cluster.mem} --error={cluster.error} --output={cluster.output}"
+cluster: "sbatch --account {cluster.account} --time {cluster.time} --mem {cluster.mem_mb} --error={cluster.error} --output={cluster.output}"
 #cluster: "sbatch -A {cluster.account} -t {cluster.time} -p {cluster.partition} --mem {cluster.mem} --error={cluster.error} --output={cluster.output}"
 
 

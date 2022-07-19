@@ -16,9 +16,13 @@ philosopher_database:
     mem: 65536 # use mem, not mem_mb
 
 msfragger:
-    mem: 32768
+    mem: 131072
 
 ionquant:
+    mem: 65536
+
+
+annotate:
     mem: 65536
 
 
