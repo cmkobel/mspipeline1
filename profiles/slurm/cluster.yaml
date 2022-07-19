@@ -13,7 +13,7 @@ __default__:
 
 
 philosopher_database:
-    mem: 32768 # use mem, not mem_mb
+    mem: 65536 # use mem, not mem_mb
 
 msfragger:
     mem: 32768

@@ -120,7 +120,7 @@ rule philosopher_database:
         database = "output/{config_batch}/msfragger/philosopher_database.fas",
     benchmark: "output/{config_batch}/benchmarks/philosopher_database.tsv"
     threads: 8
-    #retries: 3
+    #retries: 3 # Disabled: Increasing memory doesn't burn through to slurm anyway.
     resources:
         mem_mb = lambda wildcards, attempt: 32768 * (2**attempt//2), # multiply by 1, 2, 4, 8 # This is not yet tested.  # Shows up in the log snakemake stdout but doesn't burn through to slurm.
     params:
@@ -142,7 +142,7 @@ rule philosopher_database:
         {params.philosopher} workspace --nocheck --clean 
 
         >&2 echo "Philosopher workspace init ..."
-        {params.philosopher} workspace --nocheck --init 
+        {params.philosopher} workspace --nocheck --init --temp $TMPDIR
 
         >&2 echo "Removing previous .fas ..."
         rm *.fas || echo "nothing to delete" # Remove all previous databases if any.
@@ -151,6 +151,9 @@ rule philosopher_database:
         {params.philosopher} database \
             --custom cat_database_sources.faa \
             --contam 
+        >&2 echo "ls TMPDIR" # just curious
+        ls -l $TMPDIR
+
 
         >&2 echo "Move output ..."
         # Manually rename the philosopher output so we can grab it later
