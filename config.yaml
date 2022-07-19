@@ -99,6 +99,11 @@ batch_parameters:
 
 
 
+
+
+
+
+
 "220506_digesta_puchun": # This batch is purely for developing and debugging the pipeline.
     d_base: "/faststorage/project/gBGC/supacow/raw_data/uplc-msms-timstof/220506_metaP_rumen_digesta_T6/20220525_CMK" # This data is also available at NIRD, but I made a copy just to mess around and make sure I don't accidentally delete something important.
     database_glob: "/faststorage/project/gBGC/supacow/01_proteomics/aa_databases/03_yannas_and_pruned_protozoans/*" # This one is proper and thorough
@@ -172,6 +177,8 @@ batch_parameters:
 # Pick a title
 #batch: "220315_test"
 batch: "220506_DnnT6S_carl"
+#batch: "220506_DnnT6S_carl_smalltest"
+
 #batch: "220506_digesta_puchun"
 
 

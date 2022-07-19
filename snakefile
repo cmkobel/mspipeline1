@@ -53,10 +53,13 @@ config_database_glob = config["batch_parameters"][config_batch]["database_glob"]
 config_database_glob_read = glob.glob(config_database_glob)
 config_samples = config["batch_parameters"][config_batch]["samples"]
 
+
 # Present configuration
 print(f"config_batch:         '{config_batch}'")
 print(f"config_d_base:        '{config_d_base}'")
 print(f"config_database_glob: '{config_database_glob}:'")
+if len(config_database_glob) < 1:
+    raise Exception("Raised exception: no glob targets in config_database_glob") # Not tested yet.
 for i, j in enumerate(config_database_glob_read):
     print(f"  {i+1}) {j}")
 print()
@@ -103,13 +106,61 @@ rule all:
 
 
 
+# I don't think rule metadata is pointing out anywhere right now.
+rule metadata:
+    #input: "output/{config_batch}/msfragger/link_input.done"
+    output: "output/{config_batch}/metadata.tsv"
+    params: dataframe = df.to_csv(None, index_label = "index", sep = "\t")
+    shell: """
+
+        echo '''{params.dataframe}''' > {output}
+    
+    """
+
+
+
+# I don't like how msfragger writes in the input file directory. So I made this rule to (soft) link the files to where I actually want the output to be.
+# I find that msfragger writes some files (...calibrated.mgf and .mzBIN). I would like to keep these files together with the rest of the pipeline outputs.
+# But if you softlink, the output will still be in those directories anyway? Maybe I should just copy?
+# Each sample is handled by a single job.
+
+# I have a warning that I need to take care of. I think it explains some of the problems I've had with the pipeline wanting to run over and over even no inputs have changed.
+#> The flag 'directory' used in rule link_input is only valid for outputs, not inputs.
+#> The flag 'directory' used in rule link_input is only valid for outputs, not inputs.
+
+rule link_input:
+    # input: # I don't think it is necessary to have any input in this rule.
+    #     d_files = directory((config_d_base + "/" + df["barcode"]).tolist()) # Instead I should probably use some kind of flag. This definition could be a param
+    output:
+        dir = directory("output/{config_batch}/msfragger"), 
+        #linked_flag = touch("output/{config_batch}/msfragger/link_input.done"), # Might technically be unnecessary, but POIRAE
+        #linked_flag = "output/{config_batch}/msfragger/link_input.done", # Might technically be unnecessary, but POIRAE
+        #linked_flag = "output/{config_batch}/msfragger/link_input.done", # I'm having permissions issue with this touch. Maybe I should just use the output.d_files as flag for this rule.
+
+        d_files = directory("output/{config_batch}/msfragger/" + df["barcode"] + "/"), # This is the output that msfragger picks up on. Not sure if it works okay without a flag file.
+        linked_flag = touch("output/{config_batch}/msfragger/link_input.done") # Tester at jeg kan skrive nå. Overvejer om den skal bli.
+    params:
+        d_files = (config_d_base + "/" + df["barcode"]).tolist() # Instead I should probably use some kind of flag. This definition could be a param.
+    shell: """
+        
+        ln -s {params.d_files} {output.dir}
+
+        """
+
+
+
+
+
+
 
 
 
 
 # Build a database of the known amino acid sequences.
 rule philosopher_database:
-    input: glob.glob(config_database_glob)
+    input: 
+        glob = glob.glob(config_database_glob),
+        linked_flag = "output/{config_batch}/msfragger/link_input.done" 
     output: 
         database = "output/{config_batch}/msfragger/philosopher_database.fas",
     benchmark: "output/{config_batch}/benchmarks/philosopher_database.tsv"
@@ -121,12 +172,12 @@ rule philosopher_database:
 
         >&2 echo "Catting database files ..."
         # Cat all database source files into one.
-        cat {input} > output/{config_batch}/msfragger/cat_database_sources.faa
+        cat {input.glob} > output/{config_batch}/msfragger/cat_database_sources.faa
 
 
         >&2 echo "Change dir ..."
         # As philosopher can't specify output files, we need to change dir.
-        mkdir -p output/{config_batch}/msfragger
+        #mkdir -p output/{config_batch}/msfragger # rule link_input already made this dir.
         cd output/{config_batch}/msfragger
 
         >&2 echo "Philosopher workspace clean ..."
@@ -159,41 +210,6 @@ rule philosopher_database:
         """
 
 
-# I don't like how msfragger writes in the input file directory. So I made this rule to (soft) link the files to where I actually want the output to be.
-# I find that msfragger writes some files (...calibrated.mgf and .mzBIN). I would like to keep these files together with the rest of the pipeline outputs.
-# Each sample is handled by a single job.
-
-# I have a warning that I need to take care of. I think it explains some of the problems I've had with the pipeline wanting to run over and over even no inputs have changed.
-#> The flag 'directory' used in rule link_input is only valid for outputs, not inputs.
-#> The flag 'directory' used in rule link_input is only valid for outputs, not inputs.
-
-rule link_input:
-    # input:
-    #     d_files = directory((config_d_base + "/" + df["barcode"]).tolist()) # Instead I should probably use some kind of flag. This definition could be a param
-    output:
-        dir = directory("output/{config_batch}/msfragger"), 
-        linked_flag = touch("output/{config_batch}/msfragger/link_input.done"), # Might technically be unnecessary, but POIRAE
-        d_files = directory("output/{config_batch}/msfragger/" + df["barcode"]) # This line is necessary for msfragger to pick up on its input.
-    params:
-        d_files = (config_d_base + "/" + df["barcode"]).tolist() # Instead I should probably use some kind of flag. This definition could be a param
-    shell:"""
-
-        ln -s {params.d_files} {output.dir}
-
-        """
-
-
-
-# I don't think rule metadata is pointing out anywhere right now.
-rule metadata:
-    input: "output/{config_batch}/msfragger/link_input.done"
-    output: "output/{config_batch}/metadata.tsv"
-    params: dataframe = df.to_csv(None, index_label = "index", sep = "\t")
-    shell: """
-
-        echo '''{params.dataframe}''' > {output}
-    
-    """
 
 
 
@@ -238,11 +254,12 @@ rule annotate:
 # TODO: Test the implications of using shadow: "minimal"
 rule msfragger:
     input:
-        linked_flag = "output/{config_batch}/msfragger/link_input.done",
-
+#        linked_flag = "output/{config_batch}/msfragger/link_input.done", # Disabled because I'm playing around with rule link_input.
         database = "output/{config_batch}/msfragger/philosopher_database.fas",  
         #d_files = (config_d_base + "/" + df["barcode"]).tolist() # deprecated
         d_files = ("output/{config_batch}/msfragger/" + df["barcode"]).tolist()
+
+
 
     output:
         #pepXML = "output/{config_batch}/msfragger/{sample}.pepXML", 
