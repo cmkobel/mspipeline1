@@ -1,24 +1,21 @@
-    
+
 # alias smk='mv logs/*.txt logs/old 2> /dev/null; snakemake --profile profiles/slurm'
 
 
-__author__ =  "Carl Mathias Kobel & Arturo Vera De Ponce Leon"
+__author__ =  "Carl Mathias Kobel & Arturo Vera Ponce De Leon"
+__version__ = "v1.0.1"
 
-__version__ = "v1.0.0"
 
-
-import os
+# TODO: prune these imports
 from datetime import datetime
-import time
-import re
-#from shutil import copyfile
 import glob
-
+import os
 import pandas as pd
 import re
+import time 
 
 
-print("/*                                                                               ")
+print("/*                                                                               ") # Helps with outputting to dot.
 print("                                             ______________                      ")
 print("                                            < MS-pipeline1 >                     ")
 print("                                             --------------                      ")
@@ -36,13 +33,6 @@ print("                       _//        {{                                     
 print("                    '='~'          \\\\_    =                                    ")
 print("                                    ~~'                                          ")
 print("                                                                                 ")
-
-
-# TODO: It looks like there is a problem with annotate. Should it really be running for each sample individually? I would think that once per batch should be plentiful.
-
-
-# I don't know what happened to directory in the new snakemake version
-# I could simply remove the directory() calls, but I want to keep them for now - doesn't hurt.
 
 
 # Import configuration
@@ -65,26 +55,17 @@ for i, j in enumerate(config_database_glob_read):
 print()
 
 
-# Populate dataframe
+# Create a dataframe with all inputs
 df = pd.DataFrame(data = {'sample':  config_samples.keys(),
                           'barcode': config_samples.values()})
 
 df["basename"] = [re.sub(".d$", "", barcode) for barcode in df["barcode"]]
-#df["path"] = config_d_base + "/" + df["barcode"]
-
-
-
-
-
-
 print(df)
 print("//")
 print()
 
 
-
-
-# Define default workflow
+# Define workflow targets
 rule all:
     input: expand(["output/{config_batch}/metadata.tsv", \
                    "output/{config_batch}/msfragger/{basename}.pepXML", \
@@ -96,17 +77,9 @@ rule all:
                    sample = df["sample"], \
                    basename = df["basename"])
 
-#"output/{config_batch}/samples/{sample}/{sample}_quant.csv"], \ # disabled until msfragger basename-sample conversion works
-
-#"output/{config_batch}/msfragger/philosopher_database.fas", 
 
 
-
-
-
-
-
-# I don't think rule metadata is pointing out anywhere right now.
+# Save some metadata about in puts for good measure.
 rule metadata:
     #input: "output/{config_batch}/msfragger/link_input.done"
     output: "output/{config_batch}/metadata.tsv"
@@ -119,39 +92,21 @@ rule metadata:
 
 
 
-# I don't like how msfragger writes in the input file directory. So I made this rule to (soft) link the files to where I actually want the output to be.
+
+# Create a symbolic link for the input files. Msfragger writes adjacent to the input directories, so linking keeps these outputs somewhat isolated. 
 # I find that msfragger writes some files (...calibrated.mgf and .mzBIN). I would like to keep these files together with the rest of the pipeline outputs.
-# But if you softlink, the output will still be in those directories anyway? Maybe I should just copy?
-# Each sample is handled by a single job.
-
-# I have a warning that I need to take care of. I think it explains some of the problems I've had with the pipeline wanting to run over and over even no inputs have changed.
-#> The flag 'directory' used in rule link_input is only valid for outputs, not inputs.
-#> The flag 'directory' used in rule link_input is only valid for outputs, not inputs.
-
 rule link_input:
-    # input: # I don't think it is necessary to have any input in this rule.
-    #     d_files = directory((config_d_base + "/" + df["barcode"]).tolist()) # Instead I should probably use some kind of flag. This definition could be a param
     output:
         dir = directory("output/{config_batch}/msfragger"), 
-        #linked_flag = touch("output/{config_batch}/msfragger/link_input.done"), # Might technically be unnecessary, but POIRAE
-        #linked_flag = "output/{config_batch}/msfragger/link_input.done", # Might technically be unnecessary, but POIRAE
-        #linked_flag = "output/{config_batch}/msfragger/link_input.done", # I'm having permissions issue with this touch. Maybe I should just use the output.d_files as flag for this rule.
-
-        d_files = directory("output/{config_batch}/msfragger/" + df["barcode"] + "/"), # This is the output that msfragger picks up on. Not sure if it works okay without a flag file.
-        linked_flag = touch("output/{config_batch}/msfragger/link_input.done") # Tester at jeg kan skrive nå. Overvejer om den skal bli.
+        d_files = directory("output/{config_batch}/msfragger/" + df["barcode"] + "/"), # Bound for msfragger.
+        linked_flag = touch("output/{config_batch}/msfragger/link_input.done") # Used by rule philosopher_database to wait for creation of the msfragger directory.
     params:
         d_files = (config_d_base + "/" + df["barcode"]).tolist() # Instead I should probably use some kind of flag. This definition could be a param.
     shell: """
         
         ln -s {params.d_files} {output.dir}
 
-        """
-
-
-
-
-
-
+    """
 
 
 
@@ -169,26 +124,20 @@ rule philosopher_database:
         philosopher = config["philosopher_executable"]
     shell: """
 
-
         >&2 echo "Catting database files ..."
         # Cat all database source files into one.
         cat {input.glob} > output/{config_batch}/msfragger/cat_database_sources.faa
 
 
         >&2 echo "Change dir ..."
-        # As philosopher can't specify output files, we need to change dir.
-        #mkdir -p output/{config_batch}/msfragger # rule link_input already made this dir.
+        # As philosopher can't be specified output files, we need to change dir.
         cd output/{config_batch}/msfragger
 
         >&2 echo "Philosopher workspace clean ..."
-        {params.philosopher} workspace \
-            --nocheck \
-            --clean 
+        {params.philosopher} workspace --nocheck --clean 
 
         >&2 echo "Philosopher workspace init ..."
-        {params.philosopher} workspace \
-            --nocheck \
-            --init 
+        {params.philosopher} workspace --nocheck --init 
 
         >&2 echo "Removing previous .fas ..."
         rm *.fas || echo "nothing to delete" # Remove all previous databases if any.
@@ -212,10 +161,8 @@ rule philosopher_database:
 
 
 
-
-# The reason for all the subdirectories beneath is that I want to make a dir for each sample, and they all need a "workspace"
-# Wouldn't it be better to annotate the database, and then copy it to each dir? No, because the binary files in each subdir are different, so that wouldn't make sense. There is going to be _a lot_ of output files for each sample further down the line, so we want to segregate early on.
-# Running this job only takes a split second any way, keeping it in its own rule makes things easy to debug. So that is it. :)
+# Create a philosopher "workspare" for each sample in dedicated directories.
+# Creating a single workspace and copying it out is _not_ a solution as one of the binary files (in the hidden workspace sub-directory) defines the location. So we need to recalculate the same thing many times over.
 rule annotate:
     input: 
         database = "output/{config_batch}/msfragger/philosopher_database.fas"
@@ -224,6 +171,7 @@ rule annotate:
     params:
         philosopher = config["philosopher_executable"]
     shell: """
+
         mkdir -p output/{config_batch}/samples/{wildcards.sample}
         cd output/{config_batch}/samples/{wildcards.sample}
 
@@ -237,53 +185,34 @@ rule annotate:
 
         >&2 echo "Annotating database ..."
         {params.philosopher} database \
-            --annotate ../../../../{input.database}
+            --annotate ../../../../{input.database}        
 
-        
-        
 
     """
 
 
 
 
-
-
-
-
-# TODO: Test the implications of using shadow: "minimal"
+# Match the PSMs to the database
+# I've considered using shadow to prune some of the unneeded outputs, but since I don't know exactly which outputs I'm going to need later on, I think it is too much of a rabbit hole to dive into right now.
 rule msfragger:
     input:
-#        linked_flag = "output/{config_batch}/msfragger/link_input.done", # Disabled because I'm playing around with rule link_input.
+        # linked_flag = "output/{config_batch}/msfragger/link_input.done", # Not necessary since d_files are well defined.
         database = "output/{config_batch}/msfragger/philosopher_database.fas",  
-        #d_files = (config_d_base + "/" + df["barcode"]).tolist() # deprecated
         d_files = ("output/{config_batch}/msfragger/" + df["barcode"]).tolist()
-
-
-
     output:
-        #pepXML = "output/{config_batch}/msfragger/{sample}.pepXML", 
-        #pepXMLs = lambda wildcards: "output/{config_batch}/msfragger/" + df[df["sample" == wildcards.sample]]["basename"] + ".pepXML"
-        #pepXMLs = expand("output/{config_batch}/msfragger/{sample}.pepXML", sample = df["sample"], config_batch = config_batch)
         pepXMLs = "output/{config_batch}/msfragger/" + df["basename"] + ".pepXML",
         stdout = "output/{config_batch}/msfragger/msfragger.out.txt"
-        #touch = touch("output/{config_batch}/msfra")
-
     # Use shadow to get rid of the pepindex files
-    #shadow: "minimal" # The setting shadow: "minimal" only symlinks the inputs to the rule. Once the rule successfully executes, the output file will be moved if necessary to the real path as indicated by output.
-    # Shadow doesn't work well with tee, as tee needs access to the log directory
+    # shadow: "minimal" # The setting shadow: "minimal" only symlinks the inputs to the rule. Once the rule successfully executes, the output file will be moved if necessary to the real path as indicated by output.
+    # Shadow doesn't work well with tee, as tee needs access to the log directory. Too much complexity.
     threads: 8
     params:
         config_d_base = config_d_base,
         msfragger_jar = config["msfragger_jar"],
         n_samples = len(df.index)
-        #basename_out =  lambda wildcards: "output/{config_batch}/msfragger/" + df[df["sample" == wildcards.sample]]["basename"] + ".pepXML"
-
     conda: "envs/openjdk.yaml"
     shell: """
-
-        # We can't manage the output path of MSFragger, so we need to symlink it to the directory where we want the output to reside.
-        # And no, we can't use snakemake-shadow, as it only works on relative subdirs.
 
         >&2 echo "MSFragger ..."
         java \
@@ -295,29 +224,24 @@ rule msfragger:
             {input.d_files} \
             | tee output/{wildcards.config_batch}/msfragger/msfragger.out.txt 
 
-   
 
-        # The last line extracts the number of lines that corresponds to the number of samples, to extract the total number of scans.
-        # Without tee, the stdout would be lost and not written in the snakemake logs.
+        # We need to collect stdout so we can later compare the number of PSMs to the number of scans.
 
-
-
-        ls output/{wildcards.config_batch}/msfragger > output/{wildcards.config_batch}/msfragger/msfragger.done
+        # Get an overview of which files were created by msfragger. 
+        ls -l output/{wildcards.config_batch}/msfragger > output/{wildcards.config_batch}/msfragger/msfragger.done
 
 
         # makes a .pepindex and a pepXML for each sample.
         # I feel like it also creates a .mgf and .mzBIN in the source directory where the .d-dirs reside
         # Should I not move the .pepXML files? No, because I'm using the --output_location argument.
         # The tutorial mentions something about moving some .tsv files after running msfragger, but I haven't seen any.
-        # These output files should in theory be mitigated by using the shadow rule?
-
+        # These output files should in theory be mitigated by using the shadow rule? Update: No.
 
 
         """
 
 
-
-
+# Filter the raw msfragger output.
 # For each sample
 rule prophet_filter:
     input:
@@ -401,15 +325,10 @@ rule ionquant:
         ionquant_jar = config["ionquant_jar"],
         config_d_base = config_d_base, # I think this one is global, thus does not need to be params-linked.
         basename = lambda wildcards: df[df["sample"] == wildcards.sample]["basename"].values[0]
-
     resources:
         #mem_mb = 65536
-        mem = lambda wildcards, attempt: 16384 * (2**attempt//2) # multiply by 1, 2, 4, 8
-
-
-
+        mem = lambda wildcards, attempt: 16384 * (2**attempt//2) # multiply by 1, 2, 4, 8 # This is not yet tested.
     shell: """
-
 
         >&2 echo "Ionquant ..."
         java \
@@ -432,9 +351,10 @@ rule ionquant:
             #mv output/{config_batch}/msfragger/{wildcards.sample}_quant.csv output/{config_batch}/samples/{wildcards.sample}/{wildcards.sample}_quant.csv
             mv output/{config_batch}/msfragger/{params.basename}_quant.csv output/{config_batch}/samples/{wildcards.sample}/{wildcards.sample}_quant.csv
 
-
     """
 
+
+# This is not yet implemented.
 rule rmarkdown:
     input:
         metadata = "output/{config_batch}/metadata.tsv",
@@ -458,9 +378,8 @@ rule rmarkdown:
         
 
 
-print("*/") # This is a language specific comment close tag that helps when you export the workflow as a graph
+print("*/") # This is a dot-language specific comment close tag that helps when you export the workflow as a graph
 
 
 
-# TODO: Go through the whole pipeline one job at a time, and make sure that all outputs are managed in the rules.
-# TODO: Export the dag and put it into the readme with a bit of documentation.
+# TODO: Go through the whole pipeline one job at a time, and make sure that all outputs are managed in the rules. Update: seems legit bruh.
