@@ -200,7 +200,6 @@ rule annotate:
 
 
 
-
 # Match the PSMs to the database
 # I've considered using shadow to prune some of the unneeded outputs, but since I don't know exactly which outputs I'm going to need later on, I think it is too much of a rabbit hole to dive into right now.
 rule msfragger:
@@ -215,12 +214,11 @@ rule msfragger:
     # shadow: "minimal" # The setting shadow: "minimal" only symlinks the inputs to the rule. Once the rule successfully executes, the output file will be moved if necessary to the real path as indicated by output.
     # Shadow doesn't work well with tee, as tee needs access to the log directory. Too much complexity.
     threads: 8
-    resources:
-        mem_mb = 131072
     params:
         config_d_base = config_d_base,
         msfragger_jar = config["msfragger_jar"],
-        n_samples = len(df.index)
+        n_samples = len(df.index), 
+        #mem_gb = -(rules.msfragger.mem_mb//-1024)
     conda: "envs/openjdk.yaml"
     shell: """
 

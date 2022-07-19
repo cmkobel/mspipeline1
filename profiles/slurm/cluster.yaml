@@ -4,7 +4,7 @@ __default__:
     account: "gBGC"
     cpus-per-task: "{threads}"
     time: "12:00:00"
-    mem: 16384 # {mem_mb}
+    mem_mb: 16384 # {mem}
     output: "logs/{rule}-%j.out.log"
     #output: "logs/{rule}.out"
 
@@ -13,17 +13,17 @@ __default__:
 
 
 philosopher_database:
-    mem: 65536 # use mem, not mem_mb
+    mem_mb: 65536 # use mem_mb, not mem
 
 msfragger:
-    mem: 131072
+    mem_mb: 262144
 
 ionquant:
-    mem: 65536
+    mem_mb: 65536
 
 
 annotate:
-    mem: 65536
+    mem_mb: 65536
 
 
 
