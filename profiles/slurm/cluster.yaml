@@ -16,7 +16,7 @@ philosopher_database:
     mem_mb: 65536 # use mem_mb, not mem
 
 msfragger:
-    mem_mb: 262144
+    mem_mb: 515538 # max is 515538
 
 ionquant:
     mem_mb: 65536

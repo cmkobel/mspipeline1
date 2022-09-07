@@ -21,18 +21,19 @@ latency-wait: 120
 # [--runtime-profile FILE] 
 #show-failed-logs: false
 
+
+
+cluster-config: "profiles/slurm/cluster.yaml" 
+cluster: "sbatch --account {cluster.account} --time {cluster.time} --mem {cluster.mem_mb} --error={cluster.error} --output={cluster.output}"
+#cluster: "sbatch -A {cluster.account} -t {cluster.time} -p {cluster.partition} --mem {cluster.mem} --error={cluster.error} --output={cluster.output}"
 # drmaa: "
-#     --mem={cluster.mem} 
+#     --mem={cluster.mem_mb} 
 #     --cpus-per-task={cluster.cpus-per-task} 
 #     --time={cluster.time} 
 #     --account={cluster.account}
 #     --error={cluster.error} 
 #     --output={cluster.output}
 # "
-
-cluster-config: "profiles/slurm/cluster.yaml" 
-cluster: "sbatch --account {cluster.account} --time {cluster.time} --mem {cluster.mem_mb} --error={cluster.error} --output={cluster.output}"
-#cluster: "sbatch -A {cluster.account} -t {cluster.time} -p {cluster.partition} --mem {cluster.mem} --error={cluster.error} --output={cluster.output}"
 
 
 jobname: "{name}.{jobid}.snakejob.sh" 

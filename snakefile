@@ -224,7 +224,7 @@ rule msfragger:
 
         >&2 echo "MSFragger ..."
         java \
-            -Xmx128G \
+            -Xmx500G \
             -jar {params.msfragger_jar} \
             --num_threads {threads} \
             --database_name {input.database} \
