@@ -17,16 +17,18 @@ conda-prefix: "conda_base/"
 
 
 
-# ---- Sigma2 Saga ----
+# ---- Sigma2 Saga SLURM specifics ----
 
 cluster-cancel: "scancel"
 
 cluster:
+  echo "{resources.mem_mb}" &&
+  echo "{resources.partition}" &&
   mkdir -p logs/old/ &&
   sbatch
     --parsable
     --cpus-per-task={threads}
-    --mem-per-cpu={resources.mem_mb}
+    --mem={resources.mem_mb}
     --job-name=ms1_{rule}_{wildcards}
     --output=logs/%j-{rule}.out.log
     --error=logs/%j-{rule}.err.log
@@ -50,7 +52,7 @@ set-resources:
   - annotate:mem_mb=65536
   - philosopher_database:mem_mb=65536 # use mem_mb, not mem
   - msfragger:mem_mb=515537 # max on gdk is 515538
-  - msfragger:disk_mb=bigmem
+  - msfragger:partition=bigmem
   - ionquant:mem_mb=65536
 
 

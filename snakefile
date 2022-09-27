@@ -229,9 +229,8 @@ rule msfragger:
         config_d_base = config_d_base,
         msfragger_jar = config["msfragger_jar"],
         n_samples = len(df.index), 
-        #mem_gb = -(rules.msfragger.mem_mb//-1024)
-    #resources:
-    #    mem_mb = 515538
+    resources:
+        mem_mb = 515538
     conda: "envs/openjdk.yaml"
     shell: """
 
