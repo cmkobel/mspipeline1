@@ -1,22 +1,20 @@
 # config file for the job execution on cluster 
+# I know that cluster-configs have been deprecated, but I refuse to put them on the cli
 
 __default__:
-    account: "gBGC"
+    account: "nn9864k"
     cpus-per-task: "{threads}"
     time: "12:00:00"
     mem_mb: 16384 # {mem}
-    output: "logs/{rule}-%j.out.log"
-    #output: "logs/{rule}.out"
-
-    error: "logs/{rule}-%j.err.log"
-    #error: "logs/{rule}.err"
+    output: "logs/%j-{rule}.out.log"
+    error: "logs/%j-{rule}.err.log"
 
 
 philosopher_database:
     mem_mb: 65536 # use mem_mb, not mem
 
 msfragger:
-    mem_mb: 515538 # max is 515538
+    mem_mb: 515538 # max on gdk is 515538
 
 ionquant:
     mem_mb: 65536

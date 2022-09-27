@@ -1,30 +1,51 @@
-# [--snakefile FILE] 
+
 cores: 2048
-# [--local-cores N] 
-#local-cores: 2
-#configfile: "configs/workflow.yaml"
-configfile: "config.yaml"
-jobs: 8
-#retries: 2
-
-
-# [--directory DIR] 
+jobs: 1000 # max parallel jobs
 keep-going: true 
-#batch: "run_main=1/500" # removed due to warning: --batch may not be combined with --forceall, because recomputed upstream jobs in subsequent batches may render already obtained results outdated.
-
-rerun-incomplete: true
-# [--shadow-prefix DIR] 
-# [--reason] 
+#rerun-incomplete: true
 latency-wait: 120
-# [--max-jobs-per-second MAX_JOBS_PER_SECOND] 
-# [--greediness GREEDINESS] 
-# [--runtime-profile FILE] 
-#show-failed-logs: false
+keep-incomplete: true
+
+# This one could be cool to have working 
+#show-failed-logs: false 
+
+
+# ---- Conda/Mamba ----
+use-conda: true
+conda-frontend: 'mamba'
+conda-prefix: "conda_base/"
+
+# ---- Singularity ----
+#use-singularity: True
+#singularity-prefix: "/faststorage/home/cmkobel/singularity_images/"
+
+# ---- Sigma2 Saga ----
+
+cluster-cancel: "scancel"
+
+cluster:
+  mkdir -p logs/old &&
+  mv logs/*.log logs/old 2> /dev/null &&
+  sbatch
+    --parsable
+    --cpus-per-task={threads}
+    --mem-per-cpu=16384
+    --job-name=ms1_{rule}_{wildcards}
+    --output=logs/%j-{rule}.out.log
+    --error=logs/%j-{rule}.err.log
+    --time=12:00:00
+    --account=nn9864k
+    
+set-resources:
+  - annotate:mem_mb=65536
+  - philosopher_database:mem_mb=65536 # use mem_mb, not mem
+  - msfragger:mem_mb=515538 # max on gdk is 515538
+  - ionquant:mem_mb=65536
 
 
 
-cluster-config: "profiles/slurm/cluster.yaml" 
-cluster: "sbatch --account {cluster.account} --time {cluster.time} --mem {cluster.mem_mb} --error={cluster.error} --output={cluster.output}"
+
+# ---- Old unused stuff ----
 #cluster: "sbatch -A {cluster.account} -t {cluster.time} -p {cluster.partition} --mem {cluster.mem} --error={cluster.error} --output={cluster.output}"
 # drmaa: "
 #     --mem={cluster.mem_mb} 
@@ -34,13 +55,14 @@ cluster: "sbatch --account {cluster.account} --time {cluster.time} --mem {cluste
 #     --error={cluster.error} 
 #     --output={cluster.output}
 # "
+#retries: 2
+#cluster: "sbatch --account {cluster.account} --time {cluster.time} --mem {cluster.mem_mb} --error={cluster.error} --output={cluster.output}"
 
+# [--local-cores N] 
+#local-cores: 2
+#configfile: "configs/workflow.yaml"
+#configfile: "config.yaml"
+# [--snakefile FILE] 
 
-jobname: "{name}.{jobid}.snakejob.sh" 
-use-conda: true
-conda-frontend: 'mamba'
-conda-prefix: "conda_base/"
-#use-singularity: True
-#singularity-prefix: "/faststorage/home/cmkobel/singularity_images/"
-cluster-cancel: "scancel"
-
+# While still being possible, cluster configuration has been deprecated by the introduction of Profiles. (https://snakemake.readthedocs.io/en/stable/executing/cli.html#profiles)
+#cluster-config: "profiles/slurm/cluster.yaml" 

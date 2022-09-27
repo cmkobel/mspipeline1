@@ -95,18 +95,25 @@ rule metadata:
 
 # Create a symbolic link for the input files. Msfragger writes adjacent to the input directories, so linking keeps these outputs somewhat isolated. 
 # I find that msfragger writes some files (...calibrated.mgf and .mzBIN). I would like to keep these files together with the rest of the pipeline outputs.
+# Update: When using slow long-term backup storage it might be better to copy the files to the wd drive instead of linking.
 rule link_input:
     output:
         dir = directory("output/{config_batch}/msfragger"), 
         d_files = directory("output/{config_batch}/msfragger/" + df["barcode"] + "/"), # Bound for msfragger.
         linked_flag = touch("output/{config_batch}/msfragger/link_input.done") # Used by rule philosopher_database to wait for creation of the msfragger directory.
+        # Make sure you've set write access to the directory where these files reside.
     params:
         d_files = (config_d_base + "/" + df["barcode"]).tolist() # Instead I should probably use some kind of flag. This definition could be a param.
     shell: """
         
         ln -s {params.d_files} {output.dir}
+        #cp -r {params.d_files} {output.dir}
+        # I'd rather manually copy the files and the link them. Otherwise snakemake will make new copies all the freakin' time.
+
 
     """
+
+
 
 
 
