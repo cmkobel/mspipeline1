@@ -1,5 +1,5 @@
-
-cores: 2048
+local-cores: 8 # front end / head node cores
+cores: 2048 # cluster cores
 jobs: 1000 # max parallel jobs
 keep-going: true 
 #rerun-incomplete: true
@@ -7,7 +7,7 @@ latency-wait: 120
 keep-incomplete: true
 
 # This one could be cool to have working 
-#show-failed-logs: false 
+show-failed-logs: true
 
 
 # ---- Conda/Mamba ----
@@ -15,9 +15,7 @@ use-conda: true
 conda-frontend: 'mamba'
 conda-prefix: "conda_base/"
 
-# ---- Singularity ----
-#use-singularity: True
-#singularity-prefix: "/faststorage/home/cmkobel/singularity_images/"
+
 
 # ---- Sigma2 Saga ----
 
@@ -66,3 +64,8 @@ set-resources:
 
 # While still being possible, cluster configuration has been deprecated by the introduction of Profiles. (https://snakemake.readthedocs.io/en/stable/executing/cli.html#profiles)
 #cluster-config: "profiles/slurm/cluster.yaml" 
+
+
+# ---- Singularity ----
+#use-singularity: True
+#singularity-prefix: "/faststorage/home/cmkobel/singularity_images/"

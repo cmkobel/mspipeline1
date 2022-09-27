@@ -1,9 +1,15 @@
 # Nesvilab doesn't like to make software freely available, so you have to specify the paths to philosopher and MSFragger
 
 
-philosopher_executable: "/faststorage/project/gBGC/bin/philosopher_v4.1.1_linux_amd64/philosopher"
-msfragger_jar: "/faststorage/project/gBGC/bin/MSFragger-3.4/MSFragger-3.4.jar"
-ionquant_jar: "/faststorage/project/gBGC/bin/MSFragger-3.4/ext/IonQuant-1.7.17.jar"
+
+philosopher_executable: "/cluster/home/cmkobel/bin/philosopher_v4.1.1_linux_amd64/philosopher"
+msfragger_jar: "/cluster/home/cmkobel/bin/MSFragger-3.4/MSFragger-3.4.jar"
+ionquant_jar: "/cluster/home/cmkobel/bin/MSFragger-3.4/ext/IonQuant-1.7.17.jar"
+
+# todo: move these to the profile instead
+#temp_dir: "/scratch/$SLURM_JOB_ID" #genomedk
+temp_dir: "$SCRATCH" # saga
+
 
 
 
@@ -171,6 +177,18 @@ batch_parameters:
       #'D75': '20220506_E9_Slot1-57_1_1995.d'      # E9
       #'D76': '20220506_E10_Slot1-58_1_1996.d'     # E10
 
+  "220506_digesta_puchun_test": # This batch is purely for developing and debugging the pipeline.
+    #d_base: "/faststorage/project/gBGC/supacow/raw_data/uplc-msms-timstof/220506_metaP_rumen_digesta_T6/20220525_CMK" # This data is also available at NIRD, but I made a copy just to mess around and make sure I don't accidentally delete something important.
+    d_base: "/cluster/home/cmkobel/userwork/01_proteinextest/MS-pipeline1/data_mirror/20220525_CMK" # simply a copy of "/cluster/home/cmkobel/memo/NS9864K@nird/datasets/2021_supacow/2022-05-06_PEP_timsTOF_D--T6S_24_puchun/timsTOF/20220525_CMK" 
+    # trying to use as much space on ~/userwork as possible. Should give a speed up to not have it on nird. One job might be copying it 
+
+    database_glob: "/cluster/home/cmkobel/userwork/01_proteinextest/aa_databases/04_puchuns/*.faa"
+
+    samples: 
+      'P1': '20220506_A1_Slot1-01_1_1939.d'       # A 1
+      'P2': '20220506_A2_Slot1-02_1_1940.d'       # A 2
+      
+
 
 
 
@@ -180,7 +198,7 @@ batch_parameters:
 #batch: "220506_DnnT6S_carl"
 #batch: "220506_DnnT6S_carl_smalltest"
 
-batch: "220506_digesta_puchun"
+batch: "220506_digesta_puchun_test"
 
 
 

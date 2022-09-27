@@ -1,3 +1,4 @@
+#profile: "profile/slurm-sigma2-saga/"
 
 # alias smk='mv logs/*.txt logs/old 2> /dev/null; snakemake --profile profiles/slurm'
 
@@ -42,6 +43,7 @@ config_d_base = config["batch_parameters"][config_batch]["d_base"]
 config_database_glob = config["batch_parameters"][config_batch]["database_glob"]
 config_database_glob_read = glob.glob(config_database_glob)
 config_samples = config["batch_parameters"][config_batch]["samples"]
+config_temp_dir = config["temp_dir"]
 
 
 # Present configuration
@@ -134,7 +136,9 @@ rule philosopher_database:
         philosopher = config["philosopher_executable"]
     shell: """
 
-        TMPDIR="/scratch/$SLURM_JOB_ID"
+
+        TMPDIR={config_temp_dir}
+
 
         >&2 echo "Catting database files ..."
         # Cat all database source files into one.
