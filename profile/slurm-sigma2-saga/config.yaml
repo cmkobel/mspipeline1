@@ -22,22 +22,35 @@ conda-prefix: "conda_base/"
 cluster-cancel: "scancel"
 
 cluster:
-  mkdir -p logs/old &&
-  mv logs/*.log logs/old 2> /dev/null &&
+  mkdir -p logs/old/ &&
   sbatch
     --parsable
     --cpus-per-task={threads}
-    --mem-per-cpu=16384
+    --mem-per-cpu={resources.mem_mb}
     --job-name=ms1_{rule}_{wildcards}
     --output=logs/%j-{rule}.out.log
     --error=logs/%j-{rule}.err.log
-    --time=12:00:00
+    --time={resources.runtime}
     --account=nn9864k
+    --partition={resources.partition}
     
+
+
+
+default-resources:
+  - mem_mb=1024
+  - disk_mb=1024
+  - runtime='12:00:00'
+  - tmpdir='$SCRATCH'
+  - partition=normal
+  
+  
+
 set-resources:
   - annotate:mem_mb=65536
   - philosopher_database:mem_mb=65536 # use mem_mb, not mem
-  - msfragger:mem_mb=515538 # max on gdk is 515538
+  - msfragger:mem_mb=515537 # max on gdk is 515538
+  - msfragger:disk_mb=bigmem
   - ionquant:mem_mb=65536
 
 

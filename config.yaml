@@ -1,6 +1,6 @@
 # Nesvilab doesn't like to make software freely available, so you have to specify the paths to philosopher and MSFragger
 
-
+#profile: "profile/slurm-sigma2-saga"
 
 philosopher_executable: "/cluster/home/cmkobel/bin/philosopher_v4.1.1_linux_amd64/philosopher"
 msfragger_jar: "/cluster/home/cmkobel/bin/MSFragger-3.4/MSFragger-3.4.jar"
@@ -9,6 +9,8 @@ ionquant_jar: "/cluster/home/cmkobel/bin/MSFragger-3.4/ext/IonQuant-1.7.17.jar"
 # todo: move these to the profile instead
 #temp_dir: "/scratch/$SLURM_JOB_ID" #genomedk
 temp_dir: "$SCRATCH" # saga
+#temp_dir: "$LOCALSCRATCH" # saga
+
 
 
 

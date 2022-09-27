@@ -191,7 +191,7 @@ rule annotate:
         philosopher = config["philosopher_executable"]
     shell: """
 
-        TMPDIR="/scratch/$SLURM_JOB_ID"
+        TMPDIR={config_temp_dir}
 
 
         mkdir -p output/{config_batch}/samples/{wildcards.sample}
@@ -230,6 +230,8 @@ rule msfragger:
         msfragger_jar = config["msfragger_jar"],
         n_samples = len(df.index), 
         #mem_gb = -(rules.msfragger.mem_mb//-1024)
+    #resources:
+    #    mem_mb = 515538
     conda: "envs/openjdk.yaml"
     shell: """
 
