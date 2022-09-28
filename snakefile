@@ -121,9 +121,6 @@ rule link_input:
 
 
 
-
-
-
 # Build a database of the known amino acid sequences.
 rule philosopher_database:
     input: 
@@ -141,7 +138,7 @@ rule philosopher_database:
     shell: """
 
 
-        #TMPDIR={config_temp_dir}
+        #TMPDIR={config_temp_dir} # tmp_dir should be set by snakemake
 
 
         >&2 echo "Catting database files ..."
@@ -158,6 +155,8 @@ rule philosopher_database:
 
         >&2 echo "Philosopher workspace init ..."
         {params.philosopher} workspace --nocheck --init --temp $TMPDIR
+        
+
 
         >&2 echo "Removing previous .fas ..."
         rm *.fas || echo "nothing to delete" # Remove all previous databases if any.
@@ -195,7 +194,7 @@ rule annotate:
         philosopher = config["philosopher_executable"]
     shell: """
 
-        #TMPDIR={config_temp_dir}
+        #TMPDIR={config_temp_dir} # tmp_dir should be set by snakemake
 
 
         mkdir -p output/{config_batch}/samples/{wildcards.sample}
@@ -204,6 +203,7 @@ rule annotate:
         {params.philosopher} workspace --nocheck --clean
 
         {params.philosopher} workspace --nocheck --init --temp $TMPDIR
+
 
 
         >&2 echo "Annotating database ..."
@@ -263,6 +263,9 @@ rule msfragger:
 
 
         """
+
+
+
 
 
 # Filter the raw msfragger output.
@@ -376,6 +379,11 @@ rule ionquant:
             mv output/{config_batch}/msfragger/{params.basename}_quant.csv output/{config_batch}/samples/{wildcards.sample}/{wildcards.sample}_quant.csv
 
     """
+
+
+
+
+
 
 
 # This is not yet implemented.

@@ -13,7 +13,7 @@ show-failed-logs: true
 # ---- Conda/Mamba ----
 use-conda: true
 conda-frontend: 'mamba'
-conda-prefix: "conda_base/"
+conda-prefix: "conda_base/" # This can't be true, I need to use the asscom2 base, right?
 
 
 
@@ -41,6 +41,8 @@ default-resources:
   - mem_mb=1024
   - disk_mb=1024
   - runtime='12:00:00'
+  #- tmpdir='$SCRATCH'
+  - tmpdir='/cluster/work/users/cmkobel/tmp' # We're already at userwork, so that won't be faster
   - partition=normal
   
   
