@@ -52,8 +52,12 @@ print(f"config_d_base:        '{config_d_base}'")
 print(f"config_database_glob: '{config_database_glob}:'")
 if len(config_database_glob) < 1:
     raise Exception("Raised exception: no glob targets in config_database_glob") # Not tested yet.
+k = 0
 for i, j in enumerate(config_database_glob_read):
     print(f"  {i}) {j}")
+    if i==29:
+        print(f"and {len(config_database_glob_read)-30} more..")
+        break
 print()
 
 
@@ -137,7 +141,7 @@ rule philosopher_database:
     shell: """
 
 
-        TMPDIR={config_temp_dir}
+        #TMPDIR={config_temp_dir}
 
 
         >&2 echo "Catting database files ..."
@@ -191,7 +195,7 @@ rule annotate:
         philosopher = config["philosopher_executable"]
     shell: """
 
-        TMPDIR={config_temp_dir}
+        #TMPDIR={config_temp_dir}
 
 
         mkdir -p output/{config_batch}/samples/{wildcards.sample}
@@ -230,7 +234,7 @@ rule msfragger:
         msfragger_jar = config["msfragger_jar"],
         n_samples = len(df.index), 
     resources:
-        mem_mb = 515538
+        mem_mb = 515538 # will be overwritten by set-resources in the profile, so remove that before managing it here.
     conda: "envs/openjdk.yaml"
     shell: """
 

@@ -22,8 +22,6 @@ conda-prefix: "conda_base/"
 cluster-cancel: "scancel"
 
 cluster:
-  echo "{resources.mem_mb}" &&
-  echo "{resources.partition}" &&
   mkdir -p logs/old/ &&
   sbatch
     --parsable
@@ -43,7 +41,6 @@ default-resources:
   - mem_mb=1024
   - disk_mb=1024
   - runtime='12:00:00'
-  - tmpdir='$SCRATCH'
   - partition=normal
   
   
