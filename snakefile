@@ -56,7 +56,7 @@ k = 0
 for i, j in enumerate(config_database_glob_read):
     print(f"  {i}) {j}")
     if i==29:
-        print(f"and {len(config_database_glob_read)-30} more..")
+        print(f"and {len(config_database_glob_read)-29} more..")
         break
 print()
 
