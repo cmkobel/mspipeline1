@@ -132,7 +132,7 @@ rule philosopher_database:
     threads: 8
     #retries: 3 # Disabled: Increasing memory doesn't burn through to slurm anyway.
     resources:
-        mem_mb = lambda wildcards, attempt: 32768 * (2**attempt//2), # multiply by 1, 2, 4, 8 # This is not yet tested.  # Shows up in the log snakemake stdout but doesn't burn through to slurm.
+        mem_mb = lambda wildcards, attempt: 32768 * (2**attempt//2), # multiply by 1, 2, 4, 8 # This is not yet tested.  # Shows up in the log snakemake stdout but doesn't burn through to slurm.      
     params:
         philosopher = config["philosopher_executable"]
     shell: """
@@ -192,6 +192,8 @@ rule annotate:
         flag = touch("output/{config_batch}/samples/{sample}/annotate.done")
     params:
         philosopher = config["philosopher_executable"]
+    resources:
+        mem_mb = 65536
     shell: """
 
         #TMPDIR={config_temp_dir} # tmp_dir should be set by snakemake
@@ -234,7 +236,8 @@ rule msfragger:
         msfragger_jar = config["msfragger_jar"],
         n_samples = len(df.index), 
     resources:
-        mem_mb = 515538 # will be overwritten by set-resources in the profile, so remove that before managing it here.
+        mem_mb = 515538, # will be overwritten by set-resources in the profile, so remove that before managing it here.
+        partition = 'bigmem'
     conda: "envs/openjdk.yaml"
     shell: """
 
@@ -285,6 +288,8 @@ rule prophet_filter:
         #protein = "output/{config_batch}/samples/{sample}/proteinprophet-{sample}.prot.xml"
     params:
         philosopher = config["philosopher_executable"]
+    resources:
+        mem_mb = 64000
     shell: """
 
         # Since the output location of philosopher is controlled by the input location, we should copy the input file.
@@ -353,8 +358,8 @@ rule ionquant:
         config_d_base = config_d_base, # I think this one is global, thus does not need to be params-linked.
         basename = lambda wildcards: df[df["sample"] == wildcards.sample]["basename"].values[0]
     resources:
-        #mem_mb = 65536
-        mem_mb = lambda wildcards, attempt: 16384 * (2**attempt//2) # multiply by 1, 2, 4, 8 # This is not yet tested.
+        mem_mb = 65536
+        #mem_mb = lambda wildcards, attempt: 16384 * (2**attempt//2) # multiply by 1, 2, 4, 8 # This is not yet tested.
     shell: """
 
         >&2 echo "Ionquant ..."

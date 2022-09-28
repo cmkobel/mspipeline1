@@ -47,13 +47,13 @@ default-resources:
   
   
 
-set-resources:
-  - annotate:mem_mb=65536
-  - philosopher_database:mem_mb=65536 # use mem_mb, not mem
-  - msfragger:mem_mb=515537 # max on gdk is 515538
-  - msfragger:partition=bigmem
-  - ionquant:mem_mb=65536
-
+#set-resources:
+#  - annotate:mem_mb=65536
+#  - philosopher_database:mem_mb=65536 # use mem_mb, not mem
+#  - msfragger:mem_mb=515537 # max on gdk is 515538
+#  - msfragger:partition=bigmem
+#  - ionquant:mem_mb=65536
+# update: Moved these into the snakefile
 
 
 
