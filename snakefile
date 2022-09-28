@@ -78,7 +78,8 @@ rule all:
                    "output/{config_batch}/samples/{sample}/annotate.done", \
                    "output/{config_batch}/samples/{sample}/peptideprophet-{sample}.pep.xml", \
                    "output/{config_batch}/samples/{sample}/protein.tsv", \
-                   "output/{config_batch}/samples/{sample}/{sample}_quant.csv"], \
+                   "output/{config_batch}/samples/{sample}/{sample}_quant.csv", \
+                   "output/{config_batch}/quantified.csv"], \
                    config_batch = config_batch, \
                    sample = df["sample"], \
                    basename = df["basename"])
@@ -165,8 +166,7 @@ rule philosopher_database:
         {params.philosopher} database \
             --custom cat_database_sources.faa \
             --contam 
-        >&2 echo "ls TMPDIR" # just curious
-        ls -l $TMPDIR
+        
 
 
         >&2 echo "Move output ..."
@@ -236,7 +236,8 @@ rule msfragger:
         msfragger_jar = config["msfragger_jar"],
         n_samples = len(df.index), 
     resources:
-        mem_mb = 515538, # will be overwritten by set-resources in the profile, so remove that before managing it here.
+        #mem_mb = 515538, # will be overwritten by set-resources in the profile, so remove that before managing it here.
+        mem_mb = 120000,
         partition = 'bigmem'
     conda: "envs/openjdk.yaml"
     shell: """
@@ -339,6 +340,7 @@ rule prophet_filter:
 
 
 # TODO: This rule ought to output the abundances named in the samples name and not the basename? I don't really see any neat way to do that 
+# I assume that ionquant changes the files in place?
 rule ionquant:
     input:
         irrelevant = ["output/{config_batch}/samples/{sample}/ion.tsv", \
@@ -350,13 +352,15 @@ rule ionquant:
         pepXML = lambda wildcards: "output/" + config_batch + "/msfragger/" + df[df["sample"] == wildcards.sample]["basename"] + ".pepXML",
 
     output: #touch("output/{config_batch}/samples/{sample}/ionquant.done")
-        csv = "output/{config_batch}/samples/{sample}/{sample}_quant.csv"
+        csv = "output/{config_batch}/samples/{sample}/{sample}_quant.csv",
+        tsv = "output/{config_batch}/samples/{sample}/{sample}_protein.tsv"
+        # Why not one of the many other files? quant is produced by msfragger you know.
     threads: 8
     conda: "envs/openjdk.yaml"
     params:
         ionquant_jar = config["ionquant_jar"],
         config_d_base = config_d_base, # I think this one is global, thus does not need to be params-linked.
-        basename = lambda wildcards: df[df["sample"] == wildcards.sample]["basename"].values[0]
+        basename = lambda wildcards: df[df["sample"] == wildcards.sample]["basename"].values[0] # used to have a [0] in the end, which I just removed, and it started working again.
     resources:
         mem_mb = 65536
         #mem_mb = lambda wildcards, attempt: 16384 * (2**attempt//2) # multiply by 1, 2, 4, 8 # This is not yet tested.
@@ -373,19 +377,49 @@ rule ionquant:
             # address to msfragger pepXML file
 
 
-            # TODO: Ask Arturo if it makes any sense that I'm not using the pepXML from peptideprophet, but the one directly from msfragger
+        # TODO: Ask Arturo if it makes any sense that I'm not using the pepXML from peptideprophet, but the one directly from msfragger
 
-            # Apparently, --specdir should point to the msfragger pepxmls. Maybe, I just need to point to the msfragger dir.
-            # Or maybe I need to point directly to the file.
-            # --specdir output/220315_test/msfragger/20220302_A1_Slot1-01_1_1592.pepXML 
-            # Maybe the other pepxml is the culprit
+        # Apparently, --specdir should point to the msfragger pepxmls. Maybe, I just need to point to the msfragger dir.
+        # Or maybe I need to point directly to the file.
+        # --specdir output/220315_test/msfragger/20220302_A1_Slot1-01_1_1592.pepXML 
+        # Maybe the other pepxml is the culprit
 
-            #mv output/{config_batch}/msfragger/{wildcards.sample}_quant.csv output/{config_batch}/samples/{wildcards.sample}/{wildcards.sample}_quant.csv
-            mv output/{config_batch}/msfragger/{params.basename}_quant.csv output/{config_batch}/samples/{wildcards.sample}/{wildcards.sample}_quant.csv
+
+        # mv output/{config_batch}/msfragger/{params.basename}_quant.csv output/{config_batch}/samples/{wildcards.sample}/{wildcards.sample}_quant.csv
+
+        # Instead of simply moving that file, I might want to prepend it with its sample name:
+        # This one I think is needed for rate calculation, but why don't I do it inside the msfragger job?
+        # TODO move it to msfragger
+        cat output/{config_batch}/msfragger/{params.basename}_quant.csv \
+        | awk -v sample={wildcards.sample} '{{ print sample "\\t" $0 }}' \
+        > output/{config_batch}/samples/{wildcards.sample}/{wildcards.sample}_quant.csv
+        # why not use output.csv
+
+        # Turns out that it is really the proteins file that we're interested in
+        cat output/{config_batch}/samples/{wildcards.sample}/protein.tsv \
+        | awk -v sample={wildcards.sample} '{{ print sample "\\t" $0 }}' \
+        > output/{config_batch}/samples/{wildcards.sample}/{wildcards.sample}_protein.tsv
+
+
 
     """
 
 
+
+rule collect:
+    input: 
+        quant = expand("output/{config_batch}/samples/{sample}/{sample}_quant.csv", sample = df["sample"], config_batch = config_batch),
+        protein = expand("output/{config_batch}/samples/{sample}/{sample}_protein.tsv", sample = df["sample"], config_batch = config_batch)
+    output:
+        quant = "output/{config_batch}/quantified.csv",
+        protein = "output/{config_batch}/proteins.tsv"
+
+    shell: """
+
+        cat {input.quant} > {output.quant}
+        cat {input.protein} > {output.protein}
+
+    """
 
 
 
