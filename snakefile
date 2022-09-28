@@ -78,8 +78,7 @@ rule all:
                    "output/{config_batch}/samples/{sample}/annotate.done", \
                    "output/{config_batch}/samples/{sample}/peptideprophet-{sample}.pep.xml", \
                    "output/{config_batch}/samples/{sample}/protein.tsv", \
-                   "output/{config_batch}/samples/{sample}/{sample}_quant.csv", \
-                   "output/{config_batch}/quantified.csv"], \
+                   "output/{config_batch}/samples/{sample}/{sample}_quant.csv"], \
                    config_batch = config_batch, \
                    sample = df["sample"], \
                    basename = df["basename"])
@@ -236,8 +235,8 @@ rule msfragger:
         msfragger_jar = config["msfragger_jar"],
         n_samples = len(df.index), 
     resources:
-        #mem_mb = 515538, # will be overwritten by set-resources in the profile, so remove that before managing it here.
-        mem_mb = 120000,
+        mem_mb = 515538, # will be overwritten by set-resources in the profile, so remove that before managing it here.
+        #mem_mb = 120000,
         partition = 'bigmem'
     conda: "envs/openjdk.yaml"
     shell: """
@@ -390,15 +389,13 @@ rule ionquant:
         # Instead of simply moving that file, I might want to prepend it with its sample name:
         # This one I think is needed for rate calculation, but why don't I do it inside the msfragger job?
         # TODO move it to msfragger
-        cat output/{config_batch}/msfragger/{params.basename}_quant.csv \
-        | awk -v sample={wildcards.sample} '{{ print sample "\\t" $0 }}' \
-        > output/{config_batch}/samples/{wildcards.sample}/{wildcards.sample}_quant.csv
-        # why not use output.csv
+        
+
+        cp output/{config_batch}/msfragger/{params.basename}_quant.csv output/{config_batch}/samples/{wildcards.sample}/{wildcards.sample}_quant.csv
+        
 
         # Turns out that it is really the proteins file that we're interested in
-        cat output/{config_batch}/samples/{wildcards.sample}/protein.tsv \
-        | awk -v sample={wildcards.sample} '{{ print sample "\\t" $0 }}' \
-        > output/{config_batch}/samples/{wildcards.sample}/{wildcards.sample}_protein.tsv
+        cp output/{config_batch}/samples/{wildcards.sample}/protein.tsv output/{config_batch}/samples/{wildcards.sample}/{wildcards.sample}_protein.tsv
 
 
 
@@ -406,20 +403,7 @@ rule ionquant:
 
 
 
-rule collect:
-    input: 
-        quant = expand("output/{config_batch}/samples/{sample}/{sample}_quant.csv", sample = df["sample"], config_batch = config_batch),
-        protein = expand("output/{config_batch}/samples/{sample}/{sample}_protein.tsv", sample = df["sample"], config_batch = config_batch)
-    output:
-        quant = "output/{config_batch}/quantified.csv",
-        protein = "output/{config_batch}/proteins.tsv"
 
-    shell: """
-
-        cat {input.quant} > {output.quant}
-        cat {input.protein} > {output.protein}
-
-    """
 
 
 
