@@ -237,7 +237,9 @@ rule msfragger:
     resources:
         mem_mb = 515538, # will be overwritten by set-resources in the profile, so remove that before managing it here.
         #mem_mb = 120000,
-        partition = 'bigmem'
+        partition = 'bigmem',
+        runtime = '3-00:00:00'
+        
     conda: "envs/openjdk.yaml"
     shell: """
 
