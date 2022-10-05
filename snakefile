@@ -191,9 +191,10 @@ rule msfragger:
 rule workspace:
     input: 
         pepXMLs = "output/{config_batch}/msfragger/" + df["basename"] + ".pepXML",
-        database = "output/{config_batch}/philosopher_database.fas"
+        database = "output/{config_batch}/philosopher_database.fas",
     output:
-        final_flag = touch("output/{config_batch}/final.flag")
+        prot_xml = "output/{config_batch}/workspace/proteinprophet.prot.xml"
+        psm = "output/{config_batch}/msfragger/psm.tsv",
     conda: "envs/openjdk.yaml"
     params:
         philosopher = config["philosopher_executable"],
@@ -262,22 +263,31 @@ rule workspace:
 
 
 
-# rule ionquant:
-#     input
+rule ionquant:
+    input:
+        prot_xml = "output/{config_batch}/workspace/proteinprophet.prot.xml",
+        psm = "output/{config_batch}/msfragger/psm.tsv",
+        pepXMLs = "output/{config_batch}/msfragger/" + df["basename"] + ".pepXML",
+    output: 
+        final_flag = touch("output/{config_batch}/final.flag"),
+    threads: 8
+    params:
+        ionquant_jar = config["ionquant_jar"],
 
-#     shell: """
+    conda: "envs/openjdk.yaml"
+    shell: """
 
-#         >&2 echo "Ionquant ..."
-#         java \
-#             -Xmx32G \
-#             -jar {params.ionquant_jar} \
-#             --threads {threads} \
-#             --psm {input.psm} \
-#             --specdir {params.config_d_base} \
-#             {input.pepXML} 
-#             # address to msfragger pepXML file
+        >&2 echo "Ionquant ..."
+        java \
+            -Xmx32G \
+            -jar {params.ionquant_jar} \
+            --threads {threads} \
+            --psm {input.psm} \
+            --specdir output/{config_batch}/msfragger \
+            {input.pepXMLs} 
+            # address to msfragger pepXML file
 
-#     """
+    """
 
 
 
