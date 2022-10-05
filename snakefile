@@ -1,6 +1,9 @@
 #profile: "profile/slurm-sigma2-saga/"
 
-# alias smk='mv logs/*.txt logs/old 2> /dev/null; snakemake --profile profiles/slurm'
+
+# mv logs/*.log logs/old 2> /dev/null; snakemake --profile profile/slurm-sigma2-saga/ --rerun-incomplete      
+
+# I'm experiencing some major problems with the temporary directories that i might as well fix. It seems to percolate through when I have a high amount of samples. Basically, all the jobs that use a program that uses the workspace, need to be in the same rule. Silly, but that is how it is.
 
 
 __author__ =  "Carl Mathias Kobel & Arturo Vera Ponce De Leon"
@@ -14,6 +17,7 @@ import os
 import pandas as pd
 import re
 import time 
+import random
 
 
 print("/*                                                                               ") # Helps with outputting to dot.
@@ -288,16 +292,27 @@ rule prophet_filter:
         "output/{config_batch}/samples/{sample}/protein.tsv", \
         "output/{config_batch}/samples/{sample}/psm.tsv"]
         #protein = "output/{config_batch}/samples/{sample}/proteinprophet-{sample}.prot.xml"
+    conda: "envs/openjdk.yaml"
     params:
         philosopher = config["philosopher_executable"]
     resources:
-        mem_mb = 64000
+        mem_mb = 64000,
+        #tmpdir = f"tmp/{str(random.randint(1000000000000, 9999999999999))}/" # WTF, it looks like some rules are deleting the temporary directories of others, because they're shared. WTF is that.
     shell: """
 
+
+        >&2 echo "Setup ..."
+        # See https://github.com/Nesvilab/FragPipe/issues/634
+        echo "tmpdir is"
+        echo $TMPDIR
+        echo {resources.tmpdir}
+        export JAVA_OPTS=-Djava.io.tmpdir=$TMPDIR 
+
+        >&2 echo "Copy ..."
         # Since the output location of philosopher is controlled by the input location, we should copy the input file.
         cp {input.pepXML} output/{wildcards.config_batch}/samples/{wildcards.sample}/{wildcards.sample}.pepXML || echo "file exists already"
 
-
+        >&2 echo "change dir ..."
         # Because of the workspace, we're forced to change dir
         cd output/{wildcards.config_batch}/samples/{wildcards.sample}
 
