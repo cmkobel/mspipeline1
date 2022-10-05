@@ -202,8 +202,9 @@ rule workspace:
 
         >&2 echo "mkcd ..."
         # Make and enter workspace directory
-        #mkdir -p output/{config_batch}/msfragger
-        cd output/{config_batch}/msfragger
+        mkdir -p output/{config_batch}/workspace
+        cd output/{config_batch}/workspace
+
 
         >&2 echo "Workspace ..."
         # Run PeptideProphet, ProteinProphet, and FDR filtering with Philosopher
@@ -217,7 +218,7 @@ rule workspace:
         {params.philosopher} database --annotate ../../../{input.database} --prefix {params.decoyprefix}
         >&2 ls -la
 
-        {params.philosopher} database --help
+        
 
 
         # Closed search
@@ -226,7 +227,9 @@ rule workspace:
             --nonparam --expectscore --decoyprobs --ppm --accmass \
             --decoy {params.decoyprefix} \
             --database ../../../{input.database} \
-            ./*.pepXML # Take the pepXMLs directly from msfragger.
+            ../msfragger/*.pepXML # Take the pepXMLs directly from msfragger.
+
+        
 
 
 
@@ -234,8 +237,8 @@ rule workspace:
         >&2 echo "Proteinprophet ..."
         {params.philosopher} proteinprophet \
             --maxppmdiff 2000000 \
-            --output combined \
-            ./*.pep.xml
+            --output proteinprophet \
+            ../msfragger/*.pep.xml
 
         
 
@@ -245,19 +248,41 @@ rule workspace:
             --sequential --razor --mapmods \
             --tag {params.decoyprefix} \
             --pepxml ./ \
-            --protxml ./combined.prot.xml 
+            --protxml ./proteinprophet.prot.xml 
 
-
+        
         
         >&2 echo "Reports ..."
         # Generate reports.
         {params.philosopher} report
         {params.philosopher} workspace --clean
 
-        
-
-
     """
+
+
+
+
+# rule ionquant:
+#     input
+
+#     shell: """
+
+#         >&2 echo "Ionquant ..."
+#         java \
+#             -Xmx32G \
+#             -jar {params.ionquant_jar} \
+#             --threads {threads} \
+#             --psm {input.psm} \
+#             --specdir {params.config_d_base} \
+#             {input.pepXML} 
+#             # address to msfragger pepXML file
+
+#     """
+
+
+
+
+
 
 
 onsuccess:
