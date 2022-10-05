@@ -210,13 +210,16 @@ rule workspace:
         {params.philosopher} workspace --clean
         {params.philosopher} workspace --init
 
+
+        # I don't think I need to do anything with the database. It should already be annotated right?
+        # BTW, what the fuck happens when you annotate anyway?
         >&2 echo "Database ..."
         {params.philosopher} database --annotate ../../../{input.database} --prefix {params.decoyprefix}
         >&2 ls -la
 
         {params.philosopher} database --help
 
-        exit 0
+
         # Closed search
         >&2 echo "Peptideprophet ..."
         {params.philosopher} peptideprophet \
@@ -226,7 +229,7 @@ rule workspace:
             ./*.pepXML # Take the pepXMLs directly from msfragger.
 
 
-        exit 0
+
 
         >&2 echo "Proteinprophet ..."
         {params.philosopher} proteinprophet \
@@ -234,6 +237,7 @@ rule workspace:
             --output combined \
             ./*.pep.xml
 
+        
 
         # closed or non-specific closed search
         >&2 echo "Filter ..."
@@ -242,11 +246,15 @@ rule workspace:
             --tag {params.decoyprefix} \
             --pepxml ./ \
             --protxml ./combined.prot.xml 
+
+
         
         >&2 echo "Reports ..."
         # Generate reports.
         {params.philosopher} report
         {params.philosopher} workspace --clean
+
+        
 
 
     """
