@@ -1,17 +1,16 @@
-
-cores: 8
+keep-incomplete: true
+local-cores: 4
+cores: 32
 
 
 
 configfile: "config.yaml"
-jobs: 8
+jobs: 32
 
 
-keep-going: true 
-batch: "run_main=1/500" 
-#rerun-incomplete: true
 
-show-failed-logs: false
+
+show-failed-logs: true
 
 
 use-conda: true
