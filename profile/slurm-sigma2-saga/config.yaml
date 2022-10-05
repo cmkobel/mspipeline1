@@ -41,7 +41,7 @@ default-resources:
   - mem_mb=1024
   - disk_mb=1024
   - runtime='12:00:00'
-  #- tmpdir='$SCRATCH'
+  #- tmpdir='$SCRATCH' # see https://github.com/cmkobel/MS-pipeline1/issues/5
   - tmpdir='/cluster/work/users/cmkobel/tmp' # We're already at userwork, so that won't be faster
   - partition=normal
   
