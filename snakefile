@@ -108,10 +108,10 @@ rule link_input:
     output:
         dir = directory("output/{config_batch}/msfragger"), 
         d_files = directory("output/{config_batch}/msfragger/" + df["barcode"]), # Bound for msfragger.
-        linked_flag = touch("output/{config_batch}/msfragger/link_input.done") # Used by rule philosopher_database to wait for creation of the msfragger directory.
+        linked_flag = touch("output/{config_batch}/msfragger/link_input.done"), # Used by rule philosopher_database to wait for creation of the msfragger directory.
         # Make sure you've set write access to the directory where these files reside.
     params:
-        d_files = (config_d_base + "/" + df["barcode"]).tolist() # Instead I should probably use some kind of flag. This definition could be a param.
+        d_files = (config_d_base + "/" + df["barcode"]).tolist(), # Instead I should probably use some kind of flag. This definition could be a param.
     shell: """
         
         #ln -s {params.d_files} {output.dir}
@@ -193,7 +193,7 @@ rule workspace:
         pepXMLs = "output/{config_batch}/msfragger/" + df["basename"] + ".pepXML",
         database = "output/{config_batch}/philosopher_database.fas",
     output:
-        prot_xml = "output/{config_batch}/workspace/proteinprophet.prot.xml"
+        prot_xml = "output/{config_batch}/workspace/proteinprophet.prot.xml",
         psm = "output/{config_batch}/msfragger/psm.tsv",
     conda: "envs/openjdk.yaml"
     params:
@@ -273,10 +273,11 @@ rule ionquant:
     threads: 8
     params:
         ionquant_jar = config["ionquant_jar"],
-
     conda: "envs/openjdk.yaml"
     shell: """
 
+
+        mkdir -p output/{config_batch}/ionquant
         >&2 echo "Ionquant ..."
         java \
             -Xmx32G \
