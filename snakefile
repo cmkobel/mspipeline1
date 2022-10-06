@@ -270,6 +270,8 @@ rule ionquant:
         pepXMLs = "output/{config_batch}/msfragger/" + df["basename"] + ".pepXML",
     output: 
         final_flag = touch("output/{config_batch}/final.flag"),
+        peptide = "output/{config_batch}/msfragger/peptide.tsv",
+        protein = "output/{config_batch}/msfragger/protein.tsv",
     threads: 8
     params:
         ionquant_jar = config["ionquant_jar"],
@@ -277,7 +279,6 @@ rule ionquant:
     shell: """
 
 
-        mkdir -p output/{config_batch}/ionquant
         >&2 echo "Ionquant ..."
         java \
             -Xmx32G \
@@ -285,22 +286,24 @@ rule ionquant:
             --threads {threads} \
             --psm {input.psm} \
             --specdir output/{config_batch}/msfragger \
-            {input.pepXMLs} 
-            # address to msfragger pepXML file
+            {input.pepXMLs}
+            
 
     """
 
+#rule report:
 
 
 
 
-
+end_tree = "tree -L 2 output/{config_batch}/"
 
 onsuccess:
-    shell("tree -L 2 output/{config_batch}/")
+    shell(end_tree)
 
 onerror:
-    shell("tree -L 2 output/{config_batch}/")
+    shell(end_tree)
+
 
 print("*/") # This is a dot-language specific comment close tag that helps when you export the workflow as a graph
 
