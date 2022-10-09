@@ -1,4 +1,4 @@
-keep-incomplete: true
+keep-incomplete: false
 local-cores: 4
 cores: 32
 

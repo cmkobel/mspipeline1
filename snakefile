@@ -121,7 +121,7 @@ rule link_input:
 
     """
 
-rule prepare_database:
+rule make_database:
     input:
         glob = [glob.glob(config_database_glob)],
     output:
@@ -194,7 +194,7 @@ rule workspace:
         database = "output/{config_batch}/philosopher_database.fas",
     output:
         prot_xml = "output/{config_batch}/workspace/proteinprophet.prot.xml",
-        psm = "output/{config_batch}/msfragger/psm.tsv",
+        psm = "output/{config_batch}/workspace/psm.tsv",
     conda: "envs/openjdk.yaml"
     params:
         philosopher = config["philosopher_executable"],
@@ -248,7 +248,7 @@ rule workspace:
         {params.philosopher} filter \
             --sequential --razor --mapmods \
             --tag {params.decoyprefix} \
-            --pepxml ./ \
+            --pepxml ../msfragger/*.pepXML \
             --protxml ./proteinprophet.prot.xml 
 
         
@@ -266,12 +266,13 @@ rule workspace:
 rule ionquant:
     input:
         prot_xml = "output/{config_batch}/workspace/proteinprophet.prot.xml",
-        psm = "output/{config_batch}/msfragger/psm.tsv",
+        psm = "output/{config_batch}/workspace/psm.tsv",
         pepXMLs = "output/{config_batch}/msfragger/" + df["basename"] + ".pepXML",
     output: 
         final_flag = touch("output/{config_batch}/final.flag"),
-        peptide = "output/{config_batch}/msfragger/peptide.tsv",
-        protein = "output/{config_batch}/msfragger/protein.tsv",
+        peptide = "output/{config_batch}/workspace/peptide.tsv",
+        protein = "output/{config_batch}/workspace/protein.tsv",
+        ion = "output/{config_batch}/workspace/ion.tsv",
     threads: 8
     params:
         ionquant_jar = config["ionquant_jar"],
@@ -289,20 +290,23 @@ rule ionquant:
             {input.pepXMLs}
             
 
+        # protein output might be empty if there is no matches
+        touch {output.protein}
+
+    
     """
+
 
 #rule report:
 
 
 
 
-end_tree = "tree -L 2 output/{config_batch}/"
-
 onsuccess:
-    shell(end_tree)
+    shell("echo all good && tree -L 2 output/{config_batch}/")
 
 onerror:
-    shell(end_tree)
+    shell("echo ERROR && tree -L 2 output/{config_batch}/")
 
 
 print("*/") # This is a dot-language specific comment close tag that helps when you export the workflow as a graph
