@@ -159,15 +159,18 @@ rule msfragger:
     output: 
         pepXMLs = "output/{config_batch}/msfragger/" + df["basename"] + ".pepXML",
     threads: 32
-    params: 
+    params:
         msfragger_jar = config["msfragger_jar"],
+    resources:
+        partition = "bigmem",
+        mem_mb = 500000,
     conda: "envs/openjdk.yaml"
     shell: """
 
 
 
         java \
-            -Xmx32G \
+            -Xmx512G \
             -jar {params.msfragger_jar} \
             --num_threads {threads} \
             --database_name {input.database} \

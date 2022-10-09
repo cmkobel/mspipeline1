@@ -197,6 +197,7 @@ batch_parameters:
 
 #batch: "220506_digesta_test"
 batch: "shortest_test"
+batch: "220506_digesta_puchun"
 
 
 
