@@ -68,6 +68,8 @@ for i, j in enumerate(config_database_glob_read):
 print()
 
 
+
+
 # Create a dataframe with all inputs
 df = pd.DataFrame(data = {'sample':  config_samples.keys(),
                           'barcode': config_samples.values()})
@@ -76,6 +78,14 @@ df["basename"] = [re.sub(".d$", "", barcode) for barcode in df["barcode"]]
 print(df)
 print("//")
 print()
+
+
+# Count input sizes for managing rule resources
+n_genomes_database = len(config_database_glob_read)
+n_samples = len(df["basename"])
+
+print(f"n_genomes_database: {n_genomes_database}")
+print(f"n_samples: {n_samples}")    
 
 
 
@@ -121,6 +131,12 @@ rule link_input:
 
     """
 
+
+
+
+
+
+
 rule make_database:
     input:
         glob = [glob.glob(config_database_glob)],
@@ -128,6 +144,10 @@ rule make_database:
         database = "output/{config_batch}/philosopher_database.fas",
     params:
         philosopher = config["philosopher_executable"],
+    retries: 4
+    resources:
+        mem_mb = lambda wildcards, attempt : [6000, 12000, 16000, 32000][attempt-1]
+
     shell: """
 
         mkdir -p output/{config_batch}/
@@ -138,6 +158,9 @@ rule make_database:
         cd output/{config_batch}/
 
         {params.philosopher} workspace --init
+        
+        {params.philosopher} database --help
+
         {params.philosopher} database \
             --custom cat_database_sources.faa \
             --contam 
@@ -149,6 +172,10 @@ rule make_database:
         ls -la
 
     """
+
+
+# def memory_msfragger(wildcards, attempt):
+#     return attempt * 100000
 
 
 rule msfragger:
@@ -163,14 +190,16 @@ rule msfragger:
         msfragger_jar = config["msfragger_jar"],
     resources:
         partition = "bigmem",
-        mem_mb = 500000,
+        mem_mb = 400000, # 500000
+        #mem_mb = lambda wildcards, attempt : attempt * 100000
+        runtime = "23:59:59"
     conda: "envs/openjdk.yaml"
     shell: """
 
 
 
         java \
-            -Xmx512G \
+            -Xmx400G \
             -jar {params.msfragger_jar} \
             --num_threads {threads} \
             --database_name {input.database} \
@@ -273,7 +302,7 @@ rule ionquant:
         pepXMLs = "output/{config_batch}/msfragger/" + df["basename"] + ".pepXML",
     output: 
         final_flag = touch("output/{config_batch}/final.flag"),
-        peptide = "output/{config_batch}/workspace/peptide.tsv",
+        peptide = "output/{config_batch}/workspace/peptide.tsv", # These files will be missing if there is no callable output.
         protein = "output/{config_batch}/workspace/protein.tsv",
         ion = "output/{config_batch}/workspace/ion.tsv",
     threads: 8
