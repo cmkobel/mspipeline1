@@ -228,6 +228,8 @@ rule workspace:
         prot_xml = "output/{config_batch}/workspace/proteinprophet.prot.xml",
         psm = "output/{config_batch}/workspace/psm.tsv",
     conda: "envs/openjdk.yaml"
+    resources:
+        mem_mb = 32000
     params:
         philosopher = config["philosopher_executable"],
         decoyprefix = "rev_",
@@ -306,6 +308,8 @@ rule ionquant:
         protein = "output/{config_batch}/workspace/protein.tsv",
         ion = "output/{config_batch}/workspace/ion.tsv",
     threads: 8
+    resources:
+        mem_mb = 32000
     params:
         ionquant_jar = config["ionquant_jar"],
     conda: "envs/openjdk.yaml"
