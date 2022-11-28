@@ -187,8 +187,8 @@ rule msfragger:
         pepXMLs = "output/{config_batch}/msfragger/" + df["basename"] + ".pepXML",
     threads: 16
     params:
-        #msfraggerparams = f"output/{config_batch}/msfragger/msfragger.params",
-        msfraggerparams = "msfragger.params",
+        msfraggerparams = f"output/{config_batch}/msfragger/msfragger.params",
+        #msfraggerparams = "msfragger.params",
         msfragger_jar = config["msfragger_jar"],
         fragpipe_base = config["fragpipe_base"],
         n_splits = 4
@@ -215,8 +215,13 @@ rule msfragger:
 
 
 
-        #num_parts_str, jvm_cmd_str, msfragger_jar_path_str, param_path_str, *infiles_str = argv
-        #print('python3 msfragger_pep_split.pyz 3 "java -Xmx64g -jar" msfragger.jar fragger.params *.mzML')
+        # This is the non-standard idiosyncratic msfragger-agnostic usage of the split script:
+        # python3 msfragger_pep_split.pyz 3 "java -Xmx64g -jar" msfragger.jar fragger.params *.mzML
+        #                                 ^ num_parts_str
+        #                                   ^ jvm_cmd_str
+        #                                                       ^ msfragger_jar_path_str
+        #                                                                      ^ param_path_str
+        #                                                                                    ^ *infiles_str
 
 
         # Call msfragger with the split database script
@@ -228,27 +233,6 @@ rule msfragger:
             {input.d_files} 
 
 
-
-
-        # old below
-
-        # java \
-        #     -Xmx400G \
-        #     -jar {params.msfragger_jar} \
-        #     --num_threads {threads} \
-        #     --database_name {input.database} \
-        #     --output_location output/{wildcards.config_batch}/msfragger/ \
-        #     {input.d_files} \
-        #     | tee output/{wildcards.config_batch}/msfragger/msfragger_tee.out.log
-
-        
-
-        # Move pepXML files to current directory.
-        # cp $dataDirPath/*.pepXML ./
-        #cp {config_d_base}/*.pepXML output/{wildcards.config_batch}/msfragger/
-
-        # Move MSFragger tsv files to current directory.
-        #mv $dataDirPath/*.tsv ./ # Comment this line if localize_delta_mass = 0 in your fragger.params file.
     """
 
 
