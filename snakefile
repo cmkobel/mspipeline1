@@ -309,7 +309,7 @@ rule ionquant:
         ion = "output/{config_batch}/workspace/ion.tsv",
     threads: 8
     resources:
-        mem_mb = 32000
+        mem_mb = 128000
     params:
         ionquant_jar = config["ionquant_jar"],
     conda: "envs/openjdk.yaml"
@@ -318,7 +318,7 @@ rule ionquant:
 
         >&2 echo "Ionquant ..."
         java \
-            -Xmx32G \
+            -Xmx128G \
             -jar {params.ionquant_jar} \
             --threads {threads} \
             --psm {input.psm} \
