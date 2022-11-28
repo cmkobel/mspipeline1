@@ -122,6 +122,7 @@ rule link_input:
         # Make sure you've set write access to the directory where these files reside.
     params:
         d_files = (config_d_base + "/" + df["barcode"]).tolist(), # Instead I should probably use some kind of flag. This definition could be a param.
+    benchmark: "output/{config_batch}/benchmarks/benchmark.link_input.{wildcards}.tsv"
     shell: """
         
         #ln -s {params.d_files} {output.dir}
@@ -147,7 +148,7 @@ rule make_database:
     retries: 4
     resources:
         mem_mb = lambda wildcards, attempt : [6000, 12000, 16000, 32000][attempt-1]
-
+    benchmark: "output/{config_batch}/benchmarks/benchmark.make_database.{wildcards}.tsv"
     shell: """
 
         mkdir -p output/{config_batch}/
@@ -194,6 +195,7 @@ rule msfragger:
         #mem_mb = lambda wildcards, attempt : attempt * 100000
         runtime = "23:59:59"
     conda: "envs/openjdk.yaml"
+    benchmark: "output/{config_batch}/benchmarks/benchmark.msfragger.{wildcards}.tsv"
     shell: """
 
 
@@ -233,6 +235,7 @@ rule workspace:
     params:
         philosopher = config["philosopher_executable"],
         decoyprefix = "rev_",
+    benchmark: "output/{config_batch}/benchmarks/benchmark.workspace.{wildcards}.tsv"
     shell: """
 
         >&2 echo "mkcd ..."
@@ -313,6 +316,7 @@ rule ionquant:
     params:
         ionquant_jar = config["ionquant_jar"],
     conda: "envs/openjdk.yaml"
+    benchmark: "output/{config_batch}/benchmarks/benchmark.ionquant.{wildcards}.tsv"
     shell: """
 
 
