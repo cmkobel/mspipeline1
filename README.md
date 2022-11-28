@@ -73,6 +73,10 @@ Below is an example graph for a run involving two samples.
 <img width="1102" alt="Screenshot 2022-11-13 at 23 42 05" src="https://user-images.githubusercontent.com/5913696/201522237-72a0262d-fa92-4368-9da7-695043b08747.png">
 
 
+## TODO:
+  - Implement splitting of database
+
+
 ## Future
 
 This pipeline might involve an R-markdown performing trivial QC.
