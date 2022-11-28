@@ -1,5 +1,5 @@
 
-# mv logs/*.log logs/old 2> /dev/null; snakemake --profile profiles/slurm-sigma2-saga
+# snakemake --profile profiles/slurm-sigma2-saga
 # I'm experiencing some major problems with the temporary directories that i might as well fix. It seems to percolate through when I have a high amount of samples. Basically, all the jobs that use a program that uses the workspace, need to be in the same rule. Silly, but that is how it is.
 
 # In this branch I'm not at all screwing around. I'm closely following this tutorial:
@@ -176,6 +176,8 @@ rule make_database:
 #     return attempt * 100000
 
 
+
+
 rule msfragger:
     input:
         database = "output/{config_batch}/philosopher_database.fas",
@@ -183,28 +185,61 @@ rule msfragger:
         #linked_flag = "output/{config_batch}/msfragger/link_input.done",
     output: 
         pepXMLs = "output/{config_batch}/msfragger/" + df["basename"] + ".pepXML",
-    threads: 32
+    threads: 16
     params:
+        #msfraggerparams = f"output/{config_batch}/msfragger/msfragger.params",
+        msfraggerparams = "msfragger.params",
         msfragger_jar = config["msfragger_jar"],
+        fragpipe_base = config["fragpipe_base"],
+        n_splits = 4
     resources:
         partition = "bigmem",
-        mem_mb = 400000, # 500000
+        mem_mb = 65536, # 500000
         #mem_mb = lambda wildcards, attempt : attempt * 100000
         runtime = "23:59:59"
-    conda: "envs/openjdk.yaml"
+    conda: "envs/openjdk_python.yaml"
     benchmark: "output/{config_batch}/benchmarks/benchmark.msfragger.{config_batch}.tsv"
     shell: """
 
         
 
-        java \
-            -Xmx400G \
-            -jar {params.msfragger_jar} \
-            --num_threads {threads} \
-            --database_name {input.database} \
-            --output_location output/{wildcards.config_batch}/msfragger/ \
-            {input.d_files} \
-            | tee output/{wildcards.config_batch}/msfragger/msfragger_tee.out.log
+
+        # Copy and modify parameter file.
+        cp msfragger_default.params {params.msfraggerparams}
+        echo "" >> {params.msfraggerparams}
+        echo "num_threads = {threads}" >> {params.msfraggerparams}
+        echo "database_name = {input.database}" >> {params.msfraggerparams}
+        echo "output_location = output/{wildcards.config_batch}/msfragger/" >> {params.msfraggerparams}
+        echo "" >> {params.msfraggerparams}
+
+
+
+
+        #num_parts_str, jvm_cmd_str, msfragger_jar_path_str, param_path_str, *infiles_str = argv
+        #print('python3 msfragger_pep_split.pyz 3 "java -Xmx64g -jar" msfragger.jar fragger.params *.mzML')
+
+
+        # Call msfragger with the split database script
+        # Ode to https://github.com/Nesvilab/MSFragger/issues/180#issuecomment-938323065
+        python {params.fragpipe_base}/tools/msfragger_pep_split.py {params.n_splits} \
+            "java -Xmx64g -jar" \
+            {params.msfragger_jar} \
+            {params.msfraggerparams} \
+            {input.d_files} 
+
+
+
+
+        # old below
+
+        # java \
+        #     -Xmx400G \
+        #     -jar {params.msfragger_jar} \
+        #     --num_threads {threads} \
+        #     --database_name {input.database} \
+        #     --output_location output/{wildcards.config_batch}/msfragger/ \
+        #     {input.d_files} \
+        #     | tee output/{wildcards.config_batch}/msfragger/msfragger_tee.out.log
 
         
 

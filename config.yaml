@@ -3,9 +3,11 @@
 #profile: "profile/slurm-sigma2-saga"
 
 philosopher_executable: "/cluster/projects/nn9864k/shared/bin/philosopher_v4.1.1_linux_amd64/philosopher"
-msfragger_jar: "/cluster/projects/nn9864k/shared/bin/MSFragger-3.4/MSFragger-3.4.jar"
+#msfragger_jar: "/cluster/projects/nn9864k/shared/bin/MSFragger-3.4/MSFragger-3.4.jar"
+msfragger_jar: "/cluster/projects/nn9864k/shared/bin/MSFragger-3.5/MSFragger-3.5.jar"
 #ionquant_jar: "/cluster/projects/nn9864k/shared/bin/IonQuant/IonQuant-1.7.17.jar"
 ionquant_jar: "/cluster/projects/nn9864k/cmkobel/02_proteomics/MS-pipeline1/bin/IonQuant-1.7.17/IonQuant-1.7.17.jar" # Must be adjacent to an ext/ directory
+fragpipe_base: "/cluster/projects/nn9864k/shared/bin/FragPipe-18.0"
 
 # todo: move these to the profile instead
 #temp_dir: "/scratch/$SLURM_JOB_ID" #genomedk
@@ -171,7 +173,7 @@ batch_parameters:
 
 #batch: "220506_digesta_test"
 #batch: "220506_digesta_puchun"
-#batch: "shortest_test"
-batch: "220506_digesta_puchun"
+batch: "shortest_test"
+#batch: "220506_digesta_puchun"
 
 
