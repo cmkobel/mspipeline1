@@ -1,8 +1,5 @@
-#profile: "profile/slurm-sigma2-saga/"
 
-
-# mv logs/*.log logs/old 2> /dev/null; snakemake --profile profile/slurm-sigma2-saga/ --rerun-incomplete      
-
+# mv logs/*.log logs/old 2> /dev/null; snakemake --profile profiles/slurm-sigma2-saga
 # I'm experiencing some major problems with the temporary directories that i might as well fix. It seems to percolate through when I have a high amount of samples. Basically, all the jobs that use a program that uses the workspace, need to be in the same rule. Silly, but that is how it is.
 
 # In this branch I'm not at all screwing around. I'm closely following this tutorial:
@@ -122,7 +119,7 @@ rule link_input:
         # Make sure you've set write access to the directory where these files reside.
     params:
         d_files = (config_d_base + "/" + df["barcode"]).tolist(), # Instead I should probably use some kind of flag. This definition could be a param.
-    benchmark: "output/{config_batch}/benchmarks/benchmark.link_input.{wildcards}.tsv"
+    benchmark: "output/{config_batch}/benchmarks/benchmark.link_input.{config_batch}.tsv"
     shell: """
         
         #ln -s {params.d_files} {output.dir}
@@ -148,7 +145,7 @@ rule make_database:
     retries: 4
     resources:
         mem_mb = lambda wildcards, attempt : [6000, 12000, 16000, 32000][attempt-1]
-    benchmark: "output/{config_batch}/benchmarks/benchmark.make_database.{wildcards}.tsv"
+    benchmark: "output/{config_batch}/benchmarks/benchmark.make_database.{config_batch}.tsv"
     shell: """
 
         mkdir -p output/{config_batch}/
@@ -195,7 +192,7 @@ rule msfragger:
         #mem_mb = lambda wildcards, attempt : attempt * 100000
         runtime = "23:59:59"
     conda: "envs/openjdk.yaml"
-    benchmark: "output/{config_batch}/benchmarks/benchmark.msfragger.{wildcards}.tsv"
+    benchmark: "output/{config_batch}/benchmarks/benchmark.msfragger.{config_batch}.tsv"
     shell: """
 
 
@@ -235,7 +232,7 @@ rule workspace:
     params:
         philosopher = config["philosopher_executable"],
         decoyprefix = "rev_",
-    benchmark: "output/{config_batch}/benchmarks/benchmark.workspace.{wildcards}.tsv"
+    benchmark: "output/{config_batch}/benchmarks/benchmark.workspace.{config_batch}.tsv"
     shell: """
 
         >&2 echo "mkcd ..."
@@ -316,7 +313,7 @@ rule ionquant:
     params:
         ionquant_jar = config["ionquant_jar"],
     conda: "envs/openjdk.yaml"
-    benchmark: "output/{config_batch}/benchmarks/benchmark.ionquant.{wildcards}.tsv"
+    benchmark: "output/{config_batch}/benchmarks/benchmark.ionquant.{config_batch}.tsv"
     shell: """
 
 
