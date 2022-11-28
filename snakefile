@@ -144,7 +144,7 @@ rule make_database:
         philosopher = config["philosopher_executable"],
     retries: 4
     resources:
-        mem_mb = lambda wildcards, attempt : [6000, 12000, 16000, 32000][attempt-1]
+        mem_mb = lambda wildcards, attempt : [6000, 16000, 32000, 64000, 0, 0][attempt-1]
     benchmark: "output/{config_batch}/benchmarks/benchmark.make_database.{config_batch}.tsv"
     shell: """
 
@@ -195,7 +195,7 @@ rule msfragger:
     benchmark: "output/{config_batch}/benchmarks/benchmark.msfragger.{config_batch}.tsv"
     shell: """
 
-
+        
 
         java \
             -Xmx400G \

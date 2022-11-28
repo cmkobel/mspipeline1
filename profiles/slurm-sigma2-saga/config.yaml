@@ -28,8 +28,8 @@ cluster:
     --cpus-per-task={threads}
     --mem={resources.mem_mb}
     --job-name=ms1_{rule}_{wildcards}
-    --output=logs/%j-{rule}.out.log
-    --error=logs/%j-{rule}.err.log
+    --output=logs/{jobid}-{rule}.out.log
+    --error=logs/{jobid}-{rule}.err.log
     --time={resources.runtime}
     --account=nn9864k
     --partition={resources.partition}
