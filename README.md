@@ -49,7 +49,7 @@ Because it makes sure that all outputs are updated when you change input-paramet
    conda env create -f environment.yaml
    ```
 
-This environment can then be activated by typing `conda activate snakemake`
+   This environment can then be activated by typing `conda activate snakemake`
 
 
 3) If needed, tweak the profiles/slurm/<file> configuration so that it matches your execution environment. There is a profile for local execution without a job management system (`profiles/local/`) as well as a few profiles for different HPC environments like PBS and SLURM. 
