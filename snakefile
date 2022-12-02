@@ -356,10 +356,10 @@ rule ionquant:
 
 
 onsuccess:
-    shell("echo all good && tree -L 2 output/{config_batch}/")
+    shell("echo -n \"All good :)\ntree -L 2 below:\n\"; tree -L 2 output/{config_batch}/")
 
 onerror:
-    shell("echo ERROR && tree -L 2 output/{config_batch}/")
+    shell("echo -n \"ERROR :(\ntree -L 2 below:\n\"; tree -L 2 output/{config_batch}/")
 
 
 print("*/") # This is a dot-language specific comment close tag that helps when you export the workflow as a graph
