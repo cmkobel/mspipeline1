@@ -1,4 +1,4 @@
-name: MS-pipeline1
+name: snakemake
 channels:
   - conda-forge
   - bioconda
