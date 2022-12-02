@@ -127,7 +127,7 @@ add_Z_user_amino_acid = 0.000000
 
 
 
-
+# The parameters shown below are the ones that the pipeline (rule msfragger) has responsibility for writing into a copy of this file.
 #num_threads = 16
 #database_name = output/shortest_test/philosopher_database.fas
 #output_location = output/shortest_test/msfragger/
