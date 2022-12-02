@@ -1,4 +1,3 @@
-
 # snakemake --profile profiles/slurm-sigma2-saga
 # I'm experiencing some major problems with the temporary directories that i might as well fix. It seems to percolate through when I have a high amount of samples. Basically, all the jobs that use a program that uses the workspace, need to be in the same rule. Silly, but that is how it is.
 
@@ -51,16 +50,16 @@ config_temp_dir = config["temp_dir"]
 
 
 # Present configuration
-print(f"config_batch:         '{config_batch}'")
-print(f"config_d_base:        '{config_d_base}'")
+print(f"        config_batch: '{config_batch}'")
+print(f"       config_d_base: '{config_d_base}'")
 print(f"config_database_glob: '{config_database_glob}:'")
 if len(config_database_glob) == 1:
     raise Exception("Raised exception: no glob targets in config_database_glob") # Not tested yet.
 k = 0
 for i, j in enumerate(config_database_glob_read):
     print(f"  {i}) {j}")
-    if i==29:
-        print(f"and {len(config_database_glob_read)-29} more..")
+    if i==19: # Only show up till 30 lines, otherwise the screen will become congested. 
+        print(f"and {len(config_database_glob_read)-19} more..")
         break
 print()
 
@@ -211,8 +210,6 @@ rule msfragger:
         echo "database_name = {input.database}" >> {params.msfraggerparams}
         echo "output_location = output/{wildcards.config_batch}/msfragger/" >> {params.msfraggerparams}
         echo "" >> {params.msfraggerparams}
-
-
 
 
         # This is the non-standard idiosyncratic msfragger-agnostic usage of the split script:
