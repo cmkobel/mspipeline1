@@ -190,10 +190,10 @@ rule msfragger:
         #msfraggerparams = "msfragger.params",
         msfragger_jar = config["msfragger_jar"],
         fragpipe_base = config["fragpipe_base"],
-        n_splits = 4
+        n_splits = 8
     resources:
         partition = "bigmem",
-        mem_mb = 65536, # 500000
+        mem_mb = 65536, # Was 500000 before I used the split script
         #mem_mb = lambda wildcards, attempt : attempt * 100000
         runtime = "23:59:59"
     conda: "envs/openjdk_python.yaml"
