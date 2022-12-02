@@ -39,7 +39,7 @@ Because it makes sure that all outputs are updated when you change input-paramet
 1) Prerequisites:
 
   - A conda/miniconda3 environment.
-  - A conda environment with snakemake installed. You can install snakemake by following the [instructions in the official documentation](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html).
+  - A conda environment with snakemake installed. You can install snakemake by following the [instructions in the official documentation](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html) or you can use the bundled environment.yaml file with `conda env create -f environment.yaml`
 
 2) Clone this repo on the HPC/workstation/laptop where you want to work.
 
