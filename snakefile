@@ -195,7 +195,8 @@ rule msfragger:
         partition = "bigmem",
         mem_mb = 65536, # Was 500000 before I used the split script
         #mem_mb = lambda wildcards, attempt : attempt * 100000
-        runtime = "23:59:59"
+        #runtime = "23:59:59" 26 samples done in 24 hours
+        runtime = "6-00:00:00"
     conda: "envs/openjdk_python.yaml"
     benchmark: "output/{config_batch}/benchmarks/benchmark.msfragger.{config_batch}.tsv"
     shell: """
@@ -356,10 +357,10 @@ rule ionquant:
 
 
 onsuccess:
-    shell("echo -n \"All good :)\ntree -L 2 below:\n\"; tree -L 2 output/{config_batch}/")
+    shell("echo -n \"All good :)\ndepth 2 tree below:\n\"; tree -L 2 output/{config_batch}/")
 
 onerror:
-    shell("echo -n \"ERROR :(\ntree -L 2 below:\n\"; tree -L 2 output/{config_batch}/")
+    shell("echo -n \"ERROR :(\ndepth 2 tree below:\n\"; tree -L 2 output/{config_batch}/")
 
 
 print("*/") # This is a dot-language specific comment close tag that helps when you export the workflow as a graph

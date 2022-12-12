@@ -4,3 +4,5 @@ trash/
 conda_base/
 logs/
 ._*
+data_mirror*
+data_mirror/

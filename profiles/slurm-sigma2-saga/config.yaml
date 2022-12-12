@@ -1,7 +1,7 @@
 local-cores: 8 # front end / head node cores
 cores: 2048 # cluster cores
 jobs: 1000 # max parallel jobs
-keep-going: true 
+keep-going: false
 #rerun-incomplete: true
 latency-wait: 120
 keep-incomplete: false # true for debugging investigations
