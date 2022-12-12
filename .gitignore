@@ -6,3 +6,5 @@ logs/
 ._*
 data_mirror*
 data_mirror/
+trash
+split_peptide*
