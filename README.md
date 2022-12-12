@@ -35,17 +35,25 @@ Because it makes sure that all outputs are updated when you change input-paramet
 
 
 ## Installation
-
 1) Prerequisites:
+  - Preferably a HPC system, or just a local workstation.
+  - An anaconda or [miniconda3](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) package manager on that system.
 
-  - A conda/miniconda3 environment.
-  - A conda environment with snakemake installed. You can install snakemake by following the [instructions in the official documentation](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html).
+2) Clone this repo on the HPC/workstation where you want to work.
+   ```
+   git clone https://github.com/cmkobel/MS-pipeline1.git
+   ```
 
-2) Clone this repo on the HPC/workstation/laptop where you want to work.
+3) If you don't already have an environment with snakemake and mamba installed, use the following command to install a "snakemake" environment with the bundled environment file:
+   ```
+   conda env create -f environment.yaml
+   ```
 
-3) Set up the `profiles/slurm/` configuration so that it matches your execution environment. There is also a profile for local execution without a job management system (`profiles/local/`).
+   This environment can then be activated by typing `conda activate snakemake`
 
 
+3) If needed, tweak the profiles/slurm/<file> configuration so that it matches your execution environment. There is a profile for local execution without a job management system (`profiles/local/`) as well as a few profiles for different HPC environments like PBS and SLURM. 
+  
 
 ## Usage
 
