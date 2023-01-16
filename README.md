@@ -70,6 +70,7 @@ $ snakemake --profile profiles/slurm/
 ```
 
 Below is an example graph for a run involving two samples.
+
 <img width="500" src="https://user-images.githubusercontent.com/5913696/212691889-f33bb808-6675-4f66-8440-84f9c215f83b.png">
 
 ## TODO:
