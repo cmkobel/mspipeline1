@@ -193,7 +193,7 @@ rule msfragger:
         n_splits = 8
     resources:
         partition = "bigmem",
-        mem_mb = 65536, # Was 500000 before I used the split script
+        mem_mb = 70000, # Was 500000 before I used the split script
         #mem_mb = lambda wildcards, attempt : attempt * 100000
         #runtime = "23:59:59" 26 samples done in 24 hours
         runtime = "6-00:00:00"

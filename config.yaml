@@ -113,7 +113,7 @@ batch_parameters:
 
   "220506_digesta_puchun": 
     d_base: "data_mirror" # copy of /trd-project2/NS9864K/datasets/2021_supacow/2022-05-06_PEP_timsTOF_D--T6S_24_andpuchun36/timsTOF/20220525_CMK/
-    database_glob: "/cluster/projects/nn9864k/cmkobel/02_proteomics/aa_databases/05_puchun/extracted_aas/*.faa"
+    database_glob: "/cluster/projects/nn9864k/cmkobel/massspec_aa_databases/aa_databases/05_puchun/extracted_aas/*.faa"
     samples: 
       'P1': '20220506_A1_Slot1-01_1_1939.d'       # A 1
       'P2': '20220506_A2_Slot1-02_1_1940.d'       # A 2
