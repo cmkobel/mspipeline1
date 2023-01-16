@@ -1,20 +1,27 @@
-local-cores: 8 # front end / head node cores
+# This profile can be used with a snakemake workflow. Just put this config.yaml-file in a directory called whatever/ and call your snakemake worflow with 
+# snakemake --profile whatever/
+
+# ---- Front end stuff ----
+local-cores: 16 # front end / head node cores. Most often computing the DAG will be limited by disk-IO anyway.
+
+
+# ---- Back end stuff ----
 cores: 2048 # cluster cores
-jobs: 1000 # max parallel jobs
-keep-going: false
+jobs: 128 # max parallel jobs. Good idea to limit this for dangerous situations.
+keep-going: true 
 #rerun-incomplete: true
-latency-wait: 120
-keep-incomplete: false # true for debugging investigations
+latency-wait: 120 # Some file systems can be slow.
+keep-incomplete: false
 
 # This one could be cool to have working 
 show-failed-logs: true
 
 
-# ---- Conda/Mamba ----
-use-conda: true
-conda-frontend: 'mamba'
-#conda-prefix: "conda_base/" # Much better to use the $SNAKEMAKE_CONDA_PREFIX instead, as all workflows can then use the same envs.
 
+# ---- Conda/Mamba/Apptainer ----
+use-conda: true
+conda-frontend: 'mamba' # Make sure that you install mamba in the environment where you're calling snakemake. Muuuuch faster than conda.
+#use-singularity: true
 
 
 # ---- Sigma2 Saga SLURM specifics ----
@@ -22,14 +29,14 @@ conda-frontend: 'mamba'
 cluster-cancel: "scancel"
 
 cluster:
-  mkdir -p logs/old/ &&
+  mkdir -p logs/ &&
   sbatch
     --parsable
     --cpus-per-task={threads}
     --mem={resources.mem_mb}
-    --job-name=ms1_{rule}_{wildcards}
-    --output=logs/{jobid}-{rule}.out.log
-    --error=logs/{jobid}-{rule}.err.log
+    --job-name=j_{rule}_{wildcards}
+    --output=logs/%j-{jobid}-{rule}.out.log
+    --error=logs/%j-{jobid}-{rule}.err.log
     --time={resources.runtime}
     --account=nn9864k
     --partition={resources.partition}
@@ -39,21 +46,14 @@ cluster:
 
 default-resources:
   - mem_mb=1024
-  - disk_mb=1024
-  - runtime='12:00:00'
+  #- disk_mb=1024 # saga doesn't care
+  - runtime='06:00:00'
   - tmpdir='$SCRATCH'
-  #- tmpdir='/cluster/work/users/cmkobel/tmp' # We're already at userwork, so that won't be faster
   - partition=normal
   
   
 
-#set-resources:
-#  - annotate:mem_mb=65536
-#  - philosopher_database:mem_mb=65536 # use mem_mb, not mem
-#  - msfragger:mem_mb=515537 # max on gdk is 515538
-#  - msfragger:partition=bigmem
-#  - ionquant:mem_mb=65536
-# update: Moved these into the snakefile
+
 
 
 
@@ -83,3 +83,6 @@ default-resources:
 # ---- Singularity ----
 #use-singularity: True
 #singularity-prefix: "/faststorage/home/cmkobel/singularity_images/"
+
+
+
