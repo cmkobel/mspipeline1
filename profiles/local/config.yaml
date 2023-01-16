@@ -1,18 +1,22 @@
-keep-incomplete: false
-local-cores: 4
-cores: 32
-
-
-
 configfile: "config.yaml"
-jobs: 32
 
 
+#cores: 16 
+cores: 32
+#cores: all
 
 
+keep-going: true
 show-failed-logs: true
+keep-incomplete: false # true for development
 
 
 use-conda: true
-conda-prefix: "conda_base/"
+conda-frontend: mamba
 
+
+default-resources:
+  - tmpdir='/cluster/work/users/cmkobel/tmpdir'
+ #- tmpdir='/mnt/hpccs01/scratch/microbiome/kobel'
+ 
+ 
