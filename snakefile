@@ -125,6 +125,7 @@ rule link_input:
         cp -r {params.d_files} {output.dir}
         # I'd rather manually copy the files and then link them with this rule. Otherwise snakemake will make new copies all the freakin' time. When the pipeline becomes stable I can change it to linking.
 
+        # Arturo showed me a cool trick of using rsync to copy the files, because then it shows the write speed.
 
     """
 
