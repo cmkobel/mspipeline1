@@ -59,8 +59,8 @@ k = 0
 for i, j in enumerate(config_database_glob_read):
     print(f"  {i}) {j}")
     if i==19: # Only show up till 30 lines, otherwise the screen will become congested. 
-        print(f"and {len(config_database_glob_read)-19} more..")
-        break
+        print(f"and {len(config_database_glob_read)-19} more.. ({len(config_database_glob)} in total)")
+        break # Do not print more.
 print()
 
 
@@ -191,13 +191,15 @@ rule msfragger:
         #msfraggerparams = "msfragger.params",
         msfragger_jar = config["msfragger_jar"],
         fragpipe_base = config["fragpipe_base"],
-        n_splits = 8
+        n_splits = 8 # splits is a bad name. Having 8 groups means having 7 splits, right?
     resources:
         partition = "bigmem",
-        mem_mb = 70000, # Was 500000 before I used the split script
+        #mem_mb = 70000, # Was 500000 before I used the split script
+        mem_mb = 40000,
         #mem_mb = lambda wildcards, attempt : attempt * 100000
         #runtime = "23:59:59" 26 samples done in 24 hours
-        runtime = "6-00:00:00"
+        #runtime = "6-00:00:00" #prev
+        runtime = "24:00:00"
     conda: "envs/openjdk_python.yaml"
     benchmark: "output/{config_batch}/benchmarks/benchmark.msfragger.{config_batch}.tsv"
     shell: """
