@@ -218,10 +218,10 @@ rule fragpipe:
     resources:
         #partition = "bigmem",
         #mem_mb = 40000, 
-        mem_mb = 32000,
+        mem_mb = 64000,
         runtime = "24:00:00",
-    #conda: "envs/openjdk_python.yaml"
-    conda: "envs/openjdk_python_extra.yaml"
+    conda: "envs/openjdk_python.yaml"
+    #conda: "envs/openjdk_python_extra.yaml"
     benchmark: "output/{config_batch}/benchmarks/benchmark.fragpipe.tsv"
     shell: """
 
