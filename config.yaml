@@ -1,19 +1,9 @@
 # Nesvilab doesn't like to make software freely available, so you have to specify the paths to philosopher and MSFragger
 
 
-philosopher_executable: "/cluster/projects/nn9864k/shared/bin/philosopher_v4.1.1_linux_amd64/philosopher"
-#msfragger_jar: "/cluster/projects/nn9864k/shared/bin/MSFragger-3.4/MSFragger-3.4.jar"
-msfragger_jar: "/cluster/projects/nn9864k/shared/bin/MSFragger-3.5/MSFragger-3.5.jar"
-#ionquant_jar: "/cluster/projects/nn9864k/shared/bin/IonQuant/IonQuant-1.7.17.jar"
-ionquant_jar: "/cluster/projects/nn9864k/cmkobel/02_proteomics/MS-pipeline1/bin/IonQuant-1.7.17/IonQuant-1.7.17.jar" # Must be adjacent to an ext/ directory
-fragpipe_base: "/cluster/projects/nn9864k/shared/bin/FragPipe-18.0"
 
-
-# todo: move these to the profile instead
-#temp_dir: "/scratch/$SLURM_JOB_ID" #genomedk
-temp_dir: "$SCRATCH" # saga # Maybe better to use "userwork" as Arturo does?
-#temp_dir: "$LOCALSCRATCH" # saga
-
+philosopher_executable: "/cluster/projects/nn9864k/cmkobel/02_proteomics/bin/philosopher_v4.8.1_linux_amd64/philosopher"
+msfragger_jar: "/cluster/projects/nn9864k/cmkobel/02_proteomics/bin/MSFragger-3.7/MSFragger-3.7.jar"
 
 
 # Define parameters
@@ -34,8 +24,9 @@ batch_parameters:
       # Save this one as a test dataset. Can't be shared publicly though
 
 
-# Pick a title
 
+
+# Pick a title below
 
 batch: "minimal"
 

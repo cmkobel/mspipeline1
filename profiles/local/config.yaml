@@ -1,22 +1,21 @@
-configfile: "config.yaml"
+# configfile: "config.yaml"
+  
 
+cores: 16 # good guy
+#cores: 64 # not a good guy 
+# I think The Epycs have 64 physical cores which become 128 with hyperthreading
 
-#cores: 16 
-cores: 32
-#cores: all
-
-
-keep-going: true
+keep-going: true 
 show-failed-logs: true
-keep-incomplete: false # true for development
 
+# Flip these for debugging:
+keep-incomplete: false # true for development/debugging
+rerun-triggers: "mtime" 
 
 use-conda: true
 conda-frontend: mamba
 
-
+# In the event that TMPDIR is not set on the local node, use this:
 default-resources:
-  - tmpdir='/cluster/work/users/cmkobel/tmpdir'
  #- tmpdir='/mnt/hpccs01/scratch/microbiome/kobel'
- 
- 
+  - tmpdir='/cluster/work/users/cmkobel/tmpdir'
