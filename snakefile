@@ -87,8 +87,8 @@ print(f"n_samples: {n_samples}")
 
 print("manifest:")
 manifest = pd.DataFrame(data = {'path': config_samples.values()})
-#manifest['path'] = absolute_output_dir + "/" + config_batch + "/msfragger/" + manifest['path'] # Instead of using bash realpath
-manifest["path"] = "output/" + config_batch + "/msfragger/" + manifest["path"] # But then I realized that I might not need to point absolutely anyway..
+manifest['path'] = absolute_output_dir + "/" + config_batch + "/msfragger/" + manifest['path'] # Instead of using bash realpath
+##manifest["path"] = "output/" + config_batch + "/msfragger/" + manifest["path"] # But then I realized that I might not need to point absolutely anyway..
 #manifest["path"] = manifest["path"]
 manifest["experiment"] = "experiment" # Experiment (can be empty, alphanumeric, and _) #  IonQuant with MBR requires designating LCMS runs to experiments. If in doubt how to resolve this error, just assign all LCMS runs to the same experiment name.
 manifest["bioreplicate"] = "" # Bioreplicate (can be empty and integer)
@@ -212,8 +212,8 @@ rule fragpipe:
         #fragpipe_base = config["fragpipe_base"],
         n_splits = 8,
         absolute_output_dir = absolute_output_dir,
-        #msfragger_dir = "output/{config_batch}/msfragger",
-        msfragger_dir = ".",
+        msfragger_dir = "output/{config_batch}/msfragger",
+        #msfragger_dir = ".",
     threads: 8
     resources:
         #partition = "bigmem",
@@ -246,7 +246,7 @@ rule fragpipe:
 
 
         # Convert mem_mb into gb
-        mem_gb=$(({resources.mem_mb}/1024))
+        mem_gb=$(({resources.mem_mb}/1024-4)) # Because there is some overhead, we subtract a few GBs.
         >&2 echo "mem_gb is $mem_gb"
 
         >&2 echo "Fragpipe ..."
@@ -261,6 +261,8 @@ rule fragpipe:
             --config-msfragger {params.msfragger_jar} \
             --config-ionquant {params.ionquant_jar} \
             --config-philosopher {params.philosopher_executable}
+
+        # Then move output files
 
     """
 

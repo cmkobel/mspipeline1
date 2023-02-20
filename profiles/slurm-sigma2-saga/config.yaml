@@ -37,7 +37,7 @@ cluster:
     --parsable
     --cpus-per-task={threads}
     --mem={resources.mem_mb}
-    --job-name=st-{rule}_{wildcards}
+    --job-name=ms-{rule}_{wildcards}
     --output=logs/%j-{jobid}-{rule}.out.log
     --error=logs/%j-{jobid}-{rule}.err.log
     --time={resources.runtime}
