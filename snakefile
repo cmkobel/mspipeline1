@@ -13,6 +13,8 @@ __version__ = "v2.0.0"
 # v2.0.0: Using Arturos pipeline
 
 
+# TODO: refactor some variables and names. msfragger is not a good name for the final output dir, as it is rather fragpipe that is being called. Also, the .d files could potentially be linked to a different directory, for instance a temporary userwork dir or just a different directory, maybe called linked_inputs/.
+
 
 import glob
 import pandas as pd
