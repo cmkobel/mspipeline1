@@ -11,7 +11,7 @@ fragpipe_base: "/cluster/projects/nn9864k/shared/bin/FragPipe-18.0"
 
 # todo: move these to the profile instead
 #temp_dir: "/scratch/$SLURM_JOB_ID" #genomedk
-temp_dir: "$SCRATCH" # saga
+temp_dir: "$SCRATCH" # saga # Maybe better to use "userwork" as Arturo does?
 #temp_dir: "$LOCALSCRATCH" # saga
 
 
