@@ -82,13 +82,14 @@ print()
 n_genomes_database = len(config_database_glob_read)
 n_samples = len(df["basename"])
 print(f"n_genomes_database: {n_genomes_database}")
-print(f"n_samples: {n_samples}")    
+print(f"n_samples: {n_samples}")
 
 
 print("manifest:")
 manifest = pd.DataFrame(data = {'path': config_samples.values()})
 #manifest['path'] = absolute_output_dir + "/" + config_batch + "/msfragger/" + manifest['path'] # Instead of using bash realpath
 manifest["path"] = "output/" + config_batch + "/msfragger/" + manifest["path"] # But then I realized that I might not need to point absolutely anyway..
+#manifest["path"] = manifest["path"]
 manifest["experiment"] = "experiment" # Experiment (can be empty, alphanumeric, and _) #  IonQuant with MBR requires designating LCMS runs to experiments. If in doubt how to resolve this error, just assign all LCMS runs to the same experiment name.
 manifest["bioreplicate"] = "" # Bioreplicate (can be empty and integer)
 manifest["data_type"] = "DDA" # Data type (DDA, DIA, GPF-DIA, DIA-Quant, DIA-Lib)
@@ -211,7 +212,8 @@ rule fragpipe:
         #fragpipe_base = config["fragpipe_base"],
         n_splits = 8,
         absolute_output_dir = absolute_output_dir,
-        msfragger_dir = "output/{config_batch}/msfragger",
+        #msfragger_dir = "output/{config_batch}/msfragger",
+        msfragger_dir = "."
     threads: 8
     resources:
         #partition = "bigmem",
@@ -252,6 +254,34 @@ rule fragpipe:
             --config-philosopher {params.philosopher_executable}
 
     """
+
+
+#            Rundump:
+#            >&2 echo "Create manifest ..."
+#                    echo '''output/minimal/msfragger/20220506_D10_Slot1-46_1_1984.d                 DDA
+#            output/minimal/msfragger/20220506_C1_Slot1-25_1_1963.d                  DDA
+#            ''' > output/minimal/msfragger/minimal.manifest 
+#                    >&2 tail output/minimal/msfragger/minimal.manifest
+#           
+#                    >&2 echo "Create workflow ..."
+#                    # Write the missing dynamic lines to the workflow, depending on the current setup.
+#                    # Copy and modify parameter file.
+#                    cp arturos_workflow/LFQ-MBR_TimsTOF_edit.workflow output/minimal/msfragger/fragpipe_modified.workflow
+#                    echo "" >> output/minimal/msfragger/fragpipe_modified.workflow
+#                    echo "num_threads = 8" >> output/minimal/msfragger/fragpipe_modified.workflow
+#                    echo "database_name = output/minimal/philosopher_database.fas" >> output/minimal/msfragger/fragpipe_modified.workflow
+#                    echo "database.db-path = output/minimal/philosopher_database.fas" >> output/minimal/msfragger/fragpipe_modified.workflow
+#                    echo "output_location = output/minimal/msfragger" >> output/minimal/msfragger/fragpipe_modified.workflow
+#                    echo "" >> output/minimal/msfragger/fragpipe_modified.workflow
+#                    >&2 tail output/minimal/msfragger/fragpipe_modified.workflow
+#           
+#           
+#                    >&2 echo "Fragpipe ..."
+#                    # https://fragpipe.nesvilab.org/docs/tutorial_headless.html
+#                    /cluster/projects/nn9864k/cmkobel/02_proteomics/bin/FragPipe-19.1/bin/fragpipe--headless             --workflow output/minimal/msfragger/fragpipe_modified.workflow             --manife
+#            st output/minimal/msfragger/minimal.manifest             --workdir output/minimal/msfragger             --ram 1000             --threads 8             --config-msfragger /cluster/projects/nn9864k/cmkobel/0
+#            2_proteomics/bin/MSFragger-3.7/MSFragger-3.7.jar             --config-ionquant /cluster/projects/nn9864k/cmkobel/02_proteomics/bin/IonQuant-1.8.10/IonQuant-1.8.10.jar             --config-philosopher /clus
+#            ter/projects/nn9864k/cmkobel/02_proteomics/bin/philosopher_v4.8.1_linux_amd64/philosopher
 
 
 

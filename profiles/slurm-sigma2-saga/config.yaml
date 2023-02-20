@@ -43,9 +43,9 @@ cluster:
     --time={resources.runtime}
     --account=nn9864k
     --partition={resources.partition}
-    --qos={resources.qos}
-    
 
+    
+# Remove qos from cluster and default-resources to start running with more resources. Devel on sigma is severely limited.
 
 
 default-resources:
@@ -54,7 +54,6 @@ default-resources:
   - runtime='12:00:00'
   - tmpdir='$SCRATCH'
   - partition=normal
-  - qos=devel
   
   
 
