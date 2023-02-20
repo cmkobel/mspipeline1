@@ -4,6 +4,8 @@
 
 philosopher_executable: "/cluster/projects/nn9864k/cmkobel/02_proteomics/bin/philosopher_v4.8.1_linux_amd64/philosopher"
 msfragger_jar: "/cluster/projects/nn9864k/cmkobel/02_proteomics/bin/MSFragger-3.7/MSFragger-3.7.jar"
+ionquant_jar: "/cluster/projects/nn9864k/cmkobel/02_proteomics/bin/IonQuant-1.8.10/IonQuant-1.8.10.jar"
+fragpipe_executable: "/cluster/projects/nn9864k/cmkobel/02_proteomics/bin/FragPipe-19.1/bin/fragpipe"
 
 
 # Define parameters

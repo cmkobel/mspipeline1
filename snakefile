@@ -89,7 +89,7 @@ print("manifest:")
 manifest = pd.DataFrame(data = {'path': config_samples.values()})
 #manifest['path'] = absolute_output_dir + "/" + config_batch + "/msfragger/" + manifest['path'] # Instead of using bash realpath
 manifest["path"] = "output/" + config_batch + "/msfragger/" + manifest["path"] # But then I realized that I might not need to point absolutely anyway..
-manifest["experiment"] = "" # Experiment (can be empty, alphanumeric, and _)
+manifest["experiment"] = "experiment" # Experiment (can be empty, alphanumeric, and _) #  IonQuant with MBR requires designating LCMS runs to experiments. If in doubt how to resolve this error, just assign all LCMS runs to the same experiment name.
 manifest["bioreplicate"] = "" # Bioreplicate (can be empty and integer)
 manifest["data_type"] = "DDA" # Data type (DDA, DIA, GPF-DIA, DIA-Quant, DIA-Lib)
 print(manifest)
@@ -199,13 +199,19 @@ rule fragpipe:
         flag = touch("output/{config_batch}/fragpipe_done.flag"),
         manifest = "output/{config_batch}/msfragger/{config_batch}.manifest"
     params:
+        fragpipe_executable = config["fragpipe_executable"],
+        msfragger_jar = config["msfragger_jar"],
+        ionquant_jar = config["ionquant_jar"],
+        philosopher_executable = config["philosopher_executable"],
+        manifest = manifest.to_csv(path_or_buf=None, sep = "\t", index=False, header=False, lineterminator=False),
         fragpipe_workflow = f"output/{config_batch}/msfragger/fragpipe_modified.workflow",
+
 
         #msfragger_jar = config["msfragger_jar"],
         #fragpipe_base = config["fragpipe_base"],
         n_splits = 8,
-        manifest = manifest.to_csv(path_or_buf=None, sep = "\t", index=False, header=False, lineterminator=False),
-        absolute_output_dir = absolute_output_dir
+        absolute_output_dir = absolute_output_dir,
+        msfragger_dir = "output/{config_batch}/msfragger",
     threads: 8
     resources:
         #partition = "bigmem",
@@ -219,7 +225,6 @@ rule fragpipe:
         echo '''{params.manifest}''' > {output.manifest} 
         >&2 tail {output.manifest}
 
-
         >&2 echo "Create workflow ..."
         # Write the missing dynamic lines to the workflow, depending on the current setup.
         # Copy and modify parameter file.
@@ -227,29 +232,24 @@ rule fragpipe:
         echo "" >> {params.fragpipe_workflow}
         echo "num_threads = {threads}" >> {params.fragpipe_workflow}
         echo "database_name = {input.database}" >> {params.fragpipe_workflow}
-        echo "output_location = output/{wildcards.config_batch}/msfragger/" >> {params.fragpipe_workflow}
+        echo "database.db-path = {input.database}" >> {params.fragpipe_workflow}
+        echo "output_location = {params.msfragger_dir}" >> {params.fragpipe_workflow}
         echo "" >> {params.fragpipe_workflow}
         >&2 tail {params.fragpipe_workflow}
 
 
-        
-
-
-        # Debug: Let's stop it here for now.
-        exit 0        
-
         >&2 echo "Fragpipe ..."
         # https://fragpipe.nesvilab.org/docs/tutorial_headless.html
-        time fragpipe \
+        {params.fragpipe_executable} \
             --headless \
-            --workflow LFQ-MBR.workflow \
-            --manifest $tabmanifest.manifest.FragPipe.fp-manifest \
-            --workdir $workdir \
+            --workflow {params.fragpipe_workflow} \
+            --manifest {output.manifest} \
+            --workdir {params.msfragger_dir} \
             --ram {resources.mem_mb} \
-            --threads {threads}
-
-        >&2 echo "Fragpipe must have exited successfully ..."
-    
+            --threads {threads} \
+            --config-msfragger {params.msfragger_jar} \
+            --config-ionquant {params.ionquant_jar} \
+            --config-philosopher {params.philosopher_executable}
 
     """
 
@@ -291,7 +291,7 @@ rule fragpipe:
 #         echo "" >> {params.msfraggerparams}
 #         echo "num_threads = {threads}" >> {params.msfraggerparams}
 #         echo "database_name = {input.database}" >> {params.msfraggerparams}
-#         echo "output_location = output/{wildcards.config_batch}/msfragger/" >> {params.msfraggerparams}
+#         echo "output_location = " >> {params.msfraggerparams}
 #         echo "" >> {params.msfraggerparams}
 
 
