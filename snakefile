@@ -213,12 +213,13 @@ rule fragpipe:
         n_splits = 8,
         absolute_output_dir = absolute_output_dir,
         #msfragger_dir = "output/{config_batch}/msfragger",
-        msfragger_dir = "."
+        msfragger_dir = ".",
     threads: 8
     resources:
         #partition = "bigmem",
         #mem_mb = 40000, 
-        mem_mb = 64000,
+        mem_mb = 32768,
+        #mem_mb = rules.fragpipe.params.mem_mb * 1024,  
         runtime = "24:00:00",
     conda: "envs/openjdk_python.yaml"
     #conda: "envs/openjdk_python_extra.yaml"
@@ -228,6 +229,7 @@ rule fragpipe:
         >&2 echo "Create manifest ..."
         echo '''{params.manifest}''' > {output.manifest} 
         >&2 tail {output.manifest}
+
 
         >&2 echo "Create workflow ..."
         # Write the missing dynamic lines to the workflow, depending on the current setup.
@@ -243,6 +245,10 @@ rule fragpipe:
         >&2 tail {params.fragpipe_workflow}
 
 
+        # Convert mem_mb into gb
+        mem_gb=$(({resources.mem_mb}/1024))
+        >&2 echo "mem_gb is $mem_gb"
+
         >&2 echo "Fragpipe ..."
         # https://fragpipe.nesvilab.org/docs/tutorial_headless.html
         {params.fragpipe_executable} \
@@ -250,7 +256,7 @@ rule fragpipe:
             --workflow {params.fragpipe_workflow} \
             --manifest {output.manifest} \
             --workdir {params.msfragger_dir} \
-            --ram {resources.mem_mb} \
+            --ram $mem_gb \
             --threads {threads} \
             --config-msfragger {params.msfragger_jar} \
             --config-ionquant {params.ionquant_jar} \
