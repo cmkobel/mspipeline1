@@ -1,0 +1,11 @@
+name: openjdk
+channels:
+  - conda-forge
+dependencies:
+  - openjdk
+  - python 
+  - pip:
+    - numpy
+    - pandas
+    - easypqp
+    - lxml

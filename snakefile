@@ -232,11 +232,12 @@ rule fragpipe:
         >&2 echo "Create workflow ..."
         # Write the missing dynamic lines to the workflow, depending on the current setup.
         # Copy and modify parameter file.
-        cp arturos_workflow/LFQ-MBR_TimsTOF_edit.workflow {params.fragpipe_workflow}
+        cp assets/fragpipe_workflows/LFQ-MBR.workflow {params.fragpipe_workflow}
         echo "" >> {params.fragpipe_workflow}
         echo "num_threads = {threads}" >> {params.fragpipe_workflow}
         echo "database_name = {input.database}" >> {params.fragpipe_workflow}
         echo "database.db-path = {input.database}" >> {params.fragpipe_workflow}
+        echo "msfragger.misc.slice-db = {params.n_splits}" >> {params.fragpipe_workflow}
         echo "output_location = {params.msfragger_dir}" >> {params.fragpipe_workflow}
         echo "" >> {params.fragpipe_workflow}
         >&2 tail {params.fragpipe_workflow}
