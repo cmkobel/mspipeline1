@@ -6,7 +6,11 @@
 
 
 __author__ =  "Carl Mathias Kobel & Arturo Vera Ponce De Leon"
-__version__ = "v1.0.1"
+__version__ = "v2.0.0"
+
+# changelog:
+
+# v2.0.0: Using Arturos pipeline
 
 
 # TODO: prune these imports
