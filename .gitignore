@@ -12,3 +12,5 @@ __pycache__/
 help/
 output/
 
+.onstart.txt
+.onsuccess.txt

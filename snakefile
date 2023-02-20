@@ -13,15 +13,11 @@ __version__ = "v2.0.0"
 # v2.0.0: Using Arturos pipeline
 
 
-# TODO: prune these imports
-from datetime import datetime
+
 import glob
-import os
 import pandas as pd
 import re
-import time 
-import random
-
+import pathlib
 
 print("/*                                                                               ") # Helps with outputting to dot.
 print("                                             ______________                      ")
@@ -51,6 +47,9 @@ config_database_glob = config["batch_parameters"][config_batch]["database_glob"]
 config_database_glob_read = glob.glob(config_database_glob)
 config_samples = config["batch_parameters"][config_batch]["samples"]
 
+
+absolute_output_dir = str(pathlib.Path("output/").absolute())
+print(f"      abs out dir is: '{absolute_output_dir}'")
 
 
 # Present configuration
@@ -88,9 +87,11 @@ print(f"n_samples: {n_samples}")
 
 print("manifest:")
 manifest = pd.DataFrame(data = {'path': config_samples.values()})
-manifest['experiment'] = "" # Experiment (can be empty, alphanumeric, and _)
-manifest['bioreplicate'] = "" # Bioreplicate (can be empty and integer)
-manifest['data_type'] = "DDA" # Data type (DDA, DIA, GPF-DIA, DIA-Quant, DIA-Lib)
+#manifest['path'] = absolute_output_dir + "/" + config_batch + "/msfragger/" + manifest['path'] # Instead of using bash realpath
+manifest["path"] = "output/" + config_batch + "/msfragger/" + manifest["path"] # But then I realized that I might not need to point absolutely anyway..
+manifest["experiment"] = "" # Experiment (can be empty, alphanumeric, and _)
+manifest["bioreplicate"] = "" # Bioreplicate (can be empty and integer)
+manifest["data_type"] = "DDA" # Data type (DDA, DIA, GPF-DIA, DIA-Quant, DIA-Lib)
 print(manifest)
 print("//")
 
@@ -108,20 +109,19 @@ print("//")
 
 # Define workflow targets
 rule all:
-    input: expand(["output/{config_batch}/metadata.tsv", \
-                   "output/{config_batch}/philosopher_database.fas", \
-                   "output/{config_batch}/msfragger/link_input.done", \
-                   "output/{config_batch}/final.flag"], \
-                   config_batch = config_batch, \
-                   sample = df["sample"], \
-                   basename = df["basename"])
+    input:
+        metadata = f"output/{config_batch}/metadata.tsv",
+        link_input = f"output/{config_batch}/msfragger/link_input.done",
+        make_database = f"output/{config_batch}/philosopher_database.fas", 
+        fragpipe = f"output/{config_batch}/fragpipe_done.flag",
+        
 
 
 
 # Save some metadata about inputs for good measure.
 rule metadata:
     output: "output/{config_batch}/metadata.tsv"
-    params: dataframe = df.to_csv(None, index_label = "index", sep = "\t")
+    params: dataframe = df.to_csv(None, index_label = "index", sep = "\t"),
     shell: """
 
         echo '''{params.dataframe}''' > {output}
@@ -141,10 +141,7 @@ rule link_input:
     shell: """
         
         #ln -s {params.d_files} {output.dir}
-        cp -r {params.d_files} {output.dir}
-        # I'd rather manually copy the files and then link them with this rule. Otherwise snakemake will make new copies all the freakin' time. When the pipeline becomes stable I can change it to linking.
-
-        # Arturo showed me a cool trick of using rsync to copy the files, because then it shows the write speed.
+        cp -vr {params.d_files} {output.dir}
 
     """
 
@@ -199,27 +196,28 @@ rule fragpipe:
     input: 
         database = "output/{config_batch}/philosopher_database.fas",
     output:
-        flag = touch("output/{config_batch}/fragpipe_done.flag")
+        flag = touch("output/{config_batch}/fragpipe_done.flag"),
+        manifest = "output/{config_batch}/msfragger/{config_batch}.manifest"
     params:
         fragpipe_workflow = f"output/{config_batch}/msfragger/fragpipe_modified.workflow",
 
         #msfragger_jar = config["msfragger_jar"],
         #fragpipe_base = config["fragpipe_base"],
         n_splits = 8,
-        manifest = manifest.to_csv(path_or_buf=None, sep = "\t", index=False, header=False),
+        manifest = manifest.to_csv(path_or_buf=None, sep = "\t", index=False, header=False, lineterminator=False),
+        absolute_output_dir = absolute_output_dir
     threads: 8
     resources:
         #partition = "bigmem",
         #mem_mb = 40000, 
-        runtime = "24:00:00"
+        runtime = "24:00:00",
     conda: "envs/openjdk_python.yaml"
-    benchmark: "output/{config_batch}/benchmarks/benchmark.fragpipe.{config_batch}.tsv"
+    benchmark: "output/{config_batch}/benchmarks/benchmark.fragpipe.tsv"
     shell: """
 
-
         >&2 echo "Create manifest ..."
-        # It is a matter of outputting the metadata table in the correct manner.
-        echo '''{params.manifest}''' > {output.manifest}
+        echo '''{params.manifest}''' > {output.manifest} 
+        >&2 tail {output.manifest}
 
 
         >&2 echo "Create workflow ..."
@@ -231,7 +229,10 @@ rule fragpipe:
         echo "database_name = {input.database}" >> {params.fragpipe_workflow}
         echo "output_location = output/{wildcards.config_batch}/msfragger/" >> {params.fragpipe_workflow}
         echo "" >> {params.fragpipe_workflow}
+        >&2 tail {params.fragpipe_workflow}
 
+
+        
 
 
         # Debug: Let's stop it here for now.
@@ -436,15 +437,16 @@ rule fragpipe:
 
 
 
+onstart: 
+    shell("mkdir -p logs/old/; mv logs/*.log logs/old/ 2> /dev/null || exit 0") # Put old logs aside
+    shell("find output/ > .onstart.txt 2> /dev/null || exit 0")
 
-# onsuccess:
-#     shell("echo -n \"All good :)\ndepth 2 tree below:\n\"; tree -L 2 output/{config_batch}/")
-
-# onerror:
-#     shell("echo -n \"ERROR :(\ndepth 2 tree below:\n\"; tree -L 2 output/{config_batch}/")
+onsuccess:
+    print("onsuccess: The following files were created:")
+    shell("find output/ > .onsuccess.txt && diff .onstart.txt .onsuccess.txt || exit 0")
 
 
-# print("*/") # This is a dot-language specific comment close tag that helps when you export the workflow as a graph
+print("*/") # This is a dot-language specific comment close tag that helps when you export the workflow as a graph
 
 
 
