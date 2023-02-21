@@ -22,12 +22,7 @@
 
 
 
-
-This is a very simple pipeline to transform .d files with an appropriate database into sane protein calls with abundances.
-
-This pipeline can be seen as a snakemake wrapped version of https://fragpipe.nesvilab.org/docs/tutorial_linux.html
-
-The workflow is based on msfragger and aims to keep a tidy tree of output files.
+This pipeline takes 1) a list of .d files and 2) a list of fasta-amino acid files and outputs sane protein calls with abundances. It uses philosopher database and fragpipe to do the job. The snakemake pipeline maintains a nice output file tree.
 
 ### Why you should use this pipeline
 
@@ -36,7 +31,7 @@ Because it makes sure that all outputs are updated when you change input-paramet
 
 ## Installation
 1) Prerequisites:
-  - Preferably a HPC system, or just a local workstation.
+  - Preferably a HPC system, or a beefy local workstation.
   - An anaconda or [miniconda3](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) package manager on that system.
 
 2) Clone this repo on the HPC/workstation where you want to work.
@@ -61,7 +56,7 @@ Because it makes sure that all outputs are updated when you change input-paramet
 
 The file config.yaml contains all the parameters needed for this pipeline to run. You should update the parameters so they reflect which samples you wish to process.
 
-Because nesvilab doesn't make their executables easily publicly available, you need to tell the pipeline where to find them on your system. Update addresses for the keys `philosopher_executable`, `msfragger_jar` and `ionquant_jar` which can be downloaded [here](https://github.com/nesvilab/philosopher/releases/latest), [here](https://github.com/Nesvilab/MSFragger/wiki/Preparing-MSFragger#Downloading-MSFragger) and [here](https://github.com/Nesvilab/IonQuant#download), respectively. 
+Because nesvilab do not make their executables immediately publicly available, you need to tell the pipeline where to find them on your system. Update addresses for the keys `philosopher_executable`, `msfragger_jar`, `ionquant_jar` and `fragpipe_jar` which can be downloaded [here](https://github.com/nesvilab/philosopher/releases/latest), [here](https://github.com/Nesvilab/MSFragger/wiki/Preparing-MSFragger#Downloading-MSFragger), [here](https://github.com/Nesvilab/IonQuant#download) and [here](https://github.com/Nesvilab/FragPipe/releases), respectively. 
 
 
 Currently the pipeline only supports the input of .d-files ([agilent/bruker](https://en.wikipedia.org/wiki/Mass_spectrometry_data_format#Proprietary_formats)). Create an item in batch_parameters where you define key `d_base` which is the base directory where all .d-files reside. Define key `database_glob` which is a path (or glob) to the fasta-amino acid files that you want to include in the target protein database.
