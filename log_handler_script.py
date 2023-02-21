@@ -21,7 +21,7 @@ n_lines = 20
 def log_handler(msg):
 
     if msg["level"] == "error":
-        print("=== ", msg) # debug
+        #print("=== ", msg) # debug
 
         # Many different messages might come out of on level == error. By using the try, we make sure to only use results from successfull parsings.
         try: 

@@ -58,8 +58,9 @@ print(f"      abs out dir is: '{absolute_output_dir}'")
 print(f"        config_batch: '{config_batch}'")
 print(f"       config_d_base: '{config_d_base}'")
 print(f"config_database_glob: '{config_database_glob}:'")
-if len(config_database_glob) < 1:
-    raise Exception("Raised exception: no glob targets in config_database_glob") # Not tested yet.
+
+if len(config_database_glob_read) < 1:
+    raise Exception("No glob targets in config_database_glob") # Not tested yet.
 
 for i, j in enumerate(config_database_glob_read):
     print(f"  {i}) {j}")
@@ -214,12 +215,12 @@ rule fragpipe:
     benchmark: "output/{config_batch}/benchmarks/benchmark.fragpipe.tsv"
     shell: """
 
-        >&2 echo "Create manifest ..."
+        echo "Create manifest ..."
         echo '''{params.manifest}''' > {output.manifest} 
-        >&2 tail {output.manifest}
+        tail {output.manifest}
 
 
-        >&2 echo "Create workflow ..."
+        echo "Create workflow ..."
         # Copy and modify parameter file with dynamic content.
         cp assets/fragpipe_workflows/LFQ-MBR.workflow {params.fragpipe_workflow}
         > {params.fragpipe_workflow} echo ""
@@ -229,14 +230,14 @@ rule fragpipe:
         > {params.fragpipe_workflow} echo "msfragger.misc.slice-db = {params.n_splits}"
         > {params.fragpipe_workflow} echo "output_location = {params.fragpipe_workdir}"
         > {params.fragpipe_workflow} echo ""
-        >&2 tail {params.fragpipe_workflow}
+        tail {params.fragpipe_workflow}
 
 
         # Convert mem_mb into gb
-        mem_gb=$(({resources.mem_mb}/1024-2)) # Because there is some overhead, we subtract a few GBs. Everytime fragpipe runs out of memory, I subtract another one: that should be more effective than doing a series of test ahead of time.
-        >&2 echo "Fragpipe will be told to not use more than $mem_gb GB. In practice it usually uses a bit more."
+        mem_gb=$(({resources.mem_mb}/1024-2)) # Because there is some overhead, we subtract a few GBs. Everytime fragpipe runs out of memory, I subtract another one: that should be more effective than doing a series of tests ahead of time.
+        echo "Fragpipe will be told to not use more than $mem_gb GB. In practice it usually uses a bit more."
 
-        >&2 echo "Fragpipe ..."
+        echo "Fragpipe ..."
         # https://fragpipe.nesvilab.org/docs/tutorial_headless.html
         {params.fragpipe_executable} \
             --headless \
@@ -252,8 +253,6 @@ rule fragpipe:
         # Possibly do some output validation here.
 
     """
-
-
 
 
 
