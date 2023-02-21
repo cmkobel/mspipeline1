@@ -255,6 +255,11 @@ rule fragpipe:
     """
 
 
+rule post_processing:
+    input: 
+        protein = "output/{config_batch}/"
+
+
 
 onstart: 
     shell("mkdir -p logs/old/; mv logs/*.log logs/old/ 2> /dev/null || exit 0") # Put old logs aside
