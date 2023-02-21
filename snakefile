@@ -54,7 +54,6 @@ absolute_output_dir = str(pathlib.Path("output/").absolute())
 
 
 # Present configuration
-print("/*")
 print(f"      abs out dir is: '{absolute_output_dir}'")
 print(f"        config_batch: '{config_batch}'")
 print(f"       config_d_base: '{config_d_base}'")
@@ -90,7 +89,7 @@ print(f"n_samples: {n_samples}")
 
 print("manifest:")
 manifest = pd.DataFrame(data = {'path': config_samples.values()})
-manifest['path'] = absolute_output_dir + "/" + config_batch + "/msfragger/" + manifest['path'] # Instead of using bash realpath
+manifest['path'] = absolute_output_dir + "/" + config_batch + "/samples/" + manifest['path'] # Instead of using bash realpath
 ##manifest["path"] = "output/" + config_batch + "/msfragger/" + manifest["path"] # But then I realized that I might not need to point absolutely anyway..
 #manifest["path"] = manifest["path"]
 manifest["experiment"] = "experiment" # Experiment (can be empty, alphanumeric, and _) #  IonQuant with MBR requires designating LCMS runs to experiments. If in doubt how to resolve this error, just assign all LCMS runs to the same experiment name.
@@ -108,7 +107,7 @@ print("//")
 rule all:
     input:
         metadata = f"output/{config_batch}/metadata.tsv",
-        link_input = f"output/{config_batch}/msfragger/link_input.done",
+        copy_input = f"output/{config_batch}/samples/copy_samples.done",
         make_database = f"output/{config_batch}/philosopher_database.fas", 
         fragpipe = f"output/{config_batch}/fragpipe_done.flag",
         
@@ -126,24 +125,23 @@ rule metadata:
     """
 
 # Link input links or copies the input data to a specific directory. Long term, this should be on the fastest possible disk ie. userwork.
-rule copy_input:
+rule copy_samples: # Or place_samples, or copy_samples
     output:
-        dir = directory("output/{config_batch}/msfragger"), 
-        d_files = directory("output/{config_batch}/msfragger/" + df["barcode"]), # Bound for msfragger.
-        linked_flag = touch("output/{config_batch}/msfragger/link_input.done"), # Used by rule philosopher_database to wait for creation of the msfragger directory.
-        # Make sure you've set write access to the directory where these files reside.
+        flag = touch("output/{config_batch}/samples/copy_samples.done"), # Just used to keep track of stuff - probably a bad habit.
+        dir = directory("output/{config_batch}/samples"), # Why is this necessary?
+        d_files = directory("output/{config_batch}/samples/" + df["barcode"]), # Bound for fragpipe.
     params:
-        d_files = (config_d_base + "/" + df["barcode"]).tolist(), # Instead I should probably use some kind of flag. This definition could be a param.
-    benchmark: "output/{config_batch}/benchmarks/benchmark.copy_input.{config_batch}.tsv"
+        d_files = (config_d_base + "/" + df["barcode"]).tolist(), # Problem is that snakemake doesn't like directories as inputs, so I think it is better to define it as a param.
+    benchmark: "output/{config_batch}/benchmarks/benchmark.copy_samples.{config_batch}.tsv"
     shell: """
         
-        #ln -s {params.d_files} {output.dir}
+        #ln -s {params.d_files} {output.dir} # Should be deprecated?
         cp -vr {params.d_files} {output.dir}
 
     """
 
 
-# Make database cats all the amino acid fastas together and runs philosopher database on it.
+# make_database cats all the amino acid fastas together and runs philosopher database on it
 rule make_database:
     input:
         glob = [glob.glob(config_database_glob)],
@@ -165,8 +163,6 @@ rule make_database:
         cd output/{config_batch}/
 
         {params.philosopher} workspace --init
-        
-        {params.philosopher} database --help
 
         # https://github.com/Nesvilab/philosopher/wiki/Database
         {params.philosopher} database \
@@ -177,7 +173,10 @@ rule make_database:
         rm cat_database_sources.faa # remove unneccessary .faa file.
 
         {params.philosopher} workspace --clean
-        ls -la
+
+        >&2 echo "Statistics ..."
+        n_records=$(cat philosopher_database.fas | grep -E ">" | wc -l)
+        echo -e "n_records_in_db\t$n_records" > n_records.tsv
 
     """
 
@@ -187,17 +186,16 @@ rule make_database:
 
 
 
-# Run the headless fragpipe command
-
+# Run the fragpipe in headless. Define manifest and workflow on the fly.
 rule fragpipe:
     input: 
         database = "output/{config_batch}/philosopher_database.fas",
     output:
         flag = touch("output/{config_batch}/fragpipe_done.flag"),
-        manifest = "output/{config_batch}/msfragger/{config_batch}.manifest"
+        manifest = "output/{config_batch}/fragpipe/{config_batch}.manifest"
     params:
         manifest = manifest.to_csv(path_or_buf=None, sep = "\t", index=False, header=False, lineterminator=False),
-        fragpipe_workflow = f"output/{config_batch}/msfragger/fragpipe_modified.workflow",
+        fragpipe_workflow = f"output/{config_batch}/fragpipe/fragpipe_modified.workflow",
         n_splits = 8,
 
         fragpipe_executable = config["fragpipe_executable"],
@@ -205,13 +203,11 @@ rule fragpipe:
         ionquant_jar = config["ionquant_jar"],
         philosopher_executable = config["philosopher_executable"],
 
-        #absolute_output_dir = absolute_output_dir,
-        msfragger_dir = "output/{config_batch}/msfragger",
-        #msfragger_dir = ".",
+        fragpipe_workdir = "output/{config_batch}/fragpipe",
     threads: 8
     resources:
         #partition = "bigmem", # When using more than 178.5 GB at sigma2/saga
-        mem_mb = 32768, 
+        mem_mb = 32768, # Arturo uses 150GB in bigmem with 12 threads.
         runtime = "24:00:00",
     conda: "envs/openjdk_python.yaml"
     #conda: "envs/openjdk_python_extra.yaml"
@@ -222,6 +218,7 @@ rule fragpipe:
         echo '''{params.manifest}''' > {output.manifest} 
         >&2 tail {output.manifest}
 
+
         >&2 echo "Create workflow ..."
         # Copy and modify parameter file with dynamic content.
         cp assets/fragpipe_workflows/LFQ-MBR.workflow {params.fragpipe_workflow}
@@ -230,15 +227,14 @@ rule fragpipe:
         > {params.fragpipe_workflow} echo "database_name = {input.database}"
         > {params.fragpipe_workflow} echo "database.db-path = {input.database}"
         > {params.fragpipe_workflow} echo "msfragger.misc.slice-db = {params.n_splits}"
-        > {params.fragpipe_workflow} echo "output_location = {params.msfragger_dir}"
+        > {params.fragpipe_workflow} echo "output_location = {params.fragpipe_workdir}"
         > {params.fragpipe_workflow} echo ""
         >&2 tail {params.fragpipe_workflow}
 
 
-
         # Convert mem_mb into gb
-        mem_gb=$(({resources.mem_mb}/1024-2)) # Because there is some overhead, we subtract a few GBs. Everytime I run out of memory, I subtract another one, that should be more effective.
-        >&2 echo "mem_gb is $mem_gb"
+        mem_gb=$(({resources.mem_mb}/1024-2)) # Because there is some overhead, we subtract a few GBs. Everytime fragpipe runs out of memory, I subtract another one: that should be more effective than doing a series of test ahead of time.
+        >&2 echo "Fragpipe will be told to not use more than $mem_gb GB. In practice it usually uses a bit more."
 
         >&2 echo "Fragpipe ..."
         # https://fragpipe.nesvilab.org/docs/tutorial_headless.html
@@ -246,14 +242,14 @@ rule fragpipe:
             --headless \
             --workflow {params.fragpipe_workflow} \
             --manifest {output.manifest} \
-            --workdir {params.msfragger_dir} \
+            --workdir {params.fragpipe_workdir} \
             --ram $mem_gb \
             --threads {threads} \
             --config-msfragger {params.msfragger_jar} \
             --config-ionquant {params.ionquant_jar} \
             --config-philosopher {params.philosopher_executable}
 
-        # Then move output files
+        # Possibly do some output validation here.
 
     """
 
