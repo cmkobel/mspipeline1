@@ -51,10 +51,10 @@ config_samples = config["batch_parameters"][config_batch]["samples"]
 
 
 absolute_output_dir = str(pathlib.Path("output/").absolute())
-print(f"      abs out dir is: '{absolute_output_dir}'")
 
 
 # Present configuration
+print(f"      abs out dir is: '{absolute_output_dir}'")
 print(f"        config_batch: '{config_batch}'")
 print(f"       config_d_base: '{config_d_base}'")
 print(f"config_database_glob: '{config_database_glob}:'")
@@ -212,7 +212,6 @@ rule fragpipe:
     threads: 8
     resources:
         #partition = "bigmem",
-        #mem_mb = 40000, 
         mem_mb = 32768,
         #mem_mb = rules.fragpipe.params.mem_mb * 1024,  
         runtime = "24:00:00",
