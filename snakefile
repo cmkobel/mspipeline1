@@ -194,9 +194,15 @@ rule fragpipe:
     output:
         flag = touch("output/{config_batch}/fragpipe_done.flag"),
         manifest = "output/{config_batch}/fragpipe/{config_batch}.manifest"
+        fragpipe_workflow = "output/{config_batch}/fragpipe/fragpipe_modified.workflow",
+
+        # final results:
+        final_ion = "output/{config_batch}/combined_ion.tsv",
+        final_peptide = "output/{config_batch}/combined_peptide.tsv",
+        final_protein = "output/{config_batch}/combined_protein.tsv",
     params:
         manifest = manifest.to_csv(path_or_buf=None, sep = "\t", index=False, header=False, lineterminator=False),
-        fragpipe_workflow = f"output/{config_batch}/fragpipe/fragpipe_modified.workflow",
+        #fragpipe_workflow = f"output/{config_batch}/fragpipe/fragpipe_modified.workflow",
         n_splits = 8,
 
         fragpipe_executable = config["fragpipe_executable"],
@@ -222,15 +228,15 @@ rule fragpipe:
 
         echo "Create workflow ..."
         # Copy and modify parameter file with dynamic content.
-        cp assets/fragpipe_workflows/LFQ-MBR.workflow {params.fragpipe_workflow}
-        echo "" >> {params.fragpipe_workflow}
-        echo "num_threads = {threads}" >> {params.fragpipe_workflow}
-        echo "database_name = {input.database}" >> {params.fragpipe_workflow}
-        echo "database.db-path = {input.database}" >> {params.fragpipe_workflow}
-        echo "msfragger.misc.slice-db = {params.n_splits}" >> {params.fragpipe_workflow}
-        echo "output_location = {params.fragpipe_workdir}" >> {params.fragpipe_workflow}
-        echo "" >> {params.fragpipe_workflow}
-        tail {params.fragpipe_workflow}
+        cp assets/fragpipe_workflows/LFQ-MBR.workflow {output.fragpipe_workflow}
+        echo "" >> {output.fragpipe_workflow}
+        echo "num_threads = {threads}" >> {output.fragpipe_workflow}
+        echo "database_name = {input.database}" >> {output.fragpipe_workflow}
+        echo "database.db-path = {input.database}" >> {output.fragpipe_workflow}
+        echo "msfragger.misc.slice-db = {params.n_splits}" >> {output.fragpipe_workflow}
+        echo "output_location = {params.fragpipe_workdir}" >> {output.fragpipe_workflow}
+        echo "" >> {output.fragpipe_workflow}
+        tail {output.fragpipe_workflow}
 
 
         # Convert mem_mb into gb
@@ -241,7 +247,7 @@ rule fragpipe:
         # https://fragpipe.nesvilab.org/docs/tutorial_headless.html
         {params.fragpipe_executable} \
             --headless \
-            --workflow {params.fragpipe_workflow} \
+            --workflow {output.fragpipe_workflow} \
             --manifest {output.manifest} \
             --workdir {params.fragpipe_workdir} \
             --ram $mem_gb \
@@ -257,7 +263,14 @@ rule fragpipe:
 
 rule post_processing:
     input: 
-        protein = "output/{config_batch}/"
+        final_protein = "output/{config_batch}/combined_protein.tsv",
+    output:
+        touch("output/{config_batch}/post_processing_done.flag")
+    shell: """
+
+        echo "some R?"
+
+    """
 
 
 
