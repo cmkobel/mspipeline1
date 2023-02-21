@@ -223,13 +223,13 @@ rule fragpipe:
         echo "Create workflow ..."
         # Copy and modify parameter file with dynamic content.
         cp assets/fragpipe_workflows/LFQ-MBR.workflow {params.fragpipe_workflow}
-        > {params.fragpipe_workflow} echo ""
-        > {params.fragpipe_workflow} echo "num_threads = {threads}"
-        > {params.fragpipe_workflow} echo "database_name = {input.database}"
-        > {params.fragpipe_workflow} echo "database.db-path = {input.database}"
-        > {params.fragpipe_workflow} echo "msfragger.misc.slice-db = {params.n_splits}"
-        > {params.fragpipe_workflow} echo "output_location = {params.fragpipe_workdir}"
-        > {params.fragpipe_workflow} echo ""
+        echo "" >> {params.fragpipe_workflow}
+        echo "num_threads = {threads}" >> {params.fragpipe_workflow}
+        echo "database_name = {input.database}" >> {params.fragpipe_workflow}
+        echo "database.db-path = {input.database}" >> {params.fragpipe_workflow}
+        echo "msfragger.misc.slice-db = {params.n_splits}" >> {params.fragpipe_workflow}
+        echo "output_location = {params.fragpipe_workdir}" >> {params.fragpipe_workflow}
+        echo "" >> {params.fragpipe_workflow}
         tail {params.fragpipe_workflow}
 
 

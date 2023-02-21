@@ -12,7 +12,7 @@ keep-going: true
 latency-wait: 120 # Some file systems can be slow.
 
 # Flip these for debugging:
-keep-incomplete: false # true for development/debugging
+keep-incomplete: true # true for development/debugging
 rerun-triggers: "mtime" 
 
 
