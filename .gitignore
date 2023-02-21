@@ -10,7 +10,7 @@ trash*/
 split_peptide*
 __pycache__/
 help/
-output/
+output
 
 .onstart.txt
 .onsuccess.txt
