@@ -99,13 +99,6 @@ print(manifest)
 print("//")
 
 
-# Mock manifest file below, not sure about the many tabs between 1 and DDA. 
-# /localscratch/7407431/Fragpipe.tryar_A.dir/20220506_A1_Slot1-01_1_1939.d   testa   1			DDA
-# /localscratch/7407431/Fragpipe.tryar_A.dir/20220506_A2_Slot1-02_1_1940.d   testa   1			DDA
-# /localscratch/7407431/Fragpipe.tryar_A.dir/20220506_A3_Slot1-03_1_1941.d   testa   1			DDA
-# /localscratch/7407431/Fragpipe.tryar_A.dir/20220506_A4_Slot1-04_1_1942.d   testb   1			DDA
-# /localscratch/7407431/Fragpipe.tryar_A.dir/20220506_A5_Slot1-05_1_1943.d   testb   1			DDA
-# /localscratch/7407431/Fragpipe.tryar_A.dir/20220506_A6_Slot1-06_1_1944.d   testb   1			DDA
 
 
 
@@ -248,7 +241,7 @@ rule fragpipe:
 
 
         # Convert mem_mb into gb
-        mem_gb=$(({resources.mem_mb}/1024-4)) # Because there is some overhead, we subtract a few GBs.
+        mem_gb=$(({resources.mem_mb}/1024-1)) # Because there is some overhead, we subtract a few GBs.
         >&2 echo "mem_gb is $mem_gb"
 
         >&2 echo "Fragpipe ..."
