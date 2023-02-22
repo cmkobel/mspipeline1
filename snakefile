@@ -153,7 +153,9 @@ rule make_database:
         philosopher = config["philosopher_executable"],
     retries: 4
     resources:
-        mem_mb = lambda wildcards, attempt : [6000, 16000, 32000, 64000, 0, 0][attempt-1]
+        #mem_mb = lambda wildcards, attempt : [6000, 16000, 32000, 64000, 128000, 0][attempt-1],
+        mem_mb = 64000,
+        runtime = "24:00:00"
     benchmark: "output/{config_batch}/benchmarks/benchmark.make_database.{config_batch}.tsv"
     shell: """
 
@@ -194,7 +196,7 @@ rule fragpipe:
         database = "output/{config_batch}/philosopher_database.fas",
     output:
         flag = touch("output/{config_batch}/fragpipe_done.flag"),
-        manifest = "output/{config_batch}/fragpipe/{config_batch}.manifest"
+        manifest = "output/{config_batch}/fragpipe/{config_batch}.manifest",
         fragpipe_workflow = "output/{config_batch}/fragpipe/fragpipe_modified.workflow",
 
         # final results:
@@ -212,10 +214,10 @@ rule fragpipe:
         philosopher_executable = config["philosopher_executable"],
 
         fragpipe_workdir = "output/{config_batch}/fragpipe",
-    threads: 8
+    threads: 12
     resources:
         #partition = "bigmem", # When using more than 178.5 GB at sigma2/saga
-        mem_mb = 32768, # Arturo uses 150GB in bigmem with 12 threads.
+        mem_mb = 150000, # Arturo uses 150GB in bigmem with 12 threads.
         runtime = "24:00:00",
     conda: "envs/openjdk_python.yaml"
     #conda: "envs/openjdk_python_extra.yaml"
@@ -276,7 +278,7 @@ rule post_processing:
 
 
 onstart: 
-    shell("mkdir -p logs/old/; mv logs/*.log logs/old/ 2> /dev/null || exit 0") # Put old logs aside
+    shell("mkdir -p logs/old/; (mv logs/*.log logs/old/ 2> /dev/null || exit 0) &") # Put old logs aside
     shell("find output/ > .onstart.txt 2> /dev/null || exit 0")
 
 onsuccess:
