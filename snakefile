@@ -125,6 +125,8 @@ rule metadata:
     shell: """
 
         echo '''{params.dataframe}''' > {output}
+
+        # TODO: Write something clever to the benchmarks/ directory, so we can infer relationship between hardware allocations, input size and running time.
     
     """
 
@@ -182,7 +184,6 @@ rule make_database:
         {params.philosopher} workspace --clean
 
         >&2 echo "Statistics ..."
-        n_records=$(cat philosopher_database.faa | grep -E ">" | wc -l)
         n_records=$(grep ">" philosopher_database.faa | wc -l)
         echo -e "n_records_in_db\t$n_records" > db_stats.tsv
         echo -e "db_glob_read\t{input.glob}" >> db_stats.tsv
@@ -226,7 +227,7 @@ rule fragpipe:
         runtime = "24:00:00",
     #conda: "envs/openjdk_python.yaml"
     conda: "envs/openjdk_python_extra.yaml" # TODO: Use this file, I checked it already, and you just have to install pyopenms manually. Don't want to use a previous version of python (e.g. 3.9) just to have easypqp installed, as it seems like some people do not have it too.
-    benchmark: "output/{config_batch}/benchmarks/benchmark.fragpipe.tsv"
+    benchmark: "output/{config_batch}/benchmarks/benchmark.fragpipe.{config_batch}.tsv"
     shell: """
 
         echo "Create manifest ..."

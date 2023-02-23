@@ -56,7 +56,48 @@ batch_parameters:
       'D76T6S': '20220506_E10_Slot1-58_1_1996.d'     # E10
 
 
+
+  # Puchuns 32 digesta - With Puchun and Yanna
+  '220506_digesta_puchun': 
+    d_base: 'data_mirror/2022-05-06_PEP_timsTOF_D--T6S_24_andpuchun36' # copy of /trd-project2/NS9864K/datasets/2021_supacow/2022-05-06_PEP_timsTOF_D--T6S_24_andpuchun36/timsTOF/20220525_CMK/*
+    database_glob: '/cluster/projects/nn9864k/cmkobel/02_proteomics/aa_databases/05_puchun/extracted_aas/*.faa'
+    samples: 
+      'P1': '20220506_A1_Slot1-01_1_1939.d'       # A 1
+      'P2': '20220506_A2_Slot1-02_1_1940.d'       # A 2
+      'P3': '20220506_A3_Slot1-03_1_1941.d'       # A 3
+      'P4': '20220506_A4_Slot1-04_1_1942.d'       # A 4
+      'P5': '20220506_A5_Slot1-05_1_1943.d'       # A 5
+      'P6': '20220506_A6_Slot1-06_1_1944.d'       # A 6
+      'P7': '20220506_A7_Slot1-07_1_1945.d'       # A 7
+      'P8': '20220506_A8_Slot1-08_1_1946.d'       # A 8
+      'P8v2': '20220506_A9_Slot1-09_1_1947.d'     # A 9
+      'P9': '20220506_A10_Slot1-10_1_1948.d'      # A10
+      'P10': '20220506_A11_Slot1-11_1_1949.d'     # A11
+      'P11': '20220506_A12_Slot1-12_1_1950.d'     # A12
+      'P12': '20220506_B1_Slot1-13_1_1951.d'      # B 1
+      'P13': '20220506_B2_Slot1-14_1_1952.d'      # B 2
+      'P14': '20220506_B3_Slot1-15_1_1953.d'      # B 3
+      'P15': '20220506_B4_Slot1-16_1_1954.d'      # B 4
+      'P16': '20220506_B5_Slot1-17_1_1955.d'      # B 5
+      'P17': '20220506_B6_Slot1-18_1_1956.d'      # B 6
+      'P18': '20220506_B7_Slot1-19_1_1957.d'      # B 7
+      'P19': '20220506_B8_Slot1-20_1_1958.d'      # B 8
+      'P20': '20220506_B9_Slot1-21_1_1959.d'      # B 9
+      'P21': '20220506_B10_Slot1-22_1_1960.d'     # B10
+      'P22': '20220506_B11_Slot1-23_1_1961.d'     # B11
+      'P23': '20220506_B12_Slot1-24_1_1962.d'     # B12
+      'P24': '20220506_C1_Slot1-25_1_1963.d'      # C 1
+      'P25': '20220506_C2_Slot1-26_1_1964.d'      # C 2
+      'P26': '20220506_C3_Slot1-27_1_1965.d'      # C 3
+      'P27': '20220506_C4_Slot1-28_1_1966.d'      # C 4
+      'P28': '20220506_C5_Slot1-29_1_1967.d'      # C 5
+      'P29': '20220506_C6_Slot1-30_1_1968.d'      # C 6
+      'P30': '20220506_C7_Slot1-31_1_1969.d'      # C 7
+      'P31': '20220506_C8_Slot1-32_1_1970.d'      # C 8
+      'P32': '20220506_C10_Slot1-34_1_1972.d'     # C10
+      #'unknown': '20220506_D1_Slot1-37_1_1975.d'  # D 1
+
 # Pick a title below
 
 batch: "220506_DnnT6S_carl"
-
+batch: "220506_digesta_puchun"
