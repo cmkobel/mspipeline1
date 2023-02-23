@@ -1,20 +1,10 @@
 # snakemake --profile profiles/slurm-sigma2-saga
-# I'm experiencing some major problems with the temporary directories that i might as well fix. It seems to percolate through when I have a high amount of samples. Basically, all the jobs that use a program that uses the workspace, need to be in the same rule. Silly, but that is how it is.
-
-# In this branch I'm not at all screwing around. I'm closely following this tutorial:
-# https://fragpipe.nesvilab.org/docs/tutorial_linux.html
-
 
 __author__ =  "Carl Mathias Kobel & Arturo Vera Ponce De Leon"
 __version__ = "v2.0.0"
 
 # changelog:
-
-# v2.0.0: Using Arturos pipeline
-
-
-# TODO: refactor some variables and names. msfragger is not a good name for the final output dir, as it is rather fragpipe that is being called. Also, the .d files could potentially be linked to a different directory, for instance a temporary userwork dir or just a different directory, maybe called linked_inputs/.
-# TODO: philosopher database should use extension .faa, not .fas.
+# v2.0.0: Using Arturos pipeline, resulting in the first version that actually works.
 
 
 
@@ -156,10 +146,10 @@ rule make_database:
         database = "output/{config_batch}/philosopher_database.faa",
     params:
         philosopher = config["philosopher_executable"],
-    retries: 4
+    retries: 4 # This is some black magic voodoo shit.
     resources:
-        #mem_mb = lambda wildcards, attempt : [6000, 16000, 32000, 64000, 128000, 0][attempt-1],
-        mem_mb = 64000,
+        mem_mb = lambda wildcards, attempt : [16000, 32000, 64000, 128000, 175000, 0, 0][attempt-1], # Attempt starts from 1? Confirm:
+        #mem_mb = 64000,
         runtime = "24:00:00"
     benchmark: "output/{config_batch}/benchmarks/benchmark.make_database.{config_batch}.tsv"
     shell: """
@@ -184,8 +174,9 @@ rule make_database:
         {params.philosopher} workspace --clean
 
         >&2 echo "Statistics ..."
+        echo -e "name\tvalue" > db_stats.tsv
         n_records=$(grep ">" philosopher_database.faa | wc -l)
-        echo -e "n_records_in_db\t$n_records" > db_stats.tsv
+        echo -e "n_records_in_db\t$n_records" >> db_stats.tsv
         echo -e "db_glob_read\t{input.glob}" >> db_stats.tsv
 
     """
@@ -197,6 +188,7 @@ rule make_database:
 
 
 # Run the fragpipe in headless. Define manifest and workflow on the fly.
+# Potentially we could implement retries into this rule. But since there are soo many ways fragpipe can fail, and I don't want to waste many cpu hours, I'm abstaining from implementing.
 rule fragpipe:
     input: 
         database = "output/{config_batch}/philosopher_database.faa",
@@ -220,7 +212,7 @@ rule fragpipe:
         philosopher_executable = config["philosopher_executable"],
 
         fragpipe_workdir = "output/{config_batch}/fragpipe", # Bound for fragpipe --workdir
-    threads: 12
+    threads: 16
     resources:
         #partition = "bigmem", # When using more than 178.5 GB at sigma2/saga
         mem_mb = 150000, # Some people like to use 150GB in bigmem with 12 threads.
