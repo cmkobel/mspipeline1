@@ -14,6 +14,8 @@ __version__ = "v2.0.0"
 
 
 # TODO: refactor some variables and names. msfragger is not a good name for the final output dir, as it is rather fragpipe that is being called. Also, the .d files could potentially be linked to a different directory, for instance a temporary userwork dir or just a different directory, maybe called linked_inputs/.
+# TODO: philosopher database should use extension .faa, not .fas.
+
 
 
 import glob
@@ -200,11 +202,11 @@ rule fragpipe:
         fragpipe_workflow = "output/{config_batch}/fragpipe/fragpipe_modified.workflow",
 
         # final results:
-        final_ion = "output/{config_batch}/combined_ion.tsv",
-        final_peptide = "output/{config_batch}/combined_peptide.tsv",
-        final_protein = "output/{config_batch}/combined_protein.tsv",
+        final_ion = "output/{config_batch}/fragpipe/combined_ion.tsv",
+        final_peptide = "output/{config_batch}/fragpipe/combined_peptide.tsv",
+        final_protein = "output/{config_batch}/fragpipe/combined_protein.tsv",
     params:
-        manifest = manifest.to_csv(path_or_buf=None, sep = "\t", index=False, header=False, lineterminator=False),
+        manifest = manifest.to_csv(path_or_buf=None, sep="\t", index=False, header=False),
         #fragpipe_workflow = f"output/{config_batch}/fragpipe/fragpipe_modified.workflow",
         n_splits = 8,
 
@@ -217,10 +219,10 @@ rule fragpipe:
     threads: 12
     resources:
         #partition = "bigmem", # When using more than 178.5 GB at sigma2/saga
-        mem_mb = 150000, # Arturo uses 150GB in bigmem with 12 threads.
+        mem_mb = 150000, # Jack uses 150GB in bigmem with 12 threads.
         runtime = "24:00:00",
-    conda: "envs/openjdk_python.yaml"
-    #conda: "envs/openjdk_python_extra.yaml"
+    #conda: "envs/openjdk_python.yaml"
+    conda: "envs/openjdk_python_extra.yaml" # TODO: Use this file, I checked it already, and you just have to install pyopenms manually. Don't want to use a previous version of python (e.g. 3.9) just to have easypqp installed, as it seems like jack does not have it too.
     benchmark: "output/{config_batch}/benchmarks/benchmark.fragpipe.tsv"
     shell: """
 
@@ -290,3 +292,4 @@ print("*/") # This is a dot-language specific comment close tag that helps when 
 
 
 
+# TODO: in the benchmark directory, there should also be information about number of proteins processed, and number of scans in the tims-input. This way we might better be able to figure the resource requirements for bigger future projects.

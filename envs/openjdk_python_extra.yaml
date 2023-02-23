@@ -1,4 +1,4 @@
-name: openjdk
+name: openjdkpythonextra
 channels:
   - conda-forge
 dependencies:
@@ -6,6 +6,13 @@ dependencies:
   - python 
   - pip:
     - numpy
-    - pandas
-    - easypqp
-    - lxml
+    - scipy
+    - scikit-learn
+    - statsmodels
+    - pandas>=1.1.0
+    - biopython
+    # install pyopenms nightly from github: https://pyopenms.readthedocs.io/en/latest/installation.html#nightly-ci-wheels
+    - matplotlib
+    - seaborn
+    - lxml # I successfully ran pip install lxml in the non-extra env.
+    #- easypqp # First I installed the nightly pyopenms (dependency of easypqp), but then when I try to install easypqp nightly, it doesn't like python 3.11, so maybe I should try using python 3.10 instead. Or maybe 3.9 https://github.com/grosenberger/easypqp/issues/85#issuecomment-1280535721
