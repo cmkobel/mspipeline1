@@ -206,20 +206,20 @@ rule fragpipe:
         final_peptide = "output/{config_batch}/fragpipe/combined_peptide.tsv",
         final_protein = "output/{config_batch}/fragpipe/combined_protein.tsv",
     params:
-        manifest = manifest.to_csv(path_or_buf=None, sep="\t", index=False, header=False),
-        #fragpipe_workflow = f"output/{config_batch}/fragpipe/fragpipe_modified.workflow",
-        n_splits = 8,
+        manifest = manifest.to_csv(path_or_buf=None, sep="\t", index=False, header=False), # This is a csv formatted string 
+        original_fragpipe_workflow = "assets/fragpipe_workflows/LFQ-MBR.workflow", # The path to the workflow that specifies the type of analysis
+        n_splits = 8, # The number of database splits that fragpipe (msfragger) should perform.
 
         fragpipe_executable = config["fragpipe_executable"],
         msfragger_jar = config["msfragger_jar"],
         ionquant_jar = config["ionquant_jar"],
         philosopher_executable = config["philosopher_executable"],
 
-        fragpipe_workdir = "output/{config_batch}/fragpipe",
+        fragpipe_workdir = "output/{config_batch}/fragpipe", # Bound for fragpipe --workdir
     threads: 12
     resources:
         #partition = "bigmem", # When using more than 178.5 GB at sigma2/saga
-        mem_mb = 150000, # Some people use 150GB in bigmem with 12 threads.
+        mem_mb = 150000, # Some people like to use 150GB in bigmem with 12 threads.
         runtime = "24:00:00",
     #conda: "envs/openjdk_python.yaml"
     conda: "envs/openjdk_python_extra.yaml" # TODO: Use this file, I checked it already, and you just have to install pyopenms manually. Don't want to use a previous version of python (e.g. 3.9) just to have easypqp installed, as it seems like some people do not have it too.
@@ -233,7 +233,7 @@ rule fragpipe:
 
         echo "Create workflow ..."
         # Copy and modify parameter file with dynamic content.
-        cp assets/fragpipe_workflows/LFQ-MBR.workflow {output.fragpipe_workflow}
+        cp {params.original_fragpipe_workflow} {output.fragpipe_workflow}
         echo "" >> {output.fragpipe_workflow}
         echo "num_threads = {threads}" >> {output.fragpipe_workflow}
         echo "database_name = {input.database}" >> {output.fragpipe_workflow}
@@ -260,8 +260,6 @@ rule fragpipe:
             --config-msfragger {params.msfragger_jar} \
             --config-ionquant {params.ionquant_jar} \
             --config-philosopher {params.philosopher_executable}
-
-        # Possibly do some output validation here.
 
     """
 
