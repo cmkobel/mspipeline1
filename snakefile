@@ -219,10 +219,10 @@ rule fragpipe:
     threads: 12
     resources:
         #partition = "bigmem", # When using more than 178.5 GB at sigma2/saga
-        mem_mb = 150000, # Jack uses 150GB in bigmem with 12 threads.
+        mem_mb = 150000, # Some people use 150GB in bigmem with 12 threads.
         runtime = "24:00:00",
     #conda: "envs/openjdk_python.yaml"
-    conda: "envs/openjdk_python_extra.yaml" # TODO: Use this file, I checked it already, and you just have to install pyopenms manually. Don't want to use a previous version of python (e.g. 3.9) just to have easypqp installed, as it seems like jack does not have it too.
+    conda: "envs/openjdk_python_extra.yaml" # TODO: Use this file, I checked it already, and you just have to install pyopenms manually. Don't want to use a previous version of python (e.g. 3.9) just to have easypqp installed, as it seems like some people do not have it too.
     benchmark: "output/{config_batch}/benchmarks/benchmark.fragpipe.tsv"
     shell: """
 
