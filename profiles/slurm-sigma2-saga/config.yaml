@@ -18,7 +18,7 @@ rerun-triggers: "mtime"
 
 # ---- Logging ----
 show-failed-logs: true # This one requires additional configuration beyond the scope of this configuration file.
-log-handler-script: "log_handler_script.py"
+log-handler-script: "scripts/log_handler_script.py"
     
 
 
