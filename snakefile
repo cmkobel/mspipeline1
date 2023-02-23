@@ -112,7 +112,7 @@ rule all:
     input:
         metadata = f"output/{config_batch}/metadata.tsv",
         copy_input = f"output/{config_batch}/samples/copy_samples.done",
-        make_database = f"output/{config_batch}/philosopher_database.fas", 
+        make_database = f"output/{config_batch}/philosopher_database.faa", 
         fragpipe = f"output/{config_batch}/fragpipe_done.flag",
         
 
@@ -148,9 +148,10 @@ rule copy_samples: # Or place_samples, or copy_samples
 # make_database cats all the amino acid fastas together and runs philosopher database on it
 rule make_database:
     input:
-        glob = [glob.glob(config_database_glob)],
+        #glob = [glob.glob(config_database_glob)], # Not sure why this one was inside bracket/list?
+        glob = config_database_glob_read
     output:
-        database = "output/{config_batch}/philosopher_database.fas",
+        database = "output/{config_batch}/philosopher_database.faa",
     params:
         philosopher = config["philosopher_executable"],
     retries: 4
@@ -175,14 +176,16 @@ rule make_database:
             --custom cat_database_sources.faa \
             --contam 
 
-        mv *-decoys-contam-cat_database_sources.faa.fas philosopher_database.fas # rename database file.
+        mv *-decoys-contam-cat_database_sources.faa.fas philosopher_database.faa # rename database file.
         rm cat_database_sources.faa # remove unneccessary .faa file.
 
         {params.philosopher} workspace --clean
 
         >&2 echo "Statistics ..."
-        n_records=$(cat philosopher_database.fas | grep -E ">" | wc -l)
-        echo -e "n_records_in_db\t$n_records" > n_records.tsv
+        n_records=$(cat philosopher_database.faa | grep -E ">" | wc -l)
+        n_records=$(grep ">" philosopher_database.faa | wc -l)
+        echo -e "n_records_in_db\t$n_records" > db_stats.tsv
+        echo -e "db_glob_read\t{input.glob}" >> db_stats.tsv
 
     """
 
@@ -195,7 +198,7 @@ rule make_database:
 # Run the fragpipe in headless. Define manifest and workflow on the fly.
 rule fragpipe:
     input: 
-        database = "output/{config_batch}/philosopher_database.fas",
+        database = "output/{config_batch}/philosopher_database.faa",
     output:
         flag = touch("output/{config_batch}/fragpipe_done.flag"),
         manifest = "output/{config_batch}/fragpipe/{config_batch}.manifest",
