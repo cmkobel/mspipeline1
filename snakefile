@@ -81,7 +81,7 @@ print(f"n_genomes_database: {n_genomes_database}")
 print(f"n_samples: {n_samples}")
 
 
-print("manifest:")
+#print("manifest:")
 manifest = pd.DataFrame(data = {'path': config_samples.values()})
 manifest['path'] = absolute_output_dir + "/" + config_batch + "/samples/" + manifest['path'] # Instead of using bash realpath
 ##manifest["path"] = "output/" + config_batch + "/msfragger/" + manifest["path"] # But then I realized that I might not need to point absolutely anyway..
@@ -89,8 +89,8 @@ manifest['path'] = absolute_output_dir + "/" + config_batch + "/samples/" + mani
 manifest["experiment"] = "experiment" # Experiment (can be empty, alphanumeric, and _) #  IonQuant with MBR requires designating LCMS runs to experiments. If in doubt how to resolve this error, just assign all LCMS runs to the same experiment name.
 manifest["bioreplicate"] = "" # Bioreplicate (can be empty and integer)
 manifest["data_type"] = "DDA" # Data type (DDA, DIA, GPF-DIA, DIA-Quant, DIA-Lib)
-print(manifest)
-print("//")
+#print(manifest)
+#print("//")
 
 
 
@@ -104,6 +104,8 @@ rule all:
         copy_input = f"output/{config_batch}/samples/copy_samples.done",
         make_database = f"output/{config_batch}/philosopher_database.faa", 
         fragpipe = f"output/{config_batch}/fragpipe_done.flag",
+
+        zip_ = f"output/{config_batch}/MS-pipeline1_{config_batch}.zip",
         
 
 
@@ -144,6 +146,7 @@ rule make_database:
         glob = config_database_glob_read
     output:
         database = "output/{config_batch}/philosopher_database.faa",
+        db_stats = "output/{config_batch}/db_stats.tsv",
     params:
         philosopher = config["philosopher_executable"],
     retries: 4 # This is some black magic voodoo shit.
@@ -196,6 +199,8 @@ rule fragpipe:
         flag = touch("output/{config_batch}/fragpipe_done.flag"),
         manifest = "output/{config_batch}/fragpipe/{config_batch}.manifest",
         fragpipe_workflow = "output/{config_batch}/fragpipe/fragpipe_modified.workflow",
+
+        stats = "output/{config_batch}/fragpipe/fragpipe_stats.tsv",
 
         # final results:
         final_ion = "output/{config_batch}/fragpipe/combined_ion.tsv",
@@ -255,19 +260,44 @@ rule fragpipe:
             --threads {threads} \
             --config-msfragger {params.msfragger_jar} \
             --config-ionquant {params.ionquant_jar} \
-            --config-philosopher {params.philosopher_executable}
+            --config-philosopher {params.philosopher_executable} \
+        | tee {params.fragpipe_workdir}/fragpipe.out.log # Write the log, so we can later extract the number of "scans"
+
+        # TODO: Set keep-incomplete to true when testing this on the next run. Would be a pity to loose all of the results just because this trivial fails due to some syntax error.
+        grep -E ": Scans = [0-9]+" {params.fragpipe_workdir}/fragpipe.out.log \
+        > {params.fragpipe_workdir}/fragpipe_stats.tsv
 
     """
 
 
-rule post_processing:
+rule zip_essence:
     input: 
-        final_protein = "output/{config_batch}/combined_protein.tsv",
+        metadata = f"output/{config_batch}/metadata.tsv",
+
+        db_stats = "output/{config_batch}/db_stats.tsv",
+        
+        manifest = "output/{config_batch}/fragpipe/{config_batch}.manifest",
+        fragpipe_workflow = "output/{config_batch}/fragpipe/fragpipe_modified.workflow",
+
+        stats = "output/{config_batch}/fragpipe/fragpipe_stats.tsv",
+        
+
+        final_ion = "output/{config_batch}/fragpipe/combined_ion.tsv",
+        final_peptide = "output/{config_batch}/fragpipe/combined_peptide.tsv",
+        final_protein = "output/{config_batch}/fragpipe/combined_protein.tsv", 
     output:
-        touch("output/{config_batch}/post_processing_done.flag")
+        #touch("output/{config_batch}/post_processing_done.flag")
+        zip_ = "output/{config_batch}/MS-pipeline1_{config_batch}.zip"
+    resources:
+        runtime = "01:00:00",
     shell: """
 
-        echo "some R?"
+
+        zip {output} {input}
+
+        # TODO: Make an R script that integrates all the run metadata and does some crude QC and makes a nice report :)
+
+        
 
     """
 
@@ -279,7 +309,7 @@ onstart:
 
 onsuccess:
     print("onsuccess: The following files were created:")
-    shell("find output/ > .onsuccess.txt && diff .onstart.txt .onsuccess.txt || exit 0")
+    shell("find output/ > .onsuccess.txt && diff .onstart.txt .onsuccess.txt | head -n 500 || exit 0")
 
 
 print("*/") # This is a dot-language specific comment close tag that helps when you export the workflow as a graph
