@@ -185,6 +185,9 @@ rule make_database:
     """
 
 
+
+
+
 # def memory_msfragger(wildcards, attempt):
 #     return attempt * 100000
 
@@ -203,6 +206,8 @@ rule fragpipe:
         stats = "output/{config_batch}/fragpipe/fragpipe_stats.tsv",
 
         # final results:
+        psm = "output/{config_batch}/fragpipe/experiment/psm.tsv",
+        
         final_ion = "output/{config_batch}/fragpipe/combined_ion.tsv",
         final_peptide = "output/{config_batch}/fragpipe/combined_peptide.tsv",
         final_protein = "output/{config_batch}/fragpipe/combined_protein.tsv",
@@ -217,9 +222,10 @@ rule fragpipe:
         philosopher_executable = config["philosopher_executable"],
 
         fragpipe_workdir = "output/{config_batch}/fragpipe", # Bound for fragpipe --workdir
-    threads: 16
+    threads: 16 # 8 for testing
     resources:
         #partition = "bigmem", # When using more than 178.5 GB at sigma2/saga
+        #mem_mb = 32000, # for testing
         mem_mb = 150000, # Some people like to use 150GB in bigmem with 12 threads.
         runtime = "24:00:00",
     #conda: "envs/openjdk_python.yaml"
@@ -236,11 +242,11 @@ rule fragpipe:
         # Copy and modify parameter file with dynamic content.
         cp {params.original_fragpipe_workflow} {output.fragpipe_workflow}
         echo "" >> {output.fragpipe_workflow}
-        echo "num_threads = {threads}" >> {output.fragpipe_workflow}
-        echo "database_name = {input.database}" >> {output.fragpipe_workflow}
-        echo "database.db-path = {input.database}" >> {output.fragpipe_workflow}
-        echo "msfragger.misc.slice-db = {params.n_splits}" >> {output.fragpipe_workflow}
-        echo "output_location = {params.fragpipe_workdir}" >> {output.fragpipe_workflow}
+        echo "num_threads={threads}" >> {output.fragpipe_workflow}
+        echo "database_name={input.database}" >> {output.fragpipe_workflow}
+        echo "database.db-path={input.database}" >> {output.fragpipe_workflow}
+        echo "msfragger.misc.slice-db={params.n_splits}" >> {output.fragpipe_workflow}
+        echo "output_location={params.fragpipe_workdir}" >> {output.fragpipe_workflow}
         echo "" >> {output.fragpipe_workflow}
         tail {output.fragpipe_workflow}
 
@@ -270,18 +276,19 @@ rule fragpipe:
     """
 
 
+# Zip the most important results together for easy sharing and local analysis
 rule zip_essence:
     input: 
         metadata = f"output/{config_batch}/metadata.tsv",
-
         db_stats = "output/{config_batch}/db_stats.tsv",
         
         manifest = "output/{config_batch}/fragpipe/{config_batch}.manifest",
         fragpipe_workflow = "output/{config_batch}/fragpipe/fragpipe_modified.workflow",
-
-        stats = "output/{config_batch}/fragpipe/fragpipe_stats.tsv",
         
+        fragpipe_stats = "output/{config_batch}/fragpipe/fragpipe_stats.tsv",
 
+
+        psm = "output/{config_batch}/fragpipe/experiment/psm.tsv",
         final_ion = "output/{config_batch}/fragpipe/combined_ion.tsv",
         final_peptide = "output/{config_batch}/fragpipe/combined_peptide.tsv",
         final_protein = "output/{config_batch}/fragpipe/combined_protein.tsv", 
