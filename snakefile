@@ -279,32 +279,24 @@ rule fragpipe:
 # Zip the most important results together for easy sharing and local analysis
 rule zip_essence:
     input: 
-        metadata = f"output/{config_batch}/metadata.tsv",
-        db_stats = "output/{config_batch}/db_stats.tsv",
-        
-        manifest = "output/{config_batch}/fragpipe/{config_batch}.manifest",
-        fragpipe_workflow = "output/{config_batch}/fragpipe/fragpipe_modified.workflow",
-        
-        fragpipe_stats = "output/{config_batch}/fragpipe/fragpipe_stats.tsv",
-
-
-        psm = "output/{config_batch}/fragpipe/experiment/psm.tsv",
-        final_ion = "output/{config_batch}/fragpipe/combined_ion.tsv",
-        final_peptide = "output/{config_batch}/fragpipe/combined_peptide.tsv",
-        final_protein = "output/{config_batch}/fragpipe/combined_protein.tsv", 
+        zip = [f"output/{config_batch}/metadata.tsv", "output/{config_batch}/db_stats.tsv", "output/{config_batch}/fragpipe/{config_batch}.manifest", "output/{config_batch}/fragpipe/fragpipe_modified.workflow", "output/{config_batch}/fragpipe/fragpipe_stats.tsv", "output/{config_batch}/fragpipe/experiment/psm.tsv", "output/{config_batch}/fragpipe/combined_ion.tsv", "output/{config_batch}/fragpipe/combined_peptide.tsv", "output/{config_batch}/fragpipe/combined_protein.tsv"]
     output:
         #touch("output/{config_batch}/post_processing_done.flag")
-        zip_ = "output/{config_batch}/MS-pipeline1_{config_batch}.zip"
+        zip = "output/{config_batch}/MS-pipeline1_{config_batch}.zip",
+        report = "output/{config_batch}/report_MS-pipeline1_{config_batch}.html",
+    conda: "envs/r-markdown.yaml"
     resources:
         runtime = "01:00:00",
     shell: """
 
+        >&2 echo "Zip stuff ..."
+        zip {output.zip} {input.zip}
 
-        zip {output} {input}
+        >&2 echo "R-markdown report ..."
+        cp scripts/QC.Rmd rmarkdown_template.rmd
+        Rscript -e 'rmarkdown::render("rmarkdown_template.rmd", "html_document", output_file = "{output.report}", knit_root_dir = "output/{config_batch}/", quiet = T)' 
+        rm rmarkdown_template.rmd
 
-        # TODO: Make an R script that integrates all the run metadata and does some crude QC and makes a nice report :)
-
-        
 
     """
 

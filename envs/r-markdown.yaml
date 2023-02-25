@@ -1,6 +1,7 @@
 name: r
 channels:
   - conda-forge
+  - bioconda
   - defaults
   - r
 dependencies:
@@ -10,3 +11,6 @@ dependencies:
   - r-dt
   - r-prettydoc
   - r-rmarkdown
+  - r-phytools
+  - r-ape
+  - zip

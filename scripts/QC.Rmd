@@ -1,5 +1,5 @@
 ---
-title: "`r head(tail(unlist(strsplit(getwd(), '/')), 2), 1)`"
+title: "`r basename(getwd())`"
 subtitle: "LFQ-MBR QC"
 date: "`r Sys.time()`"
 output:
@@ -26,29 +26,57 @@ library(DT)
 
 
 
+
 ```
 
 
 # Read data
 ```{r echo=FALSE, message=F, warning=F}
 
-setwd("~/Downloads/output 8")
-setwd("MS-pipeline1/output")
-batch = "220506_digesta_puchun"
+
+#setwd("/cluster/work/users/cmkobel/MS-pipeline1-split-output/220506_digesta_puchun") # For development
+
+# Since we're already inside the batch directory, we can read it as the basename of the WD:
+batch = getwd() %>% basename
 
 
 
+paste("this is the getwd")
+paste(getwd())
 
-df_metadata = tryCatch({read_delim(paste0(batch, "/metadata.tsv")) %>% select(-index) %>% rename(stem = basename)})
-df_db_stats = tryCatch({read_delim(paste0(batch, "/db_stats.tsv"))})
-df_manifest = tryCatch({read_delim(paste0(batch, "/fragpipe/", batch, ".manifest"), col_names = c("path", "experiment", "bioreplicate", "type"))})
-df_protein = tryCatch({read_delim(paste0(batch, "/fragpipe/combined_protein.tsv"))})
-df_workflow = tryCatch({read_delim(paste0(batch, "/fragpipe/fragpipe_modified.workflow"), delim = "=", comment = "#", col_names = c("name", "value"))})
-df_fragpipe_stats = tryCatch({read_delim(paste0(batch, "/fragpipe/fragpipe_stats.tsv"), delim = ": Scans = ", col_names = c("path", "n_scans"))})
-df_psm = tryCatch({read_delim(paste0(batch, "/fragpipe/experiment/psm.tsv"))})
+
+df_metadata = tryCatch({
+    read_delim(paste0("metadata.tsv")) %>%
+        select(-index) %>% rename(stem = basename)
+})
+
+df_db_stats = tryCatch({
+    read_delim(paste0("db_stats.tsv"))
+})
+
+df_manifest = tryCatch({
+    read_delim(paste0("fragpipe/", batch, ".manifest"), col_names = c("path", "experiment", "bioreplicate", "type"))
+})
+
+df_protein = tryCatch({
+    read_delim(paste0("fragpipe/combined_protein.tsv"))
+})
+
+df_workflow = tryCatch({
+    read_delim(paste0("fragpipe/fragpipe_modified.workflow"), delim = "=", comment = "#", col_names = c("name", "value"))
+})
+
+df_fragpipe_stats = tryCatch({
+    read_delim(paste0("fragpipe/fragpipe_stats.tsv"), delim = ": Scans = ", col_names = c("path", "n_scans"))
+})
+
+df_psm = tryCatch({
+    read_delim(paste0("fragpipe/experiment/psm.tsv"))
+})
 
 
 cells = list()
+
 
 
 ```
@@ -56,6 +84,8 @@ cells = list()
 
 # Workflow
 ```{r}
+
+#df_workflow %>%
 
 
 
@@ -76,11 +106,11 @@ df_metadata %>%
 # Database
 ```{r}
 tryCatch({
-    
+
     cells$db = list()
     cells$db$`number of genes` = (df_db_stats %>% filter(name == "n_records_in_db"))$value
     cells$db$`number of files in db_glob` = (df_db_stats %>% filter(name == "db_glob_read"))$value %>% str_split(" ") %>% unlist() %>% length()
-    
+
 
     as_tibble(cells$db) %>% 
         pivot_longer(everything(), values_transform = as.character) %>% 
@@ -105,7 +135,7 @@ spectrum_counts = df_psm %>%
     
     #select(sample, n_psms)
     
-#testregex = str_match_all(spectrum_counts$`Spectrum File`, "interact-(?<sample>.+)\\.pep\\.xml")
+# testregex = str_match_all(spectrum_counts$`Spectrum File`, "interact-(?<sample>.+)\\.pep\\.xml")
 
 join_scans_psms = df_fragpipe_stats %>% 
     mutate(stem = basename(path)) %>%
@@ -132,7 +162,7 @@ identification_rate %>%
     geom_abline(slope = identification_rate$quotient %>% median(), alpha = 0.4) +
     geom_point(size = 2) +
     scale_color_viridis_b() +
-    geom_text(color = "black", vjust = 0, hjust = 0, alpha = 0.5, size = 3, check_overlap = T) +
+    geom_text(color = "#000000", vjust = 0, hjust = 0, alpha = 0.6, size = 3, check_overlap = T) +
     #geom_smooth(method = "lm") +
     
     labs(
@@ -145,11 +175,43 @@ identification_rate %>%
 ```
 
 
-# Proteinz
+# Proteins
 
 
 ```{r}
-d
+
+options(vsc.dev.args = list(width = 600, height = 700, res = 150))
+
+df_indistinguishable = df_protein %>%
+    head(1001) %>%
+    #group_by(Protein) %>%
+    mutate(
+        #indistinguishable = is.na(`Indistinguishable Proteins`),
+        #n_indistinguishable = str_split(`Indistinguishable Proteins`, ", ") %>% lengths(),
+        
+        n_indistinguishable = case_when(
+            is.na(`Indistinguishable Proteins`) ~ as.integer(0),
+            TRUE ~ str_split(`Indistinguishable Proteins`, ", ") %>% lengths(),
+        )
+    )
+
+
+df_indistinguishable %>%
+    ggplot(aes(n_indistinguishable)) +
+    geom_histogram() +
+    #scale_x_log10() +
+    scale_y_log10() +
+    labs(
+        title = "Proteins are indistinguishable",
+        caption = "This is a histogram. Vertical axis is visually log-scaled."
+    )
+
+
+# TODO: Okay, der er masser af andre ting jeg kunne gøre og det ville være fint at have en oversigt over prøverne, men nu tænker jeg lige at starte med at prøve at smide rapporten ind i snakemake.
+
+
+
+
 
 
 ```

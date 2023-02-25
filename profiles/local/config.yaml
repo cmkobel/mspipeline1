@@ -9,7 +9,7 @@ keep-going: true
 show-failed-logs: true
 
 # Flip these for debugging:
-keep-incomplete: false # true for development/debugging
+keep-incomplete: true # true for development/debugging
 rerun-triggers: "mtime" 
 
 use-conda: true
