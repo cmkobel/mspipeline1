@@ -33,6 +33,7 @@ library(DT)
 ```{r echo=FALSE, message=F, warning=F}
 
 setwd("~/Downloads/output 8")
+setwd("MS-pipeline1/output")
 batch = "220506_digesta_puchun"
 
 
@@ -57,7 +58,7 @@ cells = list()
 ```{r}
 
 
-cells
+
 
 ```
 
@@ -77,15 +78,17 @@ df_metadata %>%
 tryCatch({
     
     cells$db = list()
-    cells$db$n_genes = (df_db_stats %>% filter(name == "n_records_in_db"))$value
-    cells$db$n_db_glob = (df_db_stats %>% filter(name == "db_glob_read"))$value %>% str_split(" ") %>% unlist() %>% length()
+    cells$db$`number of genes` = (df_db_stats %>% filter(name == "n_records_in_db"))$value
+    cells$db$`number of files in db_glob` = (df_db_stats %>% filter(name == "db_glob_read"))$value %>% str_split(" ") %>% unlist() %>% length()
     
 
-    as_tibble(db_stats_parsed) %>% 
+    as_tibble(cells$db) %>% 
         pivot_longer(everything(), values_transform = as.character) %>% 
+        #mutate(name = str_replace(name, "_", " ")) %>%
         datatable(class = "cell-border stripe")
     
 #TODO: Somehow add length in bp?
+# And add some more parameters.
 
 })
 ```
