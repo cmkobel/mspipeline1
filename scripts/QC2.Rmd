@@ -42,12 +42,22 @@ df_metadata = tryCatch({read_delim(paste0(batch, "/metadata.tsv")) %>% select(-i
 df_db_stats = tryCatch({read_delim(paste0(batch, "/db_stats.tsv"))})
 df_manifest = tryCatch({read_delim(paste0(batch, "/fragpipe/", batch, ".manifest"), col_names = c("path", "experiment", "bioreplicate", "type"))})
 df_protein = tryCatch({read_delim(paste0(batch, "/fragpipe/combined_protein.tsv"))})
-df_workflow = tryCatch({read_delim(paste0(batch, "/fragpipe/fragpipe_modified.workflow"), delim = "=", comment = "#")})
+df_workflow = tryCatch({read_delim(paste0(batch, "/fragpipe/fragpipe_modified.workflow"), delim = "=", comment = "#", col_names = c("name", "value"))})
 df_fragpipe_stats = tryCatch({read_delim(paste0(batch, "/fragpipe/fragpipe_stats.tsv"), delim = ": Scans = ", col_names = c("path", "n_scans"))})
 df_psm = tryCatch({read_delim(paste0(batch, "/fragpipe/experiment/psm.tsv"))})
 
 
+cells = list()
 
+
+```
+
+
+# Workflow
+```{r}
+
+
+cells
 
 ```
 
@@ -59,15 +69,16 @@ df_metadata %>%
     #arrange(sample) %>% 
     datatable(class = "cell-border stripe")
 
+# extract workflow description as well
 ```
 
 # Database
 ```{r}
 tryCatch({
     
-    db_stats_parsed = list()
-    db_stats_parsed$n_genes = (df_db_stats %>% filter(name == "n_records_in_db"))$value
-    db_stats_parsed$n_db_glob = (df_db_stats %>% filter(name == "db_glob_read"))$value %>% str_split(" ") %>% unlist() %>% length()
+    cells$db = list()
+    cells$db$n_genes = (df_db_stats %>% filter(name == "n_records_in_db"))$value
+    cells$db$n_db_glob = (df_db_stats %>% filter(name == "db_glob_read"))$value %>% str_split(" ") %>% unlist() %>% length()
     
 
     as_tibble(db_stats_parsed) %>% 
@@ -107,7 +118,8 @@ identification_rate = df_metadata %>%
     left_join(join_scans_psms, by = "stem")
 
 identification_rate %>% 
-    select(-barcode) %>% 
+    select(-barcode) %>%
+    mutate(quotient = signif(quotient, 4)) %>% 
     datatable(class = "cell-border stripe")
 
 
@@ -130,4 +142,12 @@ identification_rate %>%
 ```
 
 
-# Proteins
+# Proteinz
+
+
+```{r}
+d
+
+
+```
+
