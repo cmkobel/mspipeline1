@@ -14,4 +14,6 @@ output
 
 .onstart.txt
 .onsuccess.txt
+
 private* # This stuff is private
+.Rproj.user*
