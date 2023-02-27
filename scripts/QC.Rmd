@@ -35,8 +35,11 @@ library(DT)
 
 
 #setwd("/cluster/work/users/cmkobel/MS-pipeline1-split-output/220506_digesta_puchun") # For development
+#setwd("/cluster/work/users/cmkobel/MS-pipeline1-split-output/220506_DnnT6S_carl") # For development
+
 
 # Since we're already inside the batch directory, we can read it as the basename of the WD:
+
 batch = getwd() %>% basename
 
 
@@ -83,7 +86,8 @@ cells = list()
 
 
 # Workflow
-```{r}
+```{r echo=FALSE, message=F, warning=F}
+
 
 #df_workflow %>%
 
@@ -94,17 +98,20 @@ cells = list()
 
 
 # Metadata
-```{r}
+```{r echo=FALSE, message=F, warning=F}
 
-df_metadata %>% 
-    #arrange(sample) %>% 
-    datatable(class = "cell-border stripe")
+tryCatch({
+    df_metadata %>% 
+        #arrange(sample) %>% 
+        datatable(class = "cell-border stripe")
 
-# extract workflow description as well
+    # extract workflow description as well
+})
 ```
 
 # Database
-```{r}
+```{r echo=FALSE, message=F, warning=F}
+
 tryCatch({
 
     cells$db = list()
@@ -125,51 +132,62 @@ tryCatch({
 
 
 # Identification rate
-```{r}
+```{r echo=FALSE, message=F, warning=F}
 
-spectrum_counts = df_psm %>% 
-    group_by(`Spectrum File`) %>% 
-    summarize(n_psms = n()) %>%
-    mutate(stem = str_remove_all(`Spectrum File`, "^interact-|\\.pep\\.xml$"))
-    #select(-`Spectrum File`) %>% 
+tryCatch({
+    spectrum_counts = df_psm %>% 
+        group_by(`Spectrum File`) %>% 
+        summarize(n_psms = n()) %>%
+        mutate(stem = str_remove_all(`Spectrum File`, "^interact-|\\.pep\\.xml$"))
+        #select(-`Spectrum File`) %>% 
+        
+        #select(sample, n_psms)
+        
+    # testregex = str_match_all(spectrum_counts$`Spectrum File`, "interact-(?<sample>.+)\\.pep\\.xml")
+
+    join_scans_psms = df_fragpipe_stats %>% 
+        mutate(stem = basename(path)) %>%
+        mutate(stem = str_remove(stem, "\\.d$")) %>% 
+        #select(-path) %>% 
+        #select(stem, everything()) %>% 
+        left_join(spectrum_counts) %>% 
+        mutate(quotient = n_psms/n_scans) %>% 
+        
+        select(n_scans, n_psms, quotient, stem)
+
+    identification_rate = df_metadata %>% 
+        left_join(join_scans_psms, by = "stem")
+
+    identification_rate %>% 
+        select(-barcode) %>%
+        mutate(quotient = signif(quotient, 4)) %>% 
+        datatable(class = "cell-border stripe")
+})
+
+```
+
+```{r echo=FALSE, message=F, warning=F}
+
+tryCatch({
+    # Useful to have writte to disk.
+    identification_rate %>%
+        write_tsv("identification_rate.tsv")
+
+    identification_rate %>% 
+        ggplot(aes(n_scans, n_psms, color = quotient, label = sample)) +
+        geom_abline(slope = identification_rate$quotient %>% median(), alpha = 0.4) +
+        geom_point(size = 2) +
+        scale_color_viridis_b() +
+        geom_text(color = "#000000", vjust = 0, hjust = 0, alpha = 0.6, size = 3, check_overlap = T) +
+        #geom_smooth(method = "lm") +
+        
+        labs(
+            title = "Identification rate",
+            caption = "quotient = n_psms/n_scans\nThe slope represents the median quotient.") 
+            
+
     
-    #select(sample, n_psms)
-    
-# testregex = str_match_all(spectrum_counts$`Spectrum File`, "interact-(?<sample>.+)\\.pep\\.xml")
-
-join_scans_psms = df_fragpipe_stats %>% 
-    mutate(stem = basename(path)) %>%
-    mutate(stem = str_remove(stem, "\\.d$")) %>% 
-    #select(-path) %>% 
-    #select(stem, everything()) %>% 
-    left_join(spectrum_counts) %>% 
-    mutate(quotient = n_psms/n_scans) %>% 
-    
-    select(n_scans, n_psms, quotient, stem)
-
-identification_rate = df_metadata %>% 
-    left_join(join_scans_psms, by = "stem")
-
-identification_rate %>% 
-    select(-barcode) %>%
-    mutate(quotient = signif(quotient, 4)) %>% 
-    datatable(class = "cell-border stripe")
-
-
-
-identification_rate %>% 
-    ggplot(aes(n_scans, n_psms, color = quotient, label = sample)) +
-    geom_abline(slope = identification_rate$quotient %>% median(), alpha = 0.4) +
-    geom_point(size = 2) +
-    scale_color_viridis_b() +
-    geom_text(color = "#000000", vjust = 0, hjust = 0, alpha = 0.6, size = 3, check_overlap = T) +
-    #geom_smooth(method = "lm") +
-    
-    labs(
-        title = "Identification rate",
-        caption = "quotient = n_psms/n_scans\nThe slope represents the median quotient.") 
-           
-
+})
 
 
 ```
@@ -178,41 +196,42 @@ identification_rate %>%
 # Proteins
 
 
-```{r}
+```{r echo=FALSE, message=F, warning=F}
 
-options(vsc.dev.args = list(width = 600, height = 700, res = 150))
+tryCatch({
+    options(vsc.dev.args = list(width = 600, height = 700, res = 150))
 
-df_indistinguishable = df_protein %>%
-    head(1001) %>%
-    #group_by(Protein) %>%
-    mutate(
-        #indistinguishable = is.na(`Indistinguishable Proteins`),
-        #n_indistinguishable = str_split(`Indistinguishable Proteins`, ", ") %>% lengths(),
-        
-        n_indistinguishable = case_when(
-            is.na(`Indistinguishable Proteins`) ~ as.integer(0),
-            TRUE ~ str_split(`Indistinguishable Proteins`, ", ") %>% lengths(),
+    df_indistinguishable = df_protein %>%
+        #head(1001) %>%
+        #group_by(Protein) %>%
+        mutate(
+            #indistinguishable = is.na(`Indistinguishable Proteins`),
+            #n_indistinguishable = str_split(`Indistinguishable Proteins`, ", ") %>% lengths(),
+            
+            n_indistinguishable = case_when(
+                is.na(`Indistinguishable Proteins`) ~ as.integer(0),
+                TRUE ~ str_split(`Indistinguishable Proteins`, ", ") %>% lengths(),
+            )
         )
-    )
 
 
-df_indistinguishable %>%
-    ggplot(aes(n_indistinguishable)) +
-    geom_histogram() +
-    #scale_x_log10() +
-    scale_y_log10() +
-    labs(
-        title = "Proteins are indistinguishable",
-        caption = "This is a histogram. Vertical axis is visually log-scaled."
-    )
+    df_indistinguishable %>%
+        ggplot(aes(n_indistinguishable)) +
+        geom_histogram() +
+        #scale_x_log10() +
+        scale_y_log10() +
+        labs(
+            title = "Proteins are indistinguishable",
+            caption = "This is a histogram. Vertical axis is visually log-scaled."
+        )
 
 
-# TODO: Okay, der er masser af andre ting jeg kunne gøre og det ville være fint at have en oversigt over prøverne, men nu tænker jeg lige at starte med at prøve at smide rapporten ind i snakemake.
-
+    # TODO: Okay, der er masser af andre ting jeg kunne gøre og det ville være fint at have en oversigt over prøverne, men nu tænker jeg lige at starte med at prøve at smide rapporten ind i snakemake.
 
 
 
 
 
+})
 ```
 

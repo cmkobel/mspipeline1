@@ -13,7 +13,7 @@ import pandas as pd
 import re
 import pathlib
 
-print("/*                                                                               ") # Helps with outputting to dot.
+print("/*                                                                               ") # Helps with outputting to dot format.
 print("                                             ______________                      ")
 print("                                            < MS-pipeline1 >                     ")
 print("                                             --------------                      ")
@@ -82,15 +82,14 @@ print(f"n_samples: {n_samples}")
 
 
 #print("manifest:")
-manifest = pd.DataFrame(data = {'path': config_samples.values()})
+manifest = pd.DataFrame(data = {'path': config_samples.values(), 'experiment': config_samples.keys()})
 manifest['path'] = absolute_output_dir + "/" + config_batch + "/samples/" + manifest['path'] # Instead of using bash realpath
 ##manifest["path"] = "output/" + config_batch + "/msfragger/" + manifest["path"] # But then I realized that I might not need to point absolutely anyway..
 #manifest["path"] = manifest["path"]
-manifest["experiment"] = "experiment" # Experiment (can be empty, alphanumeric, and _) #  IonQuant with MBR requires designating LCMS runs to experiments. If in doubt how to resolve this error, just assign all LCMS runs to the same experiment name.
+#manifest["experiment"] = "experiment" # Experiment (can be empty, alphanumeric, and _) #  IonQuant with MBR requires designating LCMS runs to experiments. If in doubt how to resolve this error, just assign all LCMS runs to the same experiment name.
 manifest["bioreplicate"] = "" # Bioreplicate (can be empty and integer)
 manifest["data_type"] = "DDA" # Data type (DDA, DIA, GPF-DIA, DIA-Quant, DIA-Lib)
-#print(manifest)
-#print("//")
+print(manifest); print("//")
 
 
 
@@ -227,7 +226,7 @@ rule fragpipe:
         #partition = "bigmem", # When using more than 178.5 GB at sigma2/saga
         #mem_mb = 32000, # for testing
         mem_mb = 150000, # Some people like to use 150GB in bigmem with 12 threads.
-        runtime = "24:00:00",
+        runtime = "1-12:00:00",
     #conda: "envs/openjdk_python.yaml"
     conda: "envs/openjdk_python_extra.yaml" # TODO: Use this file, I checked it already, and you just have to install pyopenms manually. Don't want to use a previous version of python (e.g. 3.9) just to have easypqp installed, as it seems like some people do not have it too.
     benchmark: "output/{config_batch}/benchmarks/benchmark.fragpipe.{config_batch}.tsv"

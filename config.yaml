@@ -100,5 +100,5 @@ batch_parameters:
 # Pick a title below
 
 batch: "220506_DnnT6S_carl"
-batch: "220506_digesta_puchun"
+batch: "220506_digesta_puchun" # Rerun with defined experiments
 #batch: "minimal"
