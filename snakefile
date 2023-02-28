@@ -124,7 +124,7 @@ rule metadata:
 # Link input links or copies the input data to a specific directory. Long term, this should be on the fastest possible disk ie. userwork.
 rule copy_samples: # Or place_samples, or copy_samples
     output:
-        flag = touch("output/{config_batch}/samples/copy_samples.done"), # Just used to keep track of stuff - probably a bad habit.
+        flag = touch("output/{config_batch}/samples/copy_samples.done"), # Used to keep fragpipe waiting.
         dir = directory("output/{config_batch}/samples"), # Why is this necessary?
         d_files = directory("output/{config_batch}/samples/" + df["barcode"]), # Bound for fragpipe.
     params:
@@ -196,20 +196,23 @@ rule make_database:
 # Potentially we could implement retries into this rule. But since there are soo many ways fragpipe can fail, and I don't want to waste many cpu hours, I'm abstaining from implementing.
 rule fragpipe:
     input: 
+        copy_samples = "output/{config_batch}/samples/copy_samples.done",
         database = "output/{config_batch}/philosopher_database.faa",
     output:
         flag = touch("output/{config_batch}/fragpipe_done.flag"),
         manifest = "output/{config_batch}/fragpipe/{config_batch}.manifest",
         fragpipe_workflow = "output/{config_batch}/fragpipe/fragpipe_modified.workflow",
 
-        stats = "output/{config_batch}/fragpipe/fragpipe_stats.tsv",
+        #stats = "output/{config_batch}/fragpipe/fragpipe_stats.tsv", # Moved to rule fragpipe_stats
 
         # final results:
-        psm = "output/{config_batch}/fragpipe/experiment/psm.tsv",
+        #psm = "output/{config_batch}/fragpipe/experiment/psm.tsv", # A file will be created for each experiment, and really R should read each of those directly.
         
         final_ion = "output/{config_batch}/fragpipe/combined_ion.tsv",
         final_peptide = "output/{config_batch}/fragpipe/combined_peptide.tsv",
         final_protein = "output/{config_batch}/fragpipe/combined_protein.tsv",
+
+        fragpipe_stdout = "output/{config_batch}/fragpipe/fragpipe.out.log"
     params:
         manifest = manifest.to_csv(path_or_buf=None, sep="\t", index=False, header=False), # This is a csv formatted string 
         original_fragpipe_workflow = "assets/fragpipe_workflows/LFQ-MBR.workflow", # The path to the workflow that specifies the type of analysis
@@ -266,30 +269,60 @@ rule fragpipe:
             --config-msfragger {params.msfragger_jar} \
             --config-ionquant {params.ionquant_jar} \
             --config-philosopher {params.philosopher_executable} \
-        | tee {params.fragpipe_workdir}/fragpipe.out.log # Write the log, so we can later extract the number of "scans"
+        | tee {output.fragpipe_stdout} # Write the log, so we can later extract the number of "scans"
 
-        # TODO: Set keep-incomplete to true when testing this on the next run. Would be a pity to loose all of the results just because this trivial fails due to some syntax error.
-        grep -E ": Scans = [0-9]+" {params.fragpipe_workdir}/fragpipe.out.log \
-        > {params.fragpipe_workdir}/fragpipe_stats.tsv
+       
 
     """
+
+# I moved some of these stats out just to make the debugging easier. 
+# This could have been tailing the fragpipe, but I just think it is easier to develop it like this. 
+rule fragpipe_stats:
+    input: 
+        fragpipe_stdout = "output/{config_batch}/fragpipe/fragpipe.out.log",
+    output:
+        scans = "output/{config_batch}/fragpipe/fragpipe_stats.tsv",
+        #psms = "output/{config_batch}/psms.tsv", # Better to let R read these files from the zip directory.
+    params:
+        fragpipe_workdir = "output/{config_batch}/fragpipe", # Bound for fragpipe --workdir
+    shell: """
+
+        # Extract scans from the fragpipe stdout log. Will later be compared to the individual psm files.
+        grep -E ": Scans = [0-9]+" {input.fragpipe_stdout} \
+        > {output.scans}
+
+    """
+        
+
+
 
 
 # Zip the most important results together for easy sharing and local analysis
 rule zip_essence:
     input: 
-        zip = [f"output/{config_batch}/metadata.tsv", "output/{config_batch}/db_stats.tsv", "output/{config_batch}/fragpipe/{config_batch}.manifest", "output/{config_batch}/fragpipe/fragpipe_modified.workflow", "output/{config_batch}/fragpipe/fragpipe_stats.tsv", "output/{config_batch}/fragpipe/experiment/psm.tsv", "output/{config_batch}/fragpipe/combined_ion.tsv", "output/{config_batch}/fragpipe/combined_peptide.tsv", "output/{config_batch}/fragpipe/combined_protein.tsv"]
+        zip = [
+            f"output/{config_batch}/metadata.tsv",
+            "output/{config_batch}/db_stats.tsv",
+            "output/{config_batch}/fragpipe/{config_batch}.manifest",
+            "output/{config_batch}/fragpipe/fragpipe_modified.workflow",
+            "output/{config_batch}/fragpipe/fragpipe_stats.tsv",
+            "output/{config_batch}/fragpipe/combined_ion.tsv",
+            "output/{config_batch}/fragpipe/combined_peptide.tsv",
+            "output/{config_batch}/fragpipe/combined_protein.tsv"
+        ],
     output:
         #touch("output/{config_batch}/post_processing_done.flag")
         zip = "output/{config_batch}/MS-pipeline1_{config_batch}.zip",
         report = "output/{config_batch}/report_MS-pipeline1_{config_batch}.html",
+    params:
+        zip_additional = "output/{wildcards.config_batch}/fragpipe/*/psm.tsv",
     conda: "envs/r-markdown.yaml"
     resources:
         runtime = "01:00:00",
     shell: """
 
         >&2 echo "Zip stuff ..."
-        zip {output.zip} {input.zip}
+        zip {output.zip} {input.zip} {params.zip_additional} 
 
         >&2 echo "R-markdown report ..."
         cp scripts/QC.Rmd rmarkdown_template.rmd
