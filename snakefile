@@ -34,7 +34,7 @@ print("                                                                         
 
 
 # Read configuration
-configfile: "config_liver.yaml"
+configfile: "config.yaml"
 #configfile: "private_config.yaml"
 config_batch = config["batch"]
 config_d_base = config["batch_parameters"][config_batch]["d_base"]
