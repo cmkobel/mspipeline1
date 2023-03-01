@@ -314,7 +314,7 @@ rule zip_essence:
         zip = "output/{config_batch}/MS-pipeline1_{config_batch}.zip",
         report = "output/{config_batch}/report_MS-pipeline1_{config_batch}.html",
     params:
-        zip_additional = "output/{wildcards.config_batch}/fragpipe/*/psm.tsv",
+        zip_additional = "output/{wildcards.config_batch}/fragpipe/*/psm.tsv", # Can't be bothered to expand this glob and then have to worry about potential failed/missing samples.
     conda: "envs/r-markdown.yaml"
     resources:
         runtime = "01:00:00",

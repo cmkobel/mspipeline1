@@ -1,0 +1,116 @@
+---
+title: "`r basename(getwd())`"
+subtitle: "LFQ-MBR QC"
+date: "`r Sys.time()`"
+output:
+  html_document:
+    toc: false
+    toc_depth: 2
+  #prettydoc::html_pretty:
+    #theme: cayman
+    #highlight: github
+editor_options: 
+  chunk_output_type: console
+#css: "max-width: 5000px; margin: auto; padding: 1em; line-height: 20px"
+---
+
+
+```{r}
+library(tidyverse)
+
+
+
+files = c(
+    "MS-pipeline1/output/o220506_digesta_puchun/fragpipe/P10/protein.tsv",
+    "MS-pipeline1/output/o220506_digesta_puchun/fragpipe/P20/protein.tsv",
+    "MS-pipeline1/output/o220506_digesta_puchun/fragpipe/P30/protein.tsv",
+    "MS-pipeline1/output/o220506_digesta_puchun/fragpipe/P11/protein.tsv",
+    "MS-pipeline1/output/o220506_digesta_puchun/fragpipe/P21/protein.tsv",
+    "MS-pipeline1/output/o220506_digesta_puchun/fragpipe/P31/protein.tsv",
+    "MS-pipeline1/output/o220506_digesta_puchun/fragpipe/P12/protein.tsv",
+    "MS-pipeline1/output/o220506_digesta_puchun/fragpipe/P22/protein.tsv",
+    "MS-pipeline1/output/o220506_digesta_puchun/fragpipe/P32/protein.tsv",
+    "MS-pipeline1/output/o220506_digesta_puchun/fragpipe/P13/protein.tsv",
+    "MS-pipeline1/output/o220506_digesta_puchun/fragpipe/P23/protein.tsv",
+    "MS-pipeline1/output/o220506_digesta_puchun/fragpipe/P3/protein.tsv",
+    "MS-pipeline1/output/o220506_digesta_puchun/fragpipe/P14/protein.tsv",
+    "MS-pipeline1/output/o220506_digesta_puchun/fragpipe/P24/protein.tsv",
+    "MS-pipeline1/output/o220506_digesta_puchun/fragpipe/P4/protein.tsv",
+    "MS-pipeline1/output/o220506_digesta_puchun/fragpipe/P15/protein.tsv",
+    "MS-pipeline1/output/o220506_digesta_puchun/fragpipe/P25/protein.tsv",
+    "MS-pipeline1/output/o220506_digesta_puchun/fragpipe/P5/protein.tsv",
+    "MS-pipeline1/output/o220506_digesta_puchun/fragpipe/P16/protein.tsv",
+    "MS-pipeline1/output/o220506_digesta_puchun/fragpipe/P26/protein.tsv",
+    "MS-pipeline1/output/o220506_digesta_puchun/fragpipe/P6/protein.tsv",
+    "MS-pipeline1/output/o220506_digesta_puchun/fragpipe/P17/protein.tsv",
+    "MS-pipeline1/output/o220506_digesta_puchun/fragpipe/P27/protein.tsv",
+    "MS-pipeline1/output/o220506_digesta_puchun/fragpipe/P7/protein.tsv",
+    "MS-pipeline1/output/o220506_digesta_puchun/fragpipe/P18/protein.tsv",
+    "MS-pipeline1/output/o220506_digesta_puchun/fragpipe/P28/protein.tsv",
+    "MS-pipeline1/output/o220506_digesta_puchun/fragpipe/P8/protein.tsv",
+    "MS-pipeline1/output/o220506_digesta_puchun/fragpipe/P19/protein.tsv",
+    "MS-pipeline1/output/o220506_digesta_puchun/fragpipe/P29/protein.tsv",
+    "MS-pipeline1/output/o220506_digesta_puchun/fragpipe/P8v2/protein.tsv",
+    "MS-pipeline1/output/o220506_digesta_puchun/fragpipe/P1/protein.tsv",
+    "MS-pipeline1/output/o220506_digesta_puchun/fragpipe/P2/protein.tsv",
+    "MS-pipeline1/output/o220506_digesta_puchun/fragpipe/P9/protein.tsv"
+)
+
+
+data = tibble(File = files) %>%
+    extract(File, "Site", "([A-Z]{2}-[A-Za-z0-9]{3})", remove = FALSE) %>%
+    mutate(Data = lapply(File, read_tsv)) %>%
+    unnest(Data) %>%
+    
+    mutate(sample = str_extract(File, "fragpipe/.+/protein.tsv") %>%
+        str_remove_all("^fragpipe/|/protein\\.tsv$"),
+    )
+
+
+essence = data %>%
+    filter(is.na(`Indistinguishable Proteins`)) %>%
+    select(sample, protein_id = `Protein ID`, intensity = `Razor Intensity`) 
+    
+essence_wide = essence %>%
+    pivot_wider(id_cols = sample, names_from = protein_id, values_from = intensity)
+
+```
+
+## Hierarchical Clustering
+```{r}
+dist(essence %>% column_to_rownames("sample")) %>% 
+    hclust()  %>%
+    plot()
+
+    
+```
+
+## Heatmap 
+```{r} 
+
+
+essence %>% 
+    ggplot(aes(sample, protein_id, fill = intensity)) + 
+    geom_tile()
+
+ggsave("huge.png", height = 250, width = 10, limitsize = F)
+# not possible with this many proteins.
+
+
+```
+
+
+
+## PCA
+
+```{r}
+
+essence
+
+
+
+```
+
+
+
+
