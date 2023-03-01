@@ -34,7 +34,7 @@ print("                                                                         
 
 
 # Read configuration
-configfile: "config.yaml"
+configfile: "config_liver.yaml"
 #configfile: "private_config.yaml"
 config_batch = config["batch"]
 config_d_base = config["batch_parameters"][config_batch]["d_base"]
@@ -47,10 +47,10 @@ absolute_output_dir = str(pathlib.Path("output/").absolute())
 
 
 # Present configuration
-print(f"      abs out dir is: '{absolute_output_dir}'")
-print(f"        config_batch: '{config_batch}'")
-print(f"       config_d_base: '{config_d_base}'")
-print(f"config_database_glob: '{config_database_glob}:'")
+print(f"        abs out dir is: '{absolute_output_dir}'")
+print(f"          config_batch: '{config_batch}'")
+print(f"         config_d_base: '{config_d_base}'")
+print(f"  config_database_glob: '{config_database_glob}:'")
 
 if len(config_database_glob_read) < 1:
     raise Exception("No glob targets in config_database_glob") # Not tested yet.
@@ -89,7 +89,7 @@ manifest['path'] = absolute_output_dir + "/" + config_batch + "/samples/" + mani
 #manifest["experiment"] = "experiment" # Experiment (can be empty, alphanumeric, and _) #  IonQuant with MBR requires designating LCMS runs to experiments. If in doubt how to resolve this error, just assign all LCMS runs to the same experiment name.
 manifest["bioreplicate"] = "" # Bioreplicate (can be empty and integer)
 manifest["data_type"] = "DDA" # Data type (DDA, DIA, GPF-DIA, DIA-Quant, DIA-Lib)
-print(manifest); print("//")
+#print(manifest); print("//")
 
 
 
@@ -132,7 +132,6 @@ rule copy_samples: # Or place_samples, or copy_samples
     benchmark: "output/{config_batch}/benchmarks/benchmark.copy_samples.{config_batch}.tsv"
     shell: """
         
-        #ln -s {params.d_files} {output.dir} # Should be deprecated?
         cp -vr {params.d_files} {output.dir}
 
     """
