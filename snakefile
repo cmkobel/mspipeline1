@@ -103,7 +103,7 @@ rule all:
         copy_input = f"output/{config_batch}/samples/copy_samples.done",
         make_database = f"output/{config_batch}/philosopher_database.faa", 
         fragpipe = f"output/{config_batch}/fragpipe_done.flag",
-
+        report = f"output/{config_batch}/report_MS-pipeline1_{config_batch}.html",
         zip_ = f"output/{config_batch}/MS-pipeline1_{config_batch}.zip",
         
 
@@ -304,49 +304,55 @@ rule stats:
 
 
 
-
 # Rename this to report: Do the report first, then zip the report with its outputs.
-rule zip_essence:
+rule report:
     input: 
-        zip = [
-            "output/{config_batch}/metadata.tsv",
-            "output/{config_batch}/db_stats.tsv",
-            "output/{config_batch}/fragpipe/{config_batch}.manifest",
-            "output/{config_batch}/fragpipe/fragpipe_modified.workflow",
-            "output/{config_batch}/fragpipe/stats_fragpipe_scans.tsv",
-            "output/{config_batch}/fragpipe/combined_ion.tsv",
-            "output/{config_batch}/fragpipe/combined_peptide.tsv",
-            "output/{config_batch}/fragpipe/combined_protein.tsv"
-        ],
+        "output/{config_batch}/metadata.tsv",
+        "output/{config_batch}/db_stats.tsv",
+        "output/{config_batch}/fragpipe/{config_batch}.manifest",
+        "output/{config_batch}/fragpipe/fragpipe_modified.workflow",
+        "output/{config_batch}/fragpipe/stats_fragpipe_scans.tsv",
+        "output/{config_batch}/fragpipe/combined_ion.tsv",
+        "output/{config_batch}/fragpipe/combined_peptide.tsv",
+        "output/{config_batch}/fragpipe/combined_protein.tsv",
+        "output/{config_batch}/fragpipe/fragpipe.out.log",
     output:
-        #touch("output/{config_batch}/post_processing_done.flag")
-        zip = "output/{config_batch}/MS-pipeline1_{config_batch}.zip",
-        report = "output/{config_batch}/report_MS-pipeline1_{config_batch}.html",
-    params:
-        zip_additional = [
-            "output/{wildcards.config_batch}/fragpipe/*/psm.tsv",
-            "output/{wildcards.config_batch}/report_MS-pipeline1_{wildcards.config_batch}.html",
-            "output/220506_digesta_puchun/identification_rate.tsv",
-            "scripts/QC.Rmd",
+        "output/{config_batch}/report_MS-pipeline1_{config_batch}.html",
 
-
-        ], # Can't be bothered to expand this glob and then have to worry about potential failed/missing samples.
     conda: "envs/r-markdown.yaml"
     resources:
         runtime = "01:00:00",
     shell: """
 
-        >&2 echo "R-markdown report ..."
         cp scripts/QC.Rmd rmarkdown_template.rmd
-        Rscript -e 'rmarkdown::render("rmarkdown_template.rmd", "html_document", output_file = "{output.report}", knit_root_dir = "output/{config_batch}/", quiet = T)' 
+        Rscript -e 'rmarkdown::render("rmarkdown_template.rmd", "html_document", output_file = "{output}", knit_root_dir = "output/{config_batch}/", quiet = T)' 
         rm rmarkdown_template.rmd
-
-        >&2 echo "Zip stuff ..."
-        zip {output.zip} {input.zip} {params.zip_additional} 
-
 
     """
 
+
+rule zip:
+    input:
+        "output/{config_batch}/metadata.tsv",
+        "output/{config_batch}/db_stats.tsv",
+        "output/{config_batch}/fragpipe/{config_batch}.manifest",
+        "output/{config_batch}/fragpipe/fragpipe_modified.workflow",
+        "output/{config_batch}/fragpipe/stats_fragpipe_scans.tsv",
+        "output/{config_batch}/fragpipe/combined_ion.tsv",
+        "output/{config_batch}/fragpipe/combined_peptide.tsv",
+        "output/{config_batch}/fragpipe/combined_protein.tsv",
+        "output/{config_batch}/report_MS-pipeline1_{config_batch}.html",
+        "output/220506_digesta_puchun/identification_rate.tsv",
+        "scripts/QC.Rmd"
+    output:
+        "output/{config_batch}/MS-pipeline1_{config_batch}.zip",
+    resources:
+        runtime = "01:00:00",
+    shell: """
+    
+        zip {output} {input} 
+
+    """
 
 
 onstart: 
