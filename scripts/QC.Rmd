@@ -30,66 +30,118 @@ library(DT)
 ```
 
 
-# Read data
+## Read data
 ```{r echo=FALSE, message=F, warning=F}
 
+# Basic setup
+
+
+# For development:
+options(vsc.dev.args = list(width = 600, height = 700, res = 150))
 
 #setwd("/cluster/work/users/cmkobel/MS-pipeline1-split-output/220506_digesta_puchun") # For development
 #setwd("/cluster/work/users/cmkobel/MS-pipeline1-split-output/220506_DnnT6S_carl") # For development
 
 
+
+
 # Since we're already inside the batch directory, we can read it as the basename of the WD:
 
-batch = getwd() %>% basename
+batch = getwd() %>% basename()
+#batch
 
 
+#paste("this is the getwd")
+#paste(getwd())
 
-paste("this is the getwd")
-paste(getwd())
 
-
-df_metadata = tryCatch({
+df_metadata = try({
     read_delim(paste0("metadata.tsv")) %>%
         select(-index) %>% rename(stem = basename)
 })
 
-df_db_stats = tryCatch({
+```
+
+```{r echo=FALSE, message=F, warning=F}
+# Read the rest of the data. No joining, just a bit of cleaning.
+
+df_db_stats = try({
     read_delim(paste0("db_stats.tsv"))
 })
 
-df_manifest = tryCatch({
+df_manifest = try({
     read_delim(paste0("fragpipe/", batch, ".manifest"), col_names = c("path", "experiment", "bioreplicate", "type"))
 })
 
-df_protein = tryCatch({
+df_protein = try({
     read_delim(paste0("fragpipe/combined_protein.tsv"))
 })
 
-df_workflow = tryCatch({
+df_workflow = try({
     read_delim(paste0("fragpipe/fragpipe_modified.workflow"), delim = "=", comment = "#", col_names = c("name", "value"))
 })
 
-df_fragpipe_stats = tryCatch({
-    read_delim(paste0("fragpipe/fragpipe_stats.tsv"), delim = ": Scans = ", col_names = c("path", "n_scans"))
+df_fragpipe_scans = try({
+    read_delim(paste0("fragpipe/stats_fragpipe_scans.tsv"), delim = ": Scans = ", col_names = c("path", "n_scans")) %>% 
+    mutate(stem = basename(path) %>% str_remove("\\.d$")) %>% 
+    left_join(df_metadata, by = "stem")
 })
 
-df_psm = tryCatch({
-    read_delim(paste0("fragpipe/experiment/psm.tsv"))
+
+# Not sure if I trust the sometimes random order of this stuff.
+# Non-rigorous counting of psms
+
+
+# df_fragpipe_psms_order = try({
+#     tibble(lines = read_lines("fragpipe/stats_fragpipe_psms_order.tsv")) 
+#     #extract(lines, c("ions", "peptides", "proteins", "psms"), "time=\"[0-9:]+\" level=info msg=\"Final report numbers after FDR filtering, and post-processing\" ions=(\\d+) peptides=(\\d+) proteins=(\\d+) psms=(\\d+)")
+
+# })
+
+# df_fragpipe_psms = try({
+#     tibble(lines = read_lines("fragpipe/stats_fragpipe_psms.tsv")) %>% 
+#     extract(lines, c("ions", "peptides", "proteins", "psms"), "time=\"[0-9:]+\" level=info msg=\"Final report numbers after FDR filtering, and post-processing\" ions=(\\d+) peptides=(\\d+) proteins=(\\d+) psms=(\\d+)")
+
+# })
+    
+# Check that there is the same number of rows in the tables that will blindly be joined.
+#stopifnot(dim(df_fragpipe_scans)[[1]] == dim(df_fragpipe_psms)[[1]])
+
+
+# Rigorous counting of psms
+df_psm = try({
+
+    tibble(File = Sys.glob("fragpipe/*/psm.tsv")) %>% 
+    extract(File, "sample", "fragpipe/(.+)/psm.tsv", remove = FALSE)  %>% # We don't really need this one, but it is OK to have I guess.
+    mutate(Data = lapply(File, read_lines, skip = 1))  %>% 
+    mutate(n_psms = lengths(Data)) %>% 
+    select(-Data)
+
+    # unnest(Data)  %>% 
+
+    # extract(`Spectrum File`, "stem", "interact-(.+)\\.pep\\.xml", remove = F) %>% 
+    # left_join(df_metadata, by = "stem")
 })
 
 
-cells = list()
+#df_fragpipe_stats = bind_cols(df_fragpipe_scans, df_fragpipe_psms)
+
+
+cells = list() # To not mess up the environment.
 
 
 
 ```
 
 
-# Workflow
+## Workflow
 ```{r echo=FALSE, message=F, warning=F}
 
 
-#df_workflow %>%
+#df_workflow %>% 
+#    filter(str_detect(name, "slice|description")) %>%
+#    datatable(class = "cell-border stripe")
+
 
 
 
@@ -97,10 +149,10 @@ cells = list()
 ```
 
 
-# Metadata
+## Metadata
 ```{r echo=FALSE, message=F, warning=F}
 
-tryCatch({
+try({
     df_metadata %>% 
         #arrange(sample) %>% 
         datatable(class = "cell-border stripe")
@@ -109,10 +161,10 @@ tryCatch({
 })
 ```
 
-# Database
+## Database
 ```{r echo=FALSE, message=F, warning=F}
 
-tryCatch({
+try({
 
     cells$db = list()
     cells$db$`number of genes` = (df_db_stats %>% filter(name == "n_records_in_db"))$value
@@ -131,44 +183,57 @@ tryCatch({
 ```
 
 
-# Identification rate
+## Identification rate
 ```{r echo=FALSE, message=F, warning=F}
 
-tryCatch({
-    spectrum_counts = df_psm %>% 
-        group_by(`Spectrum File`) %>% 
-        summarize(n_psms = n()) %>%
-        mutate(stem = str_remove_all(`Spectrum File`, "^interact-|\\.pep\\.xml$"))
-        #select(-`Spectrum File`) %>% 
+try({
+    # spectrum_counts = df_psm %>% 
+    #     group_by(sample, stem) %>% 
+    #     summarize(n_psms = n())
+    #     #mutate(stem = str_remove_all(`Spectrum File`, "^interact-|\\.pep\\.xml$"))
+    #     #select(-`Spectrum File`) %>% 
         
-        #select(sample, n_psms)
+    #     #select(sample, n_psms)
         
-    # testregex = str_match_all(spectrum_counts$`Spectrum File`, "interact-(?<sample>.+)\\.pep\\.xml")
+    # # testregex = str_match_all(spectrum_counts$`Spectrum File`, "interact-(?<sample>.+)\\.pep\\.xml")
 
-    join_scans_psms = df_fragpipe_stats %>% 
-        mutate(stem = basename(path)) %>%
-        mutate(stem = str_remove(stem, "\\.d$")) %>% 
-        #select(-path) %>% 
-        #select(stem, everything()) %>% 
-        left_join(spectrum_counts) %>% 
-        mutate(quotient = n_psms/n_scans) %>% 
-        
-        select(n_scans, n_psms, quotient, stem)
+    # join_scans_psms = df_fragpipe_scans %>% 
 
-    identification_rate = df_metadata %>% 
-        left_join(join_scans_psms, by = "stem")
+    #     # Extract the stem from the full path
+    #     mutate(stem = basename(path)) %>%
+    #     mutate(stem = str_remove(stem, "\\.d$")) %>% 
+    #     left_join(spectrum_counts) %>% 
+    #     mutate(quotient = n_psms/n_scans) %>% 
+        
+    #     select(n_scans, n_psms, quotient, stem)
+
+    
+
+
+
+    ## restart:    
+
+    identification_rate = df_fragpipe_scans %>% 
+        left_join(df_psm, by = "sample") %>% 
+        select(sample, stem, barcode, n_scans, n_psms) %>% 
+        mutate(quotient = n_psms/n_scans) 
 
     identification_rate %>% 
         select(-barcode) %>%
         mutate(quotient = signif(quotient, 4)) %>% 
         datatable(class = "cell-border stripe")
+
+
+# Too bad I couldn't figure out a nice way of adding the ions and peptides, but whatever, guess I can always just read the individual files or something.
+
 })
 
 ```
 
 ```{r echo=FALSE, message=F, warning=F}
 
-tryCatch({
+# Plot 
+try({
     # Useful to have writte to disk.
     identification_rate %>%
         write_tsv("identification_rate.tsv")
@@ -193,13 +258,12 @@ tryCatch({
 ```
 
 
-# Proteins
+## Proteins
 
 
 ```{r echo=FALSE, message=F, warning=F}
 
-tryCatch({
-    options(vsc.dev.args = list(width = 600, height = 700, res = 150))
+try({
 
     df_indistinguishable = df_protein %>%
         #head(1001) %>%
@@ -229,9 +293,167 @@ tryCatch({
     # TODO: Okay, der er masser af andre ting jeg kunne gøre og det ville være fint at have en oversigt over prøverne, men nu tænker jeg lige at starte med at prøve at smide rapporten ind i snakemake.
 
 
+# Generic protein statistics
+df_protein %>% 
+    select(`Protein`, `Protein Length`, `Protein Probability`, `Top Peptide Probability`, `Combined Total Peptides`, `Combined Spectral Count`, `Combined Unique Spectral Count`, `Combined Total Spectral Count`) %>%
+    #glimpse()
+
+    pivot_longer(-Protein) %>% 
+
+    ggplot(aes(value)) + 
+    geom_histogram() +
+    facet_wrap(~name, scales = "free") + 
+    labs(
+        title = "Protein statistics"
+    )
 
 
+protein_intensities = df_protein %>% 
+    select(`Protein`, ends_with("Intensity")) %>% 
+    select(-contains("MaxLFQ"))
+
+
+protein_intensities_long = protein_intensities %>% 
+    pivot_longer(-Protein) %>% 
+    mutate(sample = str_remove(name, " Intensity"))   # Potentially unstable to add metadata order?
+    
+
+
+protein_intensities_long %>% 
+    ggplot(aes(value)) + 
+    geom_histogram() + 
+    scale_x_log10() +
+    facet_wrap(~sample) + 
+    labs(title = "Protein intensities per sample", 
+        caption = "Horizontal scale is visually log-transformed.")
+
+
+# Commented out because it is too hard to tell the samples apart.
+# protein_intensities_long %>% 
+#     ggplot(aes(value, color = sample)) + 
+#     geom_density(alpha = 0, size = .05) + 
+#     scale_x_log10()
 
 })
 ```
 
+
+
+## Hierarchical clustering
+```{r echo=FALSE, message=F, warning=F}
+
+options(vsc.dev.args = list(width = 600, height = 700, res = 70))
+
+# protein labels: wrong
+# run_hclust = protein_intensities %>% 
+#     column_to_rownames("Protein") %>% 
+#     dist() %>% 
+#     hclust() 
+
+protein_intensities_altwide = protein_intensities_long %>% 
+    select(-name) %>% 
+    pivot_wider(id_cols = sample, names_from = Protein, values_from = value) 
+
+run_hclust = protein_intensities_altwide %>% 
+    column_to_rownames("sample") %>% 
+    dist() %>% 
+    hclust()
+
+run_hclust %>% 
+    plot()
+ 
+
+```
+
+
+
+## PCA
+
+### Unscaled
+```{r echo=FALSE, message=F, warning=F}
+
+options(vsc.dev.args = list(width = 600, height = 700, res = 200))
+
+# without scaling
+run_pca = protein_intensities_altwide %>% 
+    column_to_rownames("sample") %>% 
+    prcomp(scale. = F)
+
+# Scree
+plot_a = run_pca$sdev^2 %>%
+    tibble(
+        variance = (. / sum(.)) * 100,
+        component = paste0("PC", 1:length(variance))) |>
+    
+    mutate(component = fct_reorder(component, -variance)) |> 
+    ggplot(aes(component, variance)) + 
+    geom_point() +
+    labs(title = "Scree", 
+         y = "variance [%]") + 
+    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 5))
+
+
+
+plot_b = run_pca$x |> 
+    as_tibble(rownames = "sample") |> 
+
+    ggplot(aes(PC1, PC2, color = PC3, label = sample)) + 
+    geom_point() +
+    #geom_text(aes(label = sample), nudge_x = .3, nudge_y = .3, hjust = 0, vjust = 0, size = 2) +
+    geom_text(color = "#000000", vjust = 0, hjust = 0, alpha = 0.6, size = 3, check_overlap = T) +
+    scale_color_viridis_c() +
+    coord_fixed()
+    
+
+
+plot_a
+plot_b
+
+
+
+```
+
+
+
+### Scaled
+```{r echo=FALSE, message=F, warning=F}
+
+
+
+
+# with scaling:
+oopsmat = protein_intensities_altwide %>% 
+    column_to_rownames("sample") 
+run_pca_scaled = oopsmat[ , which(apply(oopsmat, 2, var) != 0)] %>%  
+    prcomp(scale. = T)
+
+# Scree
+plot_a_scaled = run_pca_scaled$sdev^2 %>%
+    tibble(
+        variance = (. / sum(.)) * 100,
+        component = paste0("PC", 1:length(variance))) |>
+    
+    mutate(component = fct_reorder(component, -variance)) |> 
+    ggplot(aes(component, variance)) + 
+    geom_point() +
+    labs(title = "Scree", 
+         y = "variance [%]") + 
+    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 5))
+
+
+
+plot_b_scaled = run_pca_scaled$x |> 
+    as_tibble(rownames = "sample") |> 
+    
+    ggplot(aes(PC1, PC2, color = PC3, label = sample)) + 
+    geom_point() +
+    #geom_text(aes(label = sample), nudge_x = .3, nudge_y = .3, hjust = 0, vjust = 0, size = 2) +
+    geom_text(color = "#000000", vjust = 0, hjust = 0, alpha = 0.6, size = 3, check_overlap = T) +
+    scale_color_viridis_c() +
+    coord_fixed()
+    
+
+
+plot_a_scaled
+plot_b_scaled
+```

@@ -122,6 +122,7 @@ rule metadata:
     """
 
 # Link input links or copies the input data to a specific directory. Long term, this should be on the fastest possible disk ie. userwork.
+# TODO: Add the metadata as input to this rule.
 rule copy_samples: # Or place_samples, or copy_samples
     output:
         flag = touch("output/{config_batch}/samples/copy_samples.done"), # Used to keep fragpipe waiting.
@@ -182,6 +183,10 @@ rule make_database:
         n_records=$(grep ">" philosopher_database.faa | wc -l)
         echo -e "n_records_in_db\t$n_records" >> db_stats.tsv
         echo -e "db_glob_read\t{input.glob}" >> db_stats.tsv
+
+
+        # TODO: Database length in basepairs?
+
 
     """
 
@@ -279,11 +284,11 @@ rule fragpipe:
 
 # I moved some of these stats out just to make the debugging easier. 
 # This could have been tailing the fragpipe, but I just think it is easier to develop it like this. 
-rule fragpipe_stats:
+rule stats:
     input: 
         fragpipe_stdout = "output/{config_batch}/fragpipe/fragpipe.out.log",
     output:
-        scans = "output/{config_batch}/fragpipe/fragpipe_stats.tsv",
+        scans = "output/{config_batch}/fragpipe/stats_fragpipe_scans.tsv",
         #psms = "output/{config_batch}/psms.tsv", # Better to let R read these files from the zip directory.
     params:
         fragpipe_workdir = "output/{config_batch}/fragpipe", # Bound for fragpipe --workdir
@@ -293,21 +298,22 @@ rule fragpipe_stats:
         grep -E ": Scans = [0-9]+" {input.fragpipe_stdout} \
         > {output.scans}
 
+
     """
         
 
 
 
 
-# Zip the most important results together for easy sharing and local analysis
+# Rename this to report: Do the report first, then zip the report with its outputs.
 rule zip_essence:
     input: 
         zip = [
-            f"output/{config_batch}/metadata.tsv",
+            "output/{config_batch}/metadata.tsv",
             "output/{config_batch}/db_stats.tsv",
             "output/{config_batch}/fragpipe/{config_batch}.manifest",
             "output/{config_batch}/fragpipe/fragpipe_modified.workflow",
-            "output/{config_batch}/fragpipe/fragpipe_stats.tsv",
+            "output/{config_batch}/fragpipe/stats_fragpipe_scans.tsv",
             "output/{config_batch}/fragpipe/combined_ion.tsv",
             "output/{config_batch}/fragpipe/combined_peptide.tsv",
             "output/{config_batch}/fragpipe/combined_protein.tsv"
@@ -317,19 +323,26 @@ rule zip_essence:
         zip = "output/{config_batch}/MS-pipeline1_{config_batch}.zip",
         report = "output/{config_batch}/report_MS-pipeline1_{config_batch}.html",
     params:
-        zip_additional = "output/{wildcards.config_batch}/fragpipe/*/psm.tsv", # Can't be bothered to expand this glob and then have to worry about potential failed/missing samples.
+        zip_additional = [
+            "output/{wildcards.config_batch}/fragpipe/*/psm.tsv",
+            "output/{wildcards.config_batch}/report_MS-pipeline1_{wildcards.config_batch}.html",
+            "output/220506_digesta_puchun/identification_rate.tsv",
+            "scripts/QC.Rmd",
+
+
+        ], # Can't be bothered to expand this glob and then have to worry about potential failed/missing samples.
     conda: "envs/r-markdown.yaml"
     resources:
         runtime = "01:00:00",
     shell: """
 
-        >&2 echo "Zip stuff ..."
-        zip {output.zip} {input.zip} {params.zip_additional} 
-
         >&2 echo "R-markdown report ..."
         cp scripts/QC.Rmd rmarkdown_template.rmd
         Rscript -e 'rmarkdown::render("rmarkdown_template.rmd", "html_document", output_file = "{output.report}", knit_root_dir = "output/{config_batch}/", quiet = T)' 
         rm rmarkdown_template.rmd
+
+        >&2 echo "Zip stuff ..."
+        zip {output.zip} {input.zip} {params.zip_additional} 
 
 
     """
@@ -343,7 +356,7 @@ onstart:
 onsuccess:
     print("onsuccess: The following (first 100) files were created:")
     #shell("find output/ > .onsuccess.txt && diff .onstart.txt .onsuccess.txt | head -n 100 || exit 0")
-    shell(""" diff .onstart.txt .onsuccess.txt > .diff.txt; head -n 10 .diff.txt; echo "$(cat .diff.txt | wc -l) files total" """)
+    shell(""" diff .onstart.txt .onsuccess.txt > .diff.txt || head -n 10 .diff.txt; echo "$(cat .diff.txt | wc -l) files total" """)
 
 
 print("*/") # This is a dot-language specific comment close tag that helps when you export the workflow as a graph
