@@ -126,13 +126,16 @@ rule copy_samples: # Or place_samples, or copy_samples
     output:
         flag = touch("output/{config_batch}/samples/copy_samples.done"), # Used to keep fragpipe waiting.
         dir = directory("output/{config_batch}/samples"), # Why is this necessary?
-        d_files = directory("output/{config_batch}/samples/" + df["barcode"]), # Bound for fragpipe.
+        d_files = directory("output/{config_batch}/samples/" + df["barcode"]), # Bound for fragpipe. Update, but fragpipe uses the flag instead?
     params:
         d_files = (config_d_base + "/" + df["barcode"]).tolist(), # Problem is that snakemake doesn't like directories as inputs, so I think it is better to define it as a param.
     benchmark: "output/{config_batch}/benchmarks/benchmark.copy_samples.{config_batch}.tsv"
     shell: """
-        
+
         cp -vr {params.d_files} {output.dir}
+
+        # Enable editing of these files
+        chmod -R 775 output/
 
     """
 
@@ -338,8 +341,9 @@ onstart:
     shell("find output/ > .onstart.txt 2> /dev/null || exit 0")
 
 onsuccess:
-    print("onsuccess: The following files were created:")
-    shell("find output/ > .onsuccess.txt && diff .onstart.txt .onsuccess.txt | head -n 500 || exit 0")
+    print("onsuccess: The following (first 100) files were created:")
+    #shell("find output/ > .onsuccess.txt && diff .onstart.txt .onsuccess.txt | head -n 100 || exit 0")
+    shell(""" diff .onstart.txt .onsuccess.txt > .diff.txt; head -n 10 .diff.txt; echo "$(cat .diff.txt | wc -l) files total" """)
 
 
 print("*/") # This is a dot-language specific comment close tag that helps when you export the workflow as a graph
