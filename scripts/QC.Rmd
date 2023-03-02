@@ -139,6 +139,9 @@ cells = list() # To not mess up the environment.
 
 
 ## Workflow
+
+Selected keys from the fragpipe workflow used.
+
 ```{r echo=FALSE, message=F, warning=F}
 # Workflow
 
