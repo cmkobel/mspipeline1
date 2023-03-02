@@ -412,7 +412,7 @@ plot_b = run_pca$x |>
     ggplot(aes(PC1, PC2, color = PC3, label = sample)) + 
     geom_point() +
     #geom_text(aes(label = sample), nudge_x = .3, nudge_y = .3, hjust = 0, vjust = 0, size = 2) +
-    geom_text(color = "#000000", vjust = 0, hjust = 0, alpha = 0.6, size = 3, check_overlap = T) +
+    geom_text(color = "#000000", vjust = 0, hjust = 0, alpha = 0.6, size = 2, check_overlap = T) +
     scale_color_viridis_c() +
     coord_fixed()
     
@@ -460,7 +460,7 @@ plot_b_scaled = run_pca_scaled$x |>
     ggplot(aes(PC1, PC2, color = PC3, label = sample)) + 
     geom_point() +
     #geom_text(aes(label = sample), nudge_x = .3, nudge_y = .3, hjust = 0, vjust = 0, size = 2) +
-    geom_text(color = "#000000", vjust = 0, hjust = 0, alpha = 0.6, size = 3, check_overlap = T) +
+    geom_text(color = "#000000", vjust = 0, hjust = 0, alpha = 0.6, size = 2, check_overlap = T) +
     scale_color_viridis_c() +
     coord_fixed()
     
