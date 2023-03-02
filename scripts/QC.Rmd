@@ -35,9 +35,8 @@ library(DT)
 ```
 
 
-## Read data
 ```{r echo=FALSE, message=F, warning=F}
-
+# Read data
 # Basic setup
 
 
@@ -141,11 +140,12 @@ cells = list() # To not mess up the environment.
 
 ## Workflow
 ```{r echo=FALSE, message=F, warning=F}
+# Workflow
 
-
-#df_workflow %>% 
-#    filter(str_detect(name, "slice|description")) %>%
-#    datatable(class = "cell-border stripe")
+df_workflow %>% 
+    filter(str_detect(name, "slice|description|cmd-opts|ionfdr|num_threads")) %>%
+    drop_na(value)  %>% 
+    datatable(class = "cell-border stripe")
 
 
 
