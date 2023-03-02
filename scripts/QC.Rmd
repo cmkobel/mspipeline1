@@ -1,5 +1,6 @@
 ---
 title: "`r basename(getwd())`"
+#author: "Carl Mathias Kobel / MEMO"
 subtitle: "LFQ-MBR QC"
 date: "`r Sys.time()`"
 output:
@@ -13,6 +14,10 @@ editor_options:
   chunk_output_type: console
 #css: "max-width: 5000px; margin: auto; padding: 1em; line-height: 20px"
 ---
+
+
+## Author: Carl Mathias Kobel / MEMO
+## License: GPL v3
 
 `r paste("This report was generated in", getwd())`
 
