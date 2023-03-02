@@ -17,7 +17,7 @@ editor_options:
 
 
 ## Author: Carl Mathias Kobel / MEMO
-## License: GPL v3
+## License: GNU GPL v3
 
 `r paste("This report was generated in", getwd())`
 
