@@ -36,7 +36,7 @@ Because it makes sure that all outputs are updated when you change input-paramet
 
 2) Clone this repo on the HPC/workstation where you want to work.
    ```
-   git clone https://github.com/cmkobel/MS-pipeline1.git
+   git clone https://github.com/cmkobel/MS-pipeline1.git && cd MS-pipeline1
    ```
 
 3) If you don't already have an environment with snakemake and mamba installed, use the following command to install a "snakemake" environment with the bundled environment file:
