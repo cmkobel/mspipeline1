@@ -317,15 +317,17 @@ rule report:
         "output/{config_batch}/fragpipe/combined_protein.tsv",
         "output/{config_batch}/fragpipe/fragpipe.out.log",
     output:
-        "output/{config_batch}/report_MS-pipeline1_{config_batch}.html",
-
+        report = "output/{config_batch}/report_MS-pipeline1_{config_batch}.html",
+        idrate = "output/{config_batch}/identification_rate.tsv",
+    benchmark: "output/{config_batch}/benchmarks/benchmark.report.{config_batch}.tsv"
     conda: "envs/r-markdown.yaml"
     resources:
-        runtime = "01:00:00",
+        runtime = "04:00:00",
+        mem_mb = "4096",
     shell: """
 
         cp scripts/QC.Rmd rmarkdown_template.rmd
-        Rscript -e 'rmarkdown::render("rmarkdown_template.rmd", "html_document", output_file = "{output}", knit_root_dir = "output/{config_batch}/", quiet = T)' 
+        Rscript -e 'rmarkdown::render("rmarkdown_template.rmd", "html_document", output_file = "{output.report}", knit_root_dir = "output/{config_batch}/", quiet = T)' 
         rm rmarkdown_template.rmd
 
     """
@@ -342,7 +344,7 @@ rule zip:
         "output/{config_batch}/fragpipe/combined_peptide.tsv",
         "output/{config_batch}/fragpipe/combined_protein.tsv",
         "output/{config_batch}/report_MS-pipeline1_{config_batch}.html",
-        "output/220506_digesta_puchun/identification_rate.tsv",
+        "output/{config_batch}/identification_rate.tsv",
         "scripts/QC.Rmd"
     output:
         "output/{config_batch}/MS-pipeline1_{config_batch}.zip",
