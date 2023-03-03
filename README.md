@@ -54,16 +54,16 @@ Because it makes sure that all outputs are updated when you change input-paramet
 
 #### 1) Update config.yaml
 
-The file config.yaml contains all the parameters needed for this pipeline to run. You should update the parameters so they reflect which samples you wish to process.
+The file config_template.yaml contains all the parameters needed to run this pipeline. You should change the parameters to reflect your sample batch.
 
 Because nesvilab do not make their executables immediately publicly available, you need to tell the pipeline where to find them on your system. Update addresses for the keys `philosopher_executable`, `msfragger_jar`, `ionquant_jar` and `fragpipe_executable` which can be downloaded [here](https://github.com/nesvilab/philosopher/releases/latest), [here](https://github.com/Nesvilab/MSFragger/wiki/Preparing-MSFragger#Downloading-MSFragger), [here](https://github.com/Nesvilab/IonQuant#download) and [here](https://github.com/Nesvilab/FragPipe/releases), respectively. 
 
 
-Currently the pipeline only supports the input of .d-files ([agilent/bruker](https://en.wikipedia.org/wiki/Mass_spectrometry_data_format#Proprietary_formats)). Create an item in batch_parameters where you define key `d_base` which is the base directory where all .d-files reside. Define key `database_glob` which is a path (or glob) to the fasta-amino acid files that you want to include in the target protein database.
+Currently the pipeline is only tested on the input of .d-files ([agilent/bruker](https://en.wikipedia.org/wiki/Mass_spectrometry_data_format#Proprietary_formats)): Create an item in batch_parameters where you define key `d_base` which is the base directory where all .d-files reside. Define key `database_glob` which is a path (or glob) to the fasta-amino acid files that you want to include in the target protein database. 
 
 Define items under the `samples` key which link sample names to the .d-files.
 
-Lastly, set the root `batch` key to point at the batch that you want to run.
+Lastly, set the `batch` key to point at the batch that you want to run.
 
 #### 2) Run
 
