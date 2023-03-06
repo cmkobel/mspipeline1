@@ -43,7 +43,7 @@ library(DT)
 # For development:
 options(vsc.dev.args = list(width = 600, height = 700, res = 150))
 
-setwd("/cluster/work/users/cmkobel/MS-pipeline1-split-output/220506_digesta_puchun") # For development
+#setwd("/cluster/work/users/cmkobel/MS-pipeline1-split-output/220506_digesta_puchun") # For development
 #setwd("/cluster/work/users/cmkobel/MS-pipeline1-split-output/220506_DnnT6S_carl") # For development
 
 
