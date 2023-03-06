@@ -190,7 +190,6 @@ rule db_stats:
     input: 
         database = "output/{config_batch}/philosopher_database.faa",
     output: 
-        db_stats = "output/{config_batch}/db_stats.tsv",
         db_stats_seqkit = "output/{config_batch}/db_stats_seqkit.tsv",
     params: 
         config_database_glob_read = config_database_glob_read,
@@ -199,13 +198,6 @@ rule db_stats:
         mem_mb = 256,
     conda: "envs/seqkit.yaml"
     shell: """
-
-        >&2 echo "Statistics ..."
-        echo -e "name\tvalue" > {output.db_stats}
-        n_records=$(grep ">" {input.database} | wc -l)
-        echo -e "n_records_in_db\t$n_records" >> {output.db_stats}
-        echo -e "db_glob_read\t{params.config_database_glob_read}" >> {output.db_stats}
-
 
         # TODO: Database length in basepairs?
         seqkit stats \
@@ -333,7 +325,6 @@ rule fragpipe_stats:
 rule report:
     input: 
         "output/{config_batch}/metadata.tsv",
-        "output/{config_batch}/db_stats.tsv",
         "output/{config_batch}/db_stats_seqkit.tsv",
         "output/{config_batch}/fragpipe/{config_batch}.manifest",
         "output/{config_batch}/fragpipe/fragpipe_modified.workflow",
@@ -362,7 +353,6 @@ rule report:
 rule zip:
     input:
         "output/{config_batch}/metadata.tsv",
-        "output/{config_batch}/db_stats.tsv",
         "output/{config_batch}/db_stats_seqkit.tsv",
         "output/{config_batch}/fragpipe/{config_batch}.manifest",
         "output/{config_batch}/fragpipe/fragpipe_modified.workflow",
