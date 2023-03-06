@@ -105,6 +105,8 @@ rule all:
         fragpipe = f"output/{config_batch}/fragpipe_done.flag",
         report = f"output/{config_batch}/report_MS-pipeline1_{config_batch}.html",
         zip_ = f"output/{config_batch}/MS-pipeline1_{config_batch}.zip",
+
+        
         
 
 
@@ -148,7 +150,6 @@ rule make_database:
         glob = config_database_glob_read
     output:
         database = "output/{config_batch}/philosopher_database.faa",
-        db_stats = "output/{config_batch}/db_stats.tsv",
     params:
         philosopher = config["philosopher_executable"],
     retries: 4 # This is some black magic voodoo shit.
@@ -178,15 +179,39 @@ rule make_database:
 
         {params.philosopher} workspace --clean
 
+        
+
+
+    """
+
+
+
+rule db_stats:
+    input: 
+        database = "output/{config_batch}/philosopher_database.faa",
+    output: 
+        db_stats = "output/{config_batch}/db_stats.tsv",
+        db_stats_seqkit = "output/{config_batch}/db_stats_seqkit.tsv",
+    params: 
+        config_database_glob_read = config_database_glob_read,
+    resources: 
+        runtime = "01:00:00",
+        mem_mb = 256,
+    conda: "envs/seqkit.yaml"
+    shell: """
+
         >&2 echo "Statistics ..."
-        echo -e "name\tvalue" > db_stats.tsv
-        n_records=$(grep ">" philosopher_database.faa | wc -l)
-        echo -e "n_records_in_db\t$n_records" >> db_stats.tsv
-        echo -e "db_glob_read\t{input.glob}" >> db_stats.tsv
+        echo -e "name\tvalue" > {output.db_stats}
+        n_records=$(grep ">" {input.database} | wc -l)
+        echo -e "n_records_in_db\t$n_records" >> {output.db_stats}
+        echo -e "db_glob_read\t{params.config_database_glob_read}" >> {output.db_stats}
 
 
         # TODO: Database length in basepairs?
-
+        seqkit stats \
+            --tabular \
+            {params.config_database_glob_read} {input.database} \
+        > {output.db_stats_seqkit}
 
     """
 
@@ -284,7 +309,7 @@ rule fragpipe:
 
 # I moved some of these stats out just to make the debugging easier. 
 # This could have been tailing the fragpipe, but I just think it is easier to develop it like this. 
-rule stats:
+rule fragpipe_stats:
     input: 
         fragpipe_stdout = "output/{config_batch}/fragpipe/fragpipe.out.log",
     output:
@@ -309,6 +334,7 @@ rule report:
     input: 
         "output/{config_batch}/metadata.tsv",
         "output/{config_batch}/db_stats.tsv",
+        "output/{config_batch}/db_stats_seqkit.tsv",
         "output/{config_batch}/fragpipe/{config_batch}.manifest",
         "output/{config_batch}/fragpipe/fragpipe_modified.workflow",
         "output/{config_batch}/fragpipe/stats_fragpipe_scans.tsv",
@@ -337,6 +363,7 @@ rule zip:
     input:
         "output/{config_batch}/metadata.tsv",
         "output/{config_batch}/db_stats.tsv",
+        "output/{config_batch}/db_stats_seqkit.tsv",
         "output/{config_batch}/fragpipe/{config_batch}.manifest",
         "output/{config_batch}/fragpipe/fragpipe_modified.workflow",
         "output/{config_batch}/fragpipe/stats_fragpipe_scans.tsv",
