@@ -174,6 +174,9 @@ rule make_database:
             --custom cat_database_sources.faa \
             --contam 
 
+        echo "Existing database pattern-matched files:"
+        ls *-decoys-contam-cat_database_sources.faa.fas
+
         mv *-decoys-contam-cat_database_sources.faa.fas philosopher_database.faa # rename database file.
         rm cat_database_sources.faa # remove unneccessary .faa file.
 

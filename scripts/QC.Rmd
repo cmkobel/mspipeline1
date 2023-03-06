@@ -43,7 +43,7 @@ library(DT)
 # For development:
 options(vsc.dev.args = list(width = 600, height = 700, res = 150))
 
-#setwd("/cluster/work/users/cmkobel/MS-pipeline1-split-output/220506_digesta_puchun") # For development
+setwd("/cluster/work/users/cmkobel/MS-pipeline1-split-output/220506_digesta_puchun") # For development
 #setwd("/cluster/work/users/cmkobel/MS-pipeline1-split-output/220506_DnnT6S_carl") # For development
 
 
@@ -69,16 +69,23 @@ df_metadata = try({
 ```{r echo=FALSE, message=F, warning=F}
 # Read the rest of the data. No joining, just a bit of cleaning.
 
+#df_db_stats = try({
+#    read_delim(paste0("db_stats.tsv"))
+#})
+
 df_db_stats = try({
-    read_delim(paste0("db_stats.tsv"))
+    read_tsv("db_stats_seqkit.tsv") %>% 
+        mutate(rank = n():1) %>% 
+        mutate(basename = basename(file)) %>% 
+        select(file, basename, everything())
 })
 
 df_manifest = try({
-    read_delim(paste0("fragpipe/", batch, ".manifest"), col_names = c("path", "experiment", "bioreplicate", "type"))
+    read_tsv(paste0("fragpipe/", batch, ".manifest"), col_names = c("path", "experiment", "bioreplicate", "type"))
 })
 
 df_protein = try({
-    read_delim(paste0("fragpipe/combined_protein.tsv"))
+    read_tsv(paste0("fragpipe/combined_protein.tsv"))
 })
 
 df_workflow = try({
@@ -146,8 +153,13 @@ Selected keys from the fragpipe workflow used.
 # Workflow
 
 df_workflow %>% 
-    filter(str_detect(name, "slice|description|cmd-opts|ionfdr|num_threads")) %>%
+    filter(str_detect(name, "slice|description|cmd-opts|ionfdr|num_threads|db\\-path")) %>%
     drop_na(value)  %>% 
+
+    group_by(name) %>% 
+    mutate(rank = n():1) %>% 
+    filter(rank == 1) %>% 
+    select(-rank) %>% 
     datatable(class = "cell-border stripe")
 
 
@@ -179,6 +191,8 @@ try({
     cells$db$`number of files in db_glob` = (df_db_stats %>% filter(name == "db_glob_read"))$value %>% str_split(" ") %>% unlist() %>% length()
 
 
+
+
     as_tibble(cells$db) %>% 
         pivot_longer(everything(), values_transform = as.character) %>% 
         #mutate(name = str_replace(name, "_", " ")) %>%
@@ -186,6 +200,31 @@ try({
     
 #TODO: Somehow add length in bp?
 # And add some more parameters.
+
+# NEW stats file:
+
+
+
+# Glob statistics
+df_db_stats_globs = df_db_stats %>% 
+    filter(rank > 1)
+
+df_db_stats %>% 
+    select(-rank, -file) %>% 
+    datatable(class = "cell-border stripe")
+    
+
+
+# Final statistics
+df_db_stats_final = df_db_stats %>% 
+    filter(rank == 1)
+
+df_db_stats_final %>% 
+    select(-file, -rank) %>% 
+    mutate_all(as.character)  %>% 
+    pivot_longer(everything())  %>% 
+    datatable()
+
 
 })
 ```
