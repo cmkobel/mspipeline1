@@ -156,7 +156,7 @@ rule make_database:
     resources:
         mem_mb = lambda wildcards, attempt : [16000, 32000, 64000, 128000, 175000, 0, 0][attempt-1], # Attempt starts from 1? Confirm:
         #mem_mb = 64000,
-        runtime = "24:00:00"
+        runtime = "24h",
     benchmark: "output/{config_batch}/benchmarks/benchmark.make_database.{config_batch}.tsv"
     shell: """
 
@@ -197,7 +197,7 @@ rule db_stats:
     params: 
         config_database_glob_read = config_database_glob_read,
     resources: 
-        runtime = "01:00:00",
+        runtime = "1h",
         mem_mb = 256,
     conda: "envs/seqkit.yaml"
     shell: """
@@ -256,7 +256,7 @@ rule fragpipe:
         #partition = "bigmem", # When using more than 178.5 GB at sigma2/saga
         #mem_mb = 32000, # for testing
         mem_mb = 150000, # Some people like to use 150GB in bigmem with 12 threads.
-        runtime = "1-12:00:00",
+        runtime = "36h",
     #conda: "envs/openjdk_python.yaml"
     conda: "envs/openjdk_python_extra.yaml" # TODO: Use this file, I checked it already, and you just have to install pyopenms manually. Don't want to use a previous version of python (e.g. 3.9) just to have easypqp installed, as it seems like some people do not have it too.
     benchmark: "output/{config_batch}/benchmarks/benchmark.fragpipe.{config_batch}.tsv"
@@ -342,7 +342,7 @@ rule report:
     benchmark: "output/{config_batch}/benchmarks/benchmark.report.{config_batch}.tsv"
     conda: "envs/r-markdown.yaml"
     resources:
-        runtime = "04:00:00",
+        runtime = "4h",
         mem_mb = "4096",
     shell: """
 
@@ -369,7 +369,7 @@ rule zip:
     output:
         "output/{config_batch}/MS-pipeline1_{config_batch}.zip",
     resources:
-        runtime = "01:00:00",
+        runtime = "1h",
     shell: """
     
         zip {output} {input} 

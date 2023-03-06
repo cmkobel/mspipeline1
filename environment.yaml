@@ -4,4 +4,4 @@ channels:
   - bioconda
 dependencies:
   - mamba
-  - snakemake
+  - snakemake=7.24
