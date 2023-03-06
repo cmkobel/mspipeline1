@@ -402,7 +402,7 @@ plot_a = run_pca$sdev^2 %>%
     geom_point() +
     labs(title = "Scree", 
          y = "variance [%]") + 
-    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 5))
+    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 
 
 
@@ -414,7 +414,9 @@ plot_b = run_pca$x |>
     #geom_text(aes(label = sample), nudge_x = .3, nudge_y = .3, hjust = 0, vjust = 0, size = 2) +
     geom_text(color = "#000000", vjust = 0, hjust = 0, alpha = 0.6, size = 2, check_overlap = T) +
     scale_color_viridis_c() +
-    coord_fixed()
+    coord_fixed() +
+    labs(title = "Principal component analysis", 
+        subtitle = "Protein intensities")
     
 
 
@@ -450,7 +452,7 @@ plot_a_scaled = run_pca_scaled$sdev^2 %>%
     geom_point() +
     labs(title = "Scree", 
          y = "variance [%]") + 
-    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 5))
+    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
 
 
 
@@ -461,8 +463,10 @@ plot_b_scaled = run_pca_scaled$x |>
     geom_point() +
     #geom_text(aes(label = sample), nudge_x = .3, nudge_y = .3, hjust = 0, vjust = 0, size = 2) +
     geom_text(color = "#000000", vjust = 0, hjust = 0, alpha = 0.6, size = 2, check_overlap = T) +
-    scale_color_viridis_c() +
-    coord_fixed()
+    scale_color_viridis_c() + 
+    coord_fixed() +
+    labs(title = "Principal component analysis", 
+        subtitle = "Scaled protein intensities")
     
 
 
