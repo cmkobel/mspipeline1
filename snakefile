@@ -34,7 +34,10 @@ print("                                                                         
 
 
 # Read configuration
-configfile: "config.yaml"
+try:
+    configfile: "config.yaml"
+except WorkflowError:
+    print("Error: Please make sure that the config.yaml file is present and correctly formatted.")
 
 config_batch = config["batch"]
 config_d_base = config["batch_parameters"][config_batch]["d_base"]
