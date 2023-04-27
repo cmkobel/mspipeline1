@@ -1,7 +1,10 @@
-name: snakemake
+name: snakemake_7_24
 channels:
   - conda-forge
   - bioconda
 dependencies:
   - mamba
   - snakemake=7.24
+
+
+# conda env create -f environment.yaml

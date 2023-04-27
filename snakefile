@@ -246,7 +246,7 @@ rule fragpipe:
     params:
         manifest = manifest.to_csv(path_or_buf=None, sep="\t", index=False, header=False), # This is a csv formatted string 
         original_fragpipe_workflow = "assets/fragpipe_workflows/LFQ-MBR.workflow", # The path to the workflow that specifies the type of analysis
-        n_splits = 8, # The number of database splits that fragpipe (msfragger) should perform.
+        n_splits = 1, # The number of database splits that fragpipe (msfragger) should perform.
 
         fragpipe_executable = config["fragpipe_executable"],
         msfragger_jar = config["msfragger_jar"],
@@ -346,7 +346,7 @@ rule report:
     conda: "envs/r-markdown.yaml"
     resources:
         runtime = "4h",
-        mem_mb = "4096",
+        mem_mb = 4096,
     shell: """
 
         cp scripts/QC.Rmd rmarkdown_template.rmd
