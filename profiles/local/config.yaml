@@ -29,7 +29,7 @@ conda-prefix: '~/.mspipeline1/conda'
 
 # Giant swapping
 resources:
-  - mem_mb=1048576
+  - mem_mb=453632
 
 # # using swap
 # resources:
