@@ -14,6 +14,7 @@ rerun-triggers: "mtime"
 
 use-conda: true
 conda-frontend: mamba
+conda-prefix: '~/.mspipeline1/conda'
 
 # In the event that TMPDIR is not set on the local node, use this:
 # default-resources:
@@ -23,5 +24,14 @@ conda-frontend: mamba
 
 
 # Local setup for a typical workstation
+# resources:
+#   - mem_mb=184320 # johans
+
+# Giant swapping
 resources:
-  - mem_mb=122000 # johans
+  - mem_mb=1048576
+
+# # using swap
+# resources:
+#   - mem_mb=190000 # johans
+

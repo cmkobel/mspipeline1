@@ -1,4 +1,7 @@
+# conda activate snakemake_7_24
+# snakemake --profile profiles/local
 # snakemake --profile profiles/slurm-sigma2-saga
+
 
 __author__ =  "Carl Mathias Kobel & Arturo Vera Ponce De Leon"
 __version__ = "v2.0.0"
@@ -245,8 +248,9 @@ rule fragpipe:
         fragpipe_stdout = "output/{config_batch}/fragpipe/fragpipe.out.log"
     params:
         manifest = manifest.to_csv(path_or_buf=None, sep="\t", index=False, header=False), # This is a csv formatted string 
-        original_fragpipe_workflow = "assets/fragpipe_workflows/LFQ-MBR.workflow", # The path to the workflow that specifies the type of analysis
-        n_splits = 1, # The number of database splits that fragpipe (msfragger) should perform.
+        #original_fragpipe_workflow = "assets/fragpipe_workflows/LFQ-MBR.workflow", # The path to the workflow that specifies the type of analysis
+        original_fragpipe_workflow = "assets/fragpipe_workflows/LFQ-MBR_carl_no_overwrite.workflow", # The path to the workflow that specifies the type of analysis
+        slice_db = 16, # The number of database splits that fragpipe (msfragger) should perform.
 
         fragpipe_executable = config["fragpipe_executable"],
         msfragger_jar = config["msfragger_jar"],
@@ -258,7 +262,8 @@ rule fragpipe:
     resources:
         #partition = "bigmem", # When using more than 178.5 GB at sigma2/saga
         #mem_mb = 32000, # for testing
-        mem_mb = 150000, # Some people like to use 150GB in bigmem with 12 threads.
+        #mem_mb = 190000, # Some people like to use 150GB in bigmem with 12 threads.
+        mem_mb = 453632, # Giant swap
         runtime = "36h",
     #conda: "envs/openjdk_python.yaml"
     conda: "envs/openjdk_python_extra.yaml" # TODO: Use this file, I checked it already, and you just have to install pyopenms manually. Don't want to use a previous version of python (e.g. 3.9) just to have easypqp installed, as it seems like some people do not have it too.
@@ -273,12 +278,21 @@ rule fragpipe:
         echo "Create workflow ..."
         # Copy and modify parameter file with dynamic content.
         cp {params.original_fragpipe_workflow} {output.fragpipe_workflow}
-        echo "" >> {output.fragpipe_workflow}
+        echo -e "\n# Things added by mspipeline1 below ...\n" >> {output.fragpipe_workflow}
+
         echo "num_threads={threads}" >> {output.fragpipe_workflow}
         echo "database_name={input.database}" >> {output.fragpipe_workflow}
         echo "database.db-path={input.database}" >> {output.fragpipe_workflow}
-        echo "msfragger.misc.slice-db={params.n_splits}" >> {output.fragpipe_workflow}
+        echo "msfragger.misc.slice-db={params.slice_db}" >> {output.fragpipe_workflow}
         echo "output_location={params.fragpipe_workdir}" >> {output.fragpipe_workflow}
+        
+        # Error message observed when running out of ram: If mass calibration was enabled, please turn it off by setting calibrate_mass = 0 (when running MSFragger in command line) or changing 'calibration and optimization' to 'None' (when running MSFragger in FragPipe).
+        # ... consider the following options: reduce the number of variable modifications specified; reduce the range of allowed peptide length (from 7-50 to e.g. 7-35).
+        echo "msfragger.calibrate_mass=0" >> {output.fragpipe_workflow}
+        echo "msfragger.digest_max_length=35" >> {output.fragpipe_workflow}
+        
+
+        
         echo "" >> {output.fragpipe_workflow}
         tail {output.fragpipe_workflow}
 
