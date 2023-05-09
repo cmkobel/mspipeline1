@@ -43,7 +43,7 @@ Because it makes sure that all outputs are updated when you change input-paramet
 
 3) If you don't already have an environment with snakemake and mamba installed, use the following command to install a "snakemake" environment with the bundled environment file:
    ```
-   conda env create -f environment.yaml
+   conda env create -f environment.yaml -n mspipeline1
    ```
 
    This environment can then be activated by typing `conda activate mspipeline1`
