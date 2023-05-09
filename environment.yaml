@@ -1,4 +1,4 @@
-name: snakemake_7_24
+name: mspipeline1
 channels:
   - conda-forge
   - bioconda
