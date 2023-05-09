@@ -14,12 +14,17 @@ test -f $outfile && rm $outfile
 
 # TODO: change mega into mibi. Also in the filename
 
+
+
+echo "#runid date type total used free shared buffers cache available" >> $outfile
+
 while true; do
     
-    free --mebi -w \
+    free --mebi --wide \
+    | grep -E "^Mem|^Swap" \
     | awk -v date="$(echo -n "$runid ";  date -Iseconds)" '{ print date "           " $0 }' \
-    | grep "Mem:" \
-    >> $outfile ;
+    >> $outfile
+    
     echo -n .
     sleep $wait_seconds;
 
