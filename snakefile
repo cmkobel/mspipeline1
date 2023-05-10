@@ -298,8 +298,8 @@ rule fragpipe:
 
 
         # Convert mem_mb into gb
-        mem_gb=$(({resources.mem_mib}/1024-2)) # Because there is some overhead, we subtract a few GBs. Everytime fragpipe runs out of memory, I subtract another one: that should be more effective than doing a series of tests ahead of time.
-        echo "Fragpipe will be told not to use more than $mem_gb GiB. In practice it usually uses a bit more."
+        mem_gib=$(({resources.mem_mib}/1024-2)) # Because there is some overhead, we subtract a few GBs. Everytime fragpipe runs out of memory, I subtract another one: that should be more effective than doing a series of tests ahead of time.
+        echo "Fragpipe will be told not to use more than $mem_gib GiB. In practice it usually uses a bit more."
 
         echo "Fragpipe ..."
         # https://fragpipe.nesvilab.org/docs/tutorial_headless.html
@@ -308,7 +308,7 @@ rule fragpipe:
             --workflow {output.fragpipe_workflow} \
             --manifest {output.manifest} \
             --workdir {params.fragpipe_workdir} \
-            --ram $mem_gb \
+            --ram $mem_gib \
             --threads {threads} \
             --config-msfragger {params.msfragger_jar} \
             --config-ionquant {params.ionquant_jar} \
