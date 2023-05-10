@@ -6,7 +6,7 @@ cores: all # good guy
 # I think The Epycs have 64 physical cores which become 128 with hyperthreading
 
 keep-going: true 
-show-failed-logs: true
+show-failed-logs: false
 
 # Flip these for debugging:
 keep-incomplete: true # true for development/debugging
@@ -17,8 +17,10 @@ conda-frontend: mamba
 conda-prefix: '~/.mspipeline1/conda'
 
 # In the event that TMPDIR is not set on the local node, use this:
-# default-resources:
-#   - tmpdir='/cluster/work/users/cmkobel/tmpdir'
+default-resources:
+  - tmpdir='/mnt/evo/tmp'
+
+
 
 
 
@@ -27,11 +29,13 @@ conda-prefix: '~/.mspipeline1/conda'
 # resources:
 #   - mem_mb=184320 # johans
 
-# Giant swapping
-resources:
-  - mem_mb=453632
 
-# # using swap
+# # Giant swapping
 # resources:
-#   - mem_mb=190000 # johans
+#   - mem_mb=453632
+
+# Gianter swapping just on the evo
+resources:
+  - mem_mib=645120 # 630 GiB 
+
 

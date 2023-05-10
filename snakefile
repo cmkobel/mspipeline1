@@ -160,7 +160,7 @@ rule make_database:
         philosopher = config["philosopher_executable"],
     retries: 4 # This is some black magic voodoo shit.
     resources:
-        mem_mb = lambda wildcards, attempt : [16000, 32000, 64000, 128000, 175000, 0, 0][attempt-1], # Attempt starts from 1? Confirm:
+        mem_mib = lambda wildcards, attempt : [16000, 32000, 64000, 128000, 175000, 0, 0][attempt-1], # Attempt starts from 1? Confirm:
         #mem_mb = 64000,
         runtime = "24h",
     benchmark: "output/{config_batch}/benchmarks/benchmark.make_database.{config_batch}.tsv"
@@ -204,7 +204,7 @@ rule db_stats:
         config_database_glob_read = config_database_glob_read,
     resources: 
         runtime = "1h",
-        mem_mb = 256,
+        mem_mib = 256,
     conda: "envs/seqkit.yaml"
     shell: """
 
@@ -263,7 +263,7 @@ rule fragpipe:
         #partition = "bigmem", # When using more than 178.5 GB at sigma2/saga
         #mem_mb = 32000, # for testing
         #mem_mb = 190000, # Some people like to use 150GB in bigmem with 12 threads.
-        mem_mb = 453632, # Giant swap
+        mem_mib = 645120, # Gianter swap
         runtime = "36h",
     #conda: "envs/openjdk_python.yaml"
     conda: "envs/openjdk_python_extra.yaml" # TODO: Use this file, I checked it already, and you just have to install pyopenms manually. Don't want to use a previous version of python (e.g. 3.9) just to have easypqp installed, as it seems like some people do not have it too.
@@ -298,8 +298,8 @@ rule fragpipe:
 
 
         # Convert mem_mb into gb
-        mem_gb=$(({resources.mem_mb}/1024-2)) # Because there is some overhead, we subtract a few GBs. Everytime fragpipe runs out of memory, I subtract another one: that should be more effective than doing a series of tests ahead of time.
-        echo "Fragpipe will be told not to use more than $mem_gb GB. In practice it usually uses a bit more."
+        mem_gb=$(({resources.mem_mib}/1024-2)) # Because there is some overhead, we subtract a few GBs. Everytime fragpipe runs out of memory, I subtract another one: that should be more effective than doing a series of tests ahead of time.
+        echo "Fragpipe will be told not to use more than $mem_gb GiB. In practice it usually uses a bit more."
 
         echo "Fragpipe ..."
         # https://fragpipe.nesvilab.org/docs/tutorial_headless.html
@@ -360,7 +360,7 @@ rule report:
     conda: "envs/r-markdown.yaml"
     resources:
         runtime = "4h",
-        mem_mb = 4096,
+        mem_mib = 4096,
     shell: """
 
         cp scripts/QC.Rmd rmarkdown_template.rmd

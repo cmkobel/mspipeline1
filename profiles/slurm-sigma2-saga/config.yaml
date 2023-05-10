@@ -36,7 +36,7 @@ cluster:
   sbatch
     --parsable
     --cpus-per-task={threads}
-    --mem={resources.mem_mb}
+    --mem={resources.mem_mib}
     --job-name=ms-{rule}_{wildcards}
     --output=logs/%j-{jobid}-{rule}.out.log
     --error=logs/%j-{jobid}-{rule}.err.log
@@ -49,7 +49,7 @@ cluster:
 
 
 default-resources:
-  - mem_mb=1024
+  - mem_mib=1024
   #- disk_mb=1024 # saga doesn't care
   - runtime='12h'
   - tmpdir='$SCRATCH'
@@ -64,7 +64,7 @@ default-resources:
 # ---- Old unused stuff ----
 #cluster: "sbatch -A {cluster.account} -t {cluster.time} -p {cluster.partition} --mem {cluster.mem} --error={cluster.error} --output={cluster.output}"
 # drmaa: "
-#     --mem={cluster.mem_mb} 
+#     --mem={cluster.mem_mib} 
 #     --cpus-per-task={cluster.cpus-per-task} 
 #     --time={cluster.time} 
 #     --account={cluster.account}
@@ -72,7 +72,7 @@ default-resources:
 #     --output={cluster.output}
 # "
 #retries: 2
-#cluster: "sbatch --account {cluster.account} --time {cluster.time} --mem {cluster.mem_mb} --error={cluster.error} --output={cluster.output}"
+#cluster: "sbatch --account {cluster.account} --time {cluster.time} --mem {cluster.mem_mib} --error={cluster.error} --output={cluster.output}"
 
 # [--local-cores N] 
 #local-cores: 2
