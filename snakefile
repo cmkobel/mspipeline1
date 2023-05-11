@@ -259,7 +259,7 @@ rule fragpipe:
 
         fragpipe_workdir = "output/{config_batch}/fragpipe", # Bound for fragpipe --workdir
     threads: 16 # 8 for testing
-    resources:
+    resources: # for memory, use around (6.3e-5)*n_proteins+41 GiB ram
         #partition = "bigmem", # When using more than 178.5 GB at sigma2/saga
         #mem_mb = 32000, # for testing
         #mem_mb = 190000, # Some people like to use 150GB in bigmem with 12 threads.
