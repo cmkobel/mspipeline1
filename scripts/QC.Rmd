@@ -45,6 +45,7 @@ options(vsc.dev.args = list(width = 600, height = 700, res = 150))
 
 #setwd("/cluster/work/users/cmkobel/MS-pipeline1-split-output/220506_digesta_puchun") # For development
 #setwd("/cluster/work/users/cmkobel/MS-pipeline1-split-output/220506_DnnT6S_carl") # For development
+setwd("/mnt/evo/mspipeline1/output/DnnT6_ABCDEF") # For development
 
 
 
@@ -186,44 +187,56 @@ try({
 
 try({
 
-    cells$db = list()
-    cells$db$`number of genes` = (df_db_stats %>% filter(name == "n_records_in_db"))$value
-    cells$db$`number of files in db_glob` = (df_db_stats %>% filter(name == "db_glob_read"))$value %>% str_split(" ") %>% unlist() %>% length()
+#     cells$db = list()
+#     cells$db$`number of genes` = (df_db_stats %>% filter(name == "n_records_in_db"))$value
+#     cells$db$`number of files in db_glob` = (df_db_stats %>% filter(name == "db_glob_read"))$value %>% str_split(" ") %>% unlist() %>% length()
 
 
 
 
-    as_tibble(cells$db) %>% 
-        pivot_longer(everything(), values_transform = as.character) %>% 
-        #mutate(name = str_replace(name, "_", " ")) %>%
-        datatable(class = "cell-border stripe")
+#     as_tibble(cells$db) %>% 
+#         pivot_longer(everything(), values_transform = as.character) %>% 
+#         #mutate(name = str_replace(name, "_", " ")) %>%
+#         datatable(class = "cell-border stripe")
     
-#TODO: Somehow add length in bp?
-# And add some more parameters.
+# #TODO: Somehow add length in bp?
+# # And add some more parameters.
 
-# NEW stats file:
+# # NEW stats file:
 
 
 
-# Glob statistics
-df_db_stats_globs = df_db_stats %>% 
-    filter(rank > 1)
+# # Glob statistics
+# df_db_stats_globs = df_db_stats %>% 
+#     filter(rank > 1)
+
+# df_db_stats %>% 
+#     select(-rank, -file) %>% 
+#     datatable(class = "cell-border stripe")
+    
+
+
+# # Final statistics
+# df_db_stats_final = df_db_stats %>% 
+#     filter(rank == 1)
+
+# df_db_stats_final %>% 
+#     select(-file, -rank) %>% 
+#     mutate_all(as.character)  %>% 
+#     pivot_longer(everything())  %>% 
+#     datatable()
+
+
+
+
+
+### New
 
 df_db_stats %>% 
-    select(-rank, -file) %>% 
+    select(-file) %>% 
     datatable(class = "cell-border stripe")
-    
 
 
-# Final statistics
-df_db_stats_final = df_db_stats %>% 
-    filter(rank == 1)
-
-df_db_stats_final %>% 
-    select(-file, -rank) %>% 
-    mutate_all(as.character)  %>% 
-    pivot_longer(everything())  %>% 
-    datatable()
 
 
 })
@@ -261,6 +274,7 @@ try({
     ## restart:    
 
     identification_rate = df_fragpipe_scans %>% 
+        distinct() %>% # When splitting the database (with the msfragger.misc.slice-db) option, the scans are printed for each split. Thus we must distinctisize the table
         left_join(df_psm, by = "sample") %>% 
         select(sample, stem, barcode, n_scans, n_psms) %>% 
         mutate(quotient = n_psms/n_scans) 
@@ -295,7 +309,7 @@ try({
         
         labs(
             title = "Identification rate",
-            caption = "quotient = n_psms/n_scans\nThe slope represents the median quotient.") 
+            caption = paste0("quotient = n_psms/n_scans\nThe slope represents the median quotient of ", round(identification_rate$quotient %>% median(), 2), "")) 
             
 
     
@@ -390,7 +404,7 @@ protein_intensities_long %>%
 
 ## Hierarchical clustering
 
-Dendrogram on protein intensities between samples.
+Dendrogram on protein intensities between samples. Intensities have been transformed by log10(intensity + 1).
 ```{r echo=FALSE, message=F, warning=F}
 
 options(vsc.dev.args = list(width = 600, height = 700, res = 70))
@@ -403,6 +417,7 @@ options(vsc.dev.args = list(width = 600, height = 700, res = 70))
 
 protein_intensities_altwide = protein_intensities_long %>% 
     select(-name) %>% 
+    mutate(value = log10(value+1))  %>% # Transformation.
     pivot_wider(id_cols = sample, names_from = Protein, values_from = value) 
 
 run_hclust = protein_intensities_altwide %>% 
@@ -420,7 +435,12 @@ run_hclust %>%
 
 ## PCA
 
+The Intensities have been transformed by log10(intensity + 1)
+
 ### Unscaled
+
+The variance is as original.
+
 ```{r echo=FALSE, message=F, warning=F}
 
 options(vsc.dev.args = list(width = 600, height = 700, res = 200))
@@ -438,7 +458,8 @@ plot_a = run_pca$sdev^2 %>%
     
     mutate(component = fct_reorder(component, -variance)) |> 
     ggplot(aes(component, variance)) + 
-    geom_point() +
+    #geom_point() +
+    geom_col() +
     labs(title = "Scree", 
          y = "variance [%]") + 
     theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
@@ -469,6 +490,9 @@ plot_b
 
 
 ### Scaled
+
+The variance of any protein is scaled to be the same. This is generally advised.
+
 ```{r echo=FALSE, message=F, warning=F}
 
 
@@ -488,7 +512,8 @@ plot_a_scaled = run_pca_scaled$sdev^2 %>%
     
     mutate(component = fct_reorder(component, -variance)) |> 
     ggplot(aes(component, variance)) + 
-    geom_point() +
+    #geom_point() +
+    geom_col() + 
     labs(title = "Scree", 
          y = "variance [%]") + 
     theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))

@@ -278,7 +278,7 @@ rule fragpipe:
         echo "Modifying workflow with runtime parameters ..." # TODO: Check if it matters to overwrite or not.
         # Copy and modify parameter file with dynamic content.
         cp {params.original_fragpipe_workflow} {output.fragpipe_workflow}
-        echo -e "\n# Added by mspipeline1 in rule fragpipe in snakefile below ...\n" >> {output.fragpipe_workflow}
+        echo -e "\n# Added by mspipeline1 in rule fragpipe in snakefile below ..." >> {output.fragpipe_workflow}
 
         echo "num_threads={threads}" >> {output.fragpipe_workflow}
         echo "database_name={input.database}" >> {output.fragpipe_workflow}
@@ -293,13 +293,14 @@ rule fragpipe:
         # echo "msfragger.allowed_missed_cleavage_1=1" >> {output.fragpipe_workflow} # Default 2
         # echo "msfragger.allowed_missed_cleavage_2=1" >> {output.fragpipe_workflow} # Default 2
         
+        # Debug, presentation of the bottom of the modified workflow
         echo "" >> {output.fragpipe_workflow}
         tail {output.fragpipe_workflow}
 
 
         # Convert mem_mb into gb
         mem_gib=$(({resources.mem_mib}/1024-2)) # Because there is some overhead, we subtract a few GBs. Everytime fragpipe runs out of memory, I subtract another one: that should be more effective than doing a series of tests ahead of time.
-        echo "Fragpipe will be told not to use more than $mem_gib GiB. In practice it usually uses a bit more."
+        echo "Fragpipe will be told not to use more than $mem_gib GiB. In practice it usually uses a bit more." # Or maybe there just is an overhead when using a conda environment?
 
         echo "Fragpipe ..."
         # https://fragpipe.nesvilab.org/docs/tutorial_headless.html
@@ -364,7 +365,7 @@ rule report:
     shell: """
 
         cp scripts/QC.Rmd rmarkdown_template.rmd
-        Rscript -e 'rmarkdown::render("rmarkdown_template.rmd", "html_document", output_file = "{output.report}", knit_root_dir = "output/{config_batch}/", quiet = T)' 
+        Rscript -e 'rmarkdown::render("rmarkdown_template.rmd", "html_document", output_file = "{output.report}", knit_root_dir = "output/{config_batch}/", quiet = F)' 
         rm rmarkdown_template.rmd
 
     """
