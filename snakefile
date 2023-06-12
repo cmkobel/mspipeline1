@@ -298,7 +298,7 @@ rule fragpipe:
         tail {output.fragpipe_workflow}
 
 
-        # Convert mem_mb into gb
+        # Convert mem_mb into gb (I'm not sure if fragpipe reads GiB or GB?)
         mem_gib=$(({resources.mem_mib}/1024-2)) # Because there is some overhead, we subtract a few GBs. Everytime fragpipe runs out of memory, I subtract another one: that should be more effective than doing a series of tests ahead of time.
         echo "Fragpipe will be told not to use more than $mem_gib GiB. In practice it usually uses a bit more." # Or maybe there just is an overhead when using a conda environment?
 

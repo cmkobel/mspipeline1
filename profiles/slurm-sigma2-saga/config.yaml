@@ -52,7 +52,6 @@ default-resources:
   - mem_mib=1024
   #- disk_mb=1024 # saga doesn't care
   - runtime='12h'
-  - tmpdir='$SCRATCH'
   - partition=normal
   
   
