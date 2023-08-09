@@ -3,7 +3,7 @@
 # snakemake --profile profiles/slurm-sigma2-saga
 
 
-__author__ =  "Carl Mathias Kobel & Arturo Vera Ponce De Leon"
+__author__ =  "Arturo Vera Ponce De Leon, Ove Øyås & Carl Mathias Kobel &"
 __version__ = "v2.0.0"
 
 # changelog:
