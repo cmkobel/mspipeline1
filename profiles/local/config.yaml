@@ -3,6 +3,7 @@
 
 cores: all # good guy 
 #cores: 64 # not a good guy 
+cores: 32 # should be enough
 # I think The Epycs have 64 physical cores which become 128 with hyperthreading
 
 keep-going: true 
@@ -17,8 +18,8 @@ conda-frontend: mamba
 conda-prefix: '~/.mspipeline1/conda'
 
 # In the event that TMPDIR is not set on the local node, use this:
-default-resources:
-  - tmpdir='/mnt/evo/tmp'
+#default-resources:
+#  - tmpdir='/mnt/evo/tmp'
 
 
 
