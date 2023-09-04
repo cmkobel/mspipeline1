@@ -1,9 +1,16 @@
 
 # Define paths to binaries and jar files
-philosopher_executable: "/cluster/projects/nn9864k/cmkobel/02_proteomics/bin/philosopher_v4.8.1_linux_amd64/philosopher"
-msfragger_jar: "/cluster/projects/nn9864k/cmkobel/02_proteomics/bin/MSFragger-3.7/MSFragger-3.7.jar"
-ionquant_jar: "/cluster/projects/nn9864k/cmkobel/02_proteomics/bin/IonQuant-1.8.10/IonQuant-1.8.10.jar"
-fragpipe_executable: "/cluster/projects/nn9864k/cmkobel/02_proteomics/bin/FragPipe-19.1/bin/fragpipe"
+#philosopher_executable: "/cluster/projects/nn9864k/cmkobel/02_proteomics/bin/philosopher_v4.8.1_linux_amd64/philosopher"
+#msfragger_jar: "/cluster/projects/nn9864k/cmkobel/02_proteomics/bin/MSFragger-3.7/MSFragger-3.7.jar"
+#ionquant_jar: "/cluster/projects/nn9864k/cmkobel/02_proteomics/bin/IonQuant-1.8.10/IonQuant-1.8.10.jar"
+#fragpipe_executable: "/cluster/projects/nn9864k/cmkobel/02_proteomics/bin/FragPipe-19.1/bin/fragpipe"
+
+
+# Paths on glittertind
+philosopher_executable: "/glittertind/shared_binaries/philosopher_v5.0.0/philosopher"
+msfragger_jar: "/glittertind/shared_binaries/msfragger_v3.8/MSFragger-3.8/MSFragger-3.8.jar"
+ionquant_jar: "/glittertind/shared_binaries/ionquant-v1.9.8/IonQuant-1.9.8/IonQuant-1.9.8.jar"
+fragpipe_executable: "/glittertind/shared_binaries/fragpipe_v20.0/fragpipe/bin/fragpipe"
 
 
 # Define parameters
@@ -11,21 +18,13 @@ fragpipe_executable: "/cluster/projects/nn9864k/cmkobel/02_proteomics/bin/FragPi
 # database_glob points to the database that the targets are made of. We can only search for proteins that we already know. I wonder if that is why we're doing transcriptomics, because we don't know how the DNA is redundantly translated?
 # samples is a dictionary that points to all the samples within 
 batch_parameters:
-  "minimal": # This batch is purely for developing and debugging the pipeline.
-    d_base: "data_mirror/2022-05-06_PEP_timsTOF_D--T6S_24_andpuchun36"
-    database_glob: "/cluster/projects/nn9864k/cmkobel/02_proteomics/aa_databases/07_puchun_minimal/*.faa"
-    samples: 
-      'D42': '20220506_D10_Slot1-46_1_1984.d'     # D10
-      #'D45': '20220506_D12_Slot1-48_1_1986.d'     # D12
-      'P24': '20220506_C1_Slot1-25_1_1963.d'      # C 1
-      # Save this one as a test dataset. Can't be shared publicly though
 
 
   # Supacow Digesta timepoint 6 - With Puchun and Yanna
   "220506_run_digesta_slaughter": # This batch is purely for developing and debugging the pipeline.
     d_base: "data_mirror/2022-05-06_PEP_timsTOF_D--T6S_24_andpuchun36" # copy of /trd-project2/NS9864K/datasets/2021_supacow/2022-05-06_PEP_timsTOF_D--T6S_24_andpuchun36/timsTOF/20220525_CMK/*
     #database_glob: "/cluster/projects/nn9864k/cmkobel/02_proteomics/aa_databases/08_yannas/finaldb/*.faa"
-    database_glob: "/cluster/projects/nn9864k/cmkobel/02_proteomics/aa_databases/10_supacow/concatenate1/*" A-F, all of them
+    database_glob: "/cluster/projects/nn9864k/cmkobel/02_proteomics/aa_databases/10_supacow/concatenate1/*" #A-F, all of them
     samples: 
       'D01T6S': '20220506_C9_Slot1-33_1_1971.d'      # C 9
       #                                               # C10
@@ -98,8 +97,108 @@ batch_parameters:
       'P32': '20220506_C10_Slot1-34_1_1972.d'     # C10
       #'unknown': '20220506_D1_Slot1-37_1_1975.d'  # D 1
 
-# Pick a title below
 
+
+
+  "20220926_WnnT6_c6": # Wall alone
+    d_base: "/glittertind/projects/supacow/data/2022-09-26_PEP_timsTOF_LWD_Carl/20220901_Carl"
+    database_glob: "/glittertind/projects/supacow/data/aa_databases/10_supacow/concatenate6/*.faa"
+    samples:
+      'W25T6R': '20220921_A4_Slot1-04_1_2452.d' # A4
+      'W51T6R': '20220921_A5_Slot1-05_1_2453.d' # A5
+      'W76T6R': '20220921_A6_Slot1-06_1_2454.d' # A6
+      'W21T6R': '20220901_B4_Slot1-16_1_2458.d' # B4
+      'W48T6R': '20220901_B5_Slot1-17_1_2459.d' # B5
+      'W75T6R': '20220901_B6_Slot1-18_1_2460.d' # B6
+      'W16T6R': '20220901_C4_Slot1-28_1_2464.d' # C4
+      'W45T6R': '20220901_C5_Slot1-29_1_2465.d' # C5
+      'W67T6R': '20220901_C6_Slot1-30_1_2466.d' # C6
+      'W15T6R': '20220901_D4_Slot1-40_1_2475.d' # D4
+      'W43T6R': '20220901_D5_Slot1-41_1_2476.d' # D5
+      'W63T6R': '20220901_D6_Slot1-42_1_2477.d' # D6
+      'W08T6R': '20220901_E4_Slot1-52_1_2486.d' # E4
+      'W42T6R': '20220901_E5_Slot1-53_1_2487.d' # E5
+      'W61T6R': '20220901_E6_Slot1-54_1_2488.d' # E6
+      'W06T6R': '20220901_F4_Slot1-64_1_2497.d' # F4
+      'W35T6R': '20220901_F5_Slot1-65_1_2498.d' # F5
+      'W60T6R': '20220901_F6_Slot1-66_1_2499.d' # F6
+      'W02T6R': '20220901_G4_Slot1-76_1_2508.d' # G4
+      'W29T6R': '20220901_G5_Slot1-77_1_2509.d' # G5
+      'W59T6R': '20220901_G6_Slot1-78_1_2510.d' # G6
+      'W01T6R': '20220901_H4_Slot1-88_1_2519.d' # H4
+      'W28T6R': '20220901_H5_Slot1-89_1_2520.d' # H5
+      'W55T6R': '20220901_H6_Slot1-90_1_2521.d' # H6
+
+
+  "220926_LnnT6_dbB2": # Carl alone Liver
+    d_base: "/glittertind/projects/supacow/data/2022-09-26_PEP_timsTOF_LWD_Carl/20220901_Carl"
+    database_glob: "/glittertind/projects/supacow/data/aa_databases/10_supacow/concatenate6/dbB2.faa"
+    samples:
+      'L01T6R': '20220901_H1_Slot1-85_1_2516.d' # H1 H 1   L01
+      'L02T6R': '20220901_G1_Slot1-73_1_2505.d' # G1 G 1   L02
+      'L06T6R': '20220901_F1_Slot1-61_1_2494.d' # F1 F 1   L06
+      'L08T6R': '20220901_E1_Slot1-49_1_2483.d' # E1 E 1   L08
+      'L15T6R': '20220901_D1_Slot1-37_1_2472.d' # D1 D 1   L15
+      'L16T6R': '20220901_C1_Slot1-25_1_2461.d' # C1 C 1   L16
+      'L21T6R': '20220901_B1_Slot1-13_1_2455.d' # B1 B 1   L21
+      'L25T6R': '20220921_A1_Slot1-01_1_2449.d' # A1 A 1   L25
+      'L28T6R': '20220901_H2_Slot1-86_1_2517.d' # H2 H 2   L28
+      'L29T6R': '20220901_G2_Slot1-74_1_2506.d' # G2 G 2   L29
+      'L35T6R': '20220901_F2_Slot1-62_1_2495.d' # F2 F 2   L35
+      'L42T6R': '20220901_E2_Slot1-50_1_2484.d' # E2 E 2   L42
+      'L43T6R': '20220901_D2_Slot1-38_1_2473.d' # D2 D 2   L43
+      'L45T6R': '20220901_C2_Slot1-26_1_2462.d' # C2 C 2   L45
+      'L48T6R': '20220901_B2_Slot1-14_1_2456.d' # B2 B 2   L48
+      'L51T6R': '20220921_A2_Slot1-02_1_2450.d' # A2 A 2   L51
+      'L55T6R': '20220901_H3_Slot1-87_1_2518.d' # H3 H 3   L55
+      'L59T6R': '20220901_G3_Slot1-75_1_2507.d' # G3 G 3   L59
+      'L60T6R': '20220901_F3_Slot1-63_1_2496.d' # F3 F 3   L60
+      'L61T6R': '20220901_E3_Slot1-51_1_2485.d' # E3 E 3   L61
+      'L63T6R': '20220901_D3_Slot1-39_1_2474.d' # D3 D 3   L63
+      'L67T6R': '20220901_C3_Slot1-27_1_2463.d' # C3 C 3   L67
+      'L75T6R': '20220901_B3_Slot1-15_1_2457.d' # B3 B 3   L75
+      'L76T6R': '20220921_A3_Slot1-03_1_2451.d' # A3 A 3   L76
+
+
+
+  "220926_DnnTnS_c6": # Carl alone Digesta timeseries
+    d_base: "/glittertind/projects/supacow/data/2022-09-26_PEP_timsTOF_LWD_Carl/20220901_Carl"
+    database_glob: "/glittertind/projects/supacow/data/aa_databases/10_supacow/concatenate6/*.faa"
+    samples:
+      'D01T1S': '20220901_H7_Slot1-91_1_2522.d'  # H7  H7   D01T1S
+      'D01T2S': '20220901_H8_Slot1-92_1_2523.d'  # H8  H8   D01T2S
+      'D01T3S': '20220901_H9_Slot1-93_1_2524.d'  # H9  H9   D01T3S
+      'D01T4S': '20220901_H10_Slot1-94_1_2525.d' # H10 H10  D01T4S
+      'D01T5S': '20220901_H11_Slot1-95_1_2526.d' # H11 H11  D01T5S
+      'D02T1S': '20220901_G7_Slot1-79_1_2511.d'  # G7  G7   D02T1S
+      'D02T2S': '20220901_G8_Slot1-80_1_2512.d'  # G8  G8   D02T2S
+      'D02T3S': '20220901_G9_Slot1-81_1_2513.d'  # G9  G9   D02T3S
+      'D02T4S': '20220901_G10_Slot1-82_1_2514.d' # G10 G10  D02T4S
+      'D02T5S': '20220901_G11_Slot1-83_1_2515.d' # G11 G11  D02T5S
+      'D28T1S': '20220901_F7_Slot1-67_1_2500.d'  # F7  F7   D28T1S
+      'D28T2S': '20220901_F8_Slot1-68_1_2501.d'  # F8  F8   D28T2S
+      'D28T3S': '20220901_F9_Slot1-69_1_2502.d'  # F9  F9   D28T3S
+      'D28T4S': '20220901_F10_Slot1-70_1_2503.d' # F10 F10  D28T4S
+      'D28T5S': '20220901_F11_Slot1-71_1_2504.d' # F11 F11  D28T5S
+      'D51T1S': '20220901_E7_Slot1-55_1_2489.d'  # E7  E7   D51T1S
+      'D51T2S': '20220901_E8_Slot1-56_1_2490.d'  # E8  E8   D51T2S
+      'D51T3S': '20220901_E9_Slot1-57_1_2491.d'  # E9  E9   D51T3S
+      'D51T4S': '20220901_E10_Slot1-58_1_2492.d' # E10 E10  D51T4S
+      'D51T5S': '20220901_E11_Slot1-59_1_2493.d' # E11 E11  D51T5S
+      'D55T1S': '20220901_D7_Slot1-43_1_2478.d'  # D7  D7   D55T1S
+      'D55T2S': '20220901_D8_Slot1-44_1_2479.d'  # D8  D8   D55T2S
+      'D55T3S': '20220901_D9_Slot1-45_1_2480.d'  # D9  D9   D55T3S
+      'D55T4S': '20220901_D10_Slot1-46_1_2481.d' # D10 D10  D55T4S
+      'D55T5S': '20220901_D11_Slot1-47_1_2482.d' # D11 D11  D55T5S
+      'D67T1S': '20220901_C7_Slot1-31_1_2467.d'  # C7  C7   D67T1S
+      'D67T2S': '20220901_C8_Slot1-32_1_2468.d'  # C8  C8   D67T2S
+      'D67T3S': '20220901_C9_Slot1-33_1_2469.d'  # C9  C9   D67T3S
+      'D67T4S': '20220901_C10_Slot1-34_1_2470.d' # C10 C10  D67T4S
+      'D67T5S': '20220901_C11_Slot1-35_1_2471.d' # C11 C11  D67T5S
+
+batch: "minimal"
 batch: "220506_DnnT6S_carl"
 batch: "220506_digesta_puchun" # Rerun with defined experiments
-#batch: "minimal"
+batch: "220926_WnnT6_c6"
+batch: "220926_LnnT6_dbB2"
+batch: "220926_DnnTnS_c6"
