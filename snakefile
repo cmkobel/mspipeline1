@@ -1,4 +1,4 @@
-# conda activate snakemake_7_24
+# conda activate mspipeline1
 # snakemake --profile profiles/local
 # snakemake --profile profiles/slurm-sigma2-saga
 

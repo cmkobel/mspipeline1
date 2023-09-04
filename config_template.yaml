@@ -17,147 +17,146 @@ fragpipe_executable: "/glittertind/shared_binaries/fragpipe_v20.0/fragpipe/bin/f
 # d_base points to the base of the d files.
 # database_glob points to the database that the targets are made of. We can only search for proteins that we already know. I wonder if that is why we're doing transcriptomics, because we don't know how the DNA is redundantly translated?
 # samples is a dictionary that points to all the samples within 
-batch_parameters:
-
-
-  # Supacow Digesta timepoint 6 - With Puchun and Yanna
-  "220506_run_digesta_slaughter": # This batch is purely for developing and debugging the pipeline.
-    d_base: "data_mirror/2022-05-06_PEP_timsTOF_D--T6S_24_andpuchun36" # copy of /trd-project2/NS9864K/datasets/2021_supacow/2022-05-06_PEP_timsTOF_D--T6S_24_andpuchun36/timsTOF/20220525_CMK/*
-    #database_glob: "/cluster/projects/nn9864k/cmkobel/02_proteomics/aa_databases/08_yannas/finaldb/*.faa"
-    database_glob: "/cluster/projects/nn9864k/cmkobel/02_proteomics/aa_databases/10_supacow/concatenate1/*" #A-F, all of them
+batch_parameters: # Digesta at slaughter - Together with Puchun and Yanna
+  "220506_DnnT6_c6": 
+    d_base: "/glittertind/projects/supacow/data/2022-05-06_PEP_timsTOF_D--T6S_24_andpuchun36/2022-05-06_PEP_timsTOF_D--T6S_24_andpuchun36/timsTOF/20220525_CMK"
+    database_glob: "/glittertind/projects/supacow/data/aa_databases/10_supacow/concatenate6/*.faa"
     samples: 
-      'D01T6S': '20220506_C9_Slot1-33_1_1971.d'      # C 9
+      "D01T6S": "20220506_C9_Slot1-33_1_1971.d"      # C 9
       #                                               # C10
-      'D02T6S': '20220506_C11_Slot1-35_1_1973.d'     # C11
-      'D06T6S': '20220506_C12_Slot1-36_1_1974.d'     # C12
+      "D02T6S": "20220506_C11_Slot1-35_1_1973.d"     # C11
+      "D06T6S": "20220506_C12_Slot1-36_1_1974.d"     # C12
       
-      #'unknown': '20220506_D1_Slot1-37_1_1975.d'     # D 1
-      'D08T6S': '20220506_D2_Slot1-38_1_1976.d'      # D 2
-      'D15T6S': '20220506_D3_Slot1-39_1_1977.d'      # D 3
-      'D16T6S': '20220506_D4_Slot1-40_1_1978.d'      # D 4
-      'D21T6S': '20220506_D5_Slot1-41_1_1979.d'      # D 5
-      'D25T6S': '20220506_D6_Slot1-42_1_1980.d'      # D 6
-      'D28T6S': '20220506_D7_Slot1-43_1_1981.d'      # D 7
-      'D29T6S': '20220506_D8_Slot1-44_1_1982.d'      # D 8
-      'D35T6S': '20220506_D9_Slot1-45_1_1983.d'      # D 9
-      'D42T6S': '20220506_D10_Slot1-46_1_1984.d'     # D10
-      'D43T6S': '20220506_D11_Slot1-47_1_1985.d'     # D11
-      'D45T6S': '20220506_D12_Slot1-48_1_1986.d'     # D12
+      #"unknown": "20220506_D1_Slot1-37_1_1975.d"     # D 1
+      "D08T6S": "20220506_D2_Slot1-38_1_1976.d"      # D 2
+      "D15T6S": "20220506_D3_Slot1-39_1_1977.d"      # D 3
+      "D16T6S": "20220506_D4_Slot1-40_1_1978.d"      # D 4
+      "D21T6S": "20220506_D5_Slot1-41_1_1979.d"      # D 5
+      "D25T6S": "20220506_D6_Slot1-42_1_1980.d"      # D 6
+      "D28T6S": "20220506_D7_Slot1-43_1_1981.d"      # D 7
+      "D29T6S": "20220506_D8_Slot1-44_1_1982.d"      # D 8
+      "D35T6S": "20220506_D9_Slot1-45_1_1983.d"      # D 9
+      "D42T6S": "20220506_D10_Slot1-46_1_1984.d"     # D10
+      "D43T6S": "20220506_D11_Slot1-47_1_1985.d"     # D11
+      "D45T6S": "20220506_D12_Slot1-48_1_1986.d"     # D12
       
-      'D48T6S': '20220506_E1_Slot1-49_1_1987.d'      # E 1
-      'D51T6S': '20220506_E2_Slot1-50_1_1988.d'      # E 2
-      'D55T6S': '20220506_E3_Slot1-51_1_1989.d'      # E 3
-      'D59T6S': '20220506_E4_Slot1-52_1_1990.d'      # E 4
-      'D60T6S': '20220506_E5_Slot1-53_1_1991.d'      # E 5
-      'D61T6S': '20220506_E6_Slot1-54_1_1992.d'      # E 6
-      'D63T6S': '20220506_E7_Slot1-55_1_1993.d'      # E 7
-      'D67T6S': '20220506_E8_Slot1-56_1_1994.d'      # E 8
-      'D75T6S': '20220506_E9_Slot1-57_1_1995.d'      # E 9
-      'D76T6S': '20220506_E10_Slot1-58_1_1996.d'     # E10
+      "D48T6S": "20220506_E1_Slot1-49_1_1987.d"      # E 1
+      "D51T6S": "20220506_E2_Slot1-50_1_1988.d"      # E 2
+      "D55T6S": "20220506_E3_Slot1-51_1_1989.d"      # E 3
+      "D59T6S": "20220506_E4_Slot1-52_1_1990.d"      # E 4
+      "D60T6S": "20220506_E5_Slot1-53_1_1991.d"      # E 5
+      "D61T6S": "20220506_E6_Slot1-54_1_1992.d"      # E 6
+      "D63T6S": "20220506_E7_Slot1-55_1_1993.d"      # E 7
+      "D67T6S": "20220506_E8_Slot1-56_1_1994.d"      # E 8
+      "D75T6S": "20220506_E9_Slot1-57_1_1995.d"      # E 9
+      "D76T6S": "20220506_E10_Slot1-58_1_1996.d"     # E10
 
 
 
-  # Puchuns 32 digesta - With Puchun and Yanna
-  '220506_digesta_puchun': 
-    d_base: 'data_mirror/2022-05-06_PEP_timsTOF_D--T6S_24_andpuchun36' # copy of /trd-project2/NS9864K/datasets/2021_supacow/2022-05-06_PEP_timsTOF_D--T6S_24_andpuchun36/timsTOF/20220525_CMK/*
-    database_glob: '/cluster/projects/nn9864k/cmkobel/02_proteomics/aa_databases/05_puchun/extracted_aas/*.faa'
+
+  # Puchuns 32 digesta - Together with Puchun and Yanna - Swap project.
+  "220506_digesta_puchun": 
+    d_base: "data_mirror/2022-05-06_PEP_timsTOF_D--T6S_24_andpuchun36" # copy of /trd-project2/NS9864K/datasets/2021_supacow/2022-05-06_PEP_timsTOF_D--T6S_24_andpuchun36/timsTOF/20220525_CMK/*
+    database_glob: "/cluster/projects/nn9864k/cmkobel/02_proteomics/aa_databases/05_puchun/extracted_aas/*.faa"
     samples: 
-      'P1': '20220506_A1_Slot1-01_1_1939.d'       # A 1
-      'P2': '20220506_A2_Slot1-02_1_1940.d'       # A 2
-      'P3': '20220506_A3_Slot1-03_1_1941.d'       # A 3
-      'P4': '20220506_A4_Slot1-04_1_1942.d'       # A 4
-      'P5': '20220506_A5_Slot1-05_1_1943.d'       # A 5
-      'P6': '20220506_A6_Slot1-06_1_1944.d'       # A 6
-      'P7': '20220506_A7_Slot1-07_1_1945.d'       # A 7
-      'P8': '20220506_A8_Slot1-08_1_1946.d'       # A 8
-      'P8v2': '20220506_A9_Slot1-09_1_1947.d'     # A 9
-      'P9': '20220506_A10_Slot1-10_1_1948.d'      # A10
-      'P10': '20220506_A11_Slot1-11_1_1949.d'     # A11
-      'P11': '20220506_A12_Slot1-12_1_1950.d'     # A12
-      'P12': '20220506_B1_Slot1-13_1_1951.d'      # B 1
-      'P13': '20220506_B2_Slot1-14_1_1952.d'      # B 2
-      'P14': '20220506_B3_Slot1-15_1_1953.d'      # B 3
-      'P15': '20220506_B4_Slot1-16_1_1954.d'      # B 4
-      'P16': '20220506_B5_Slot1-17_1_1955.d'      # B 5
-      'P17': '20220506_B6_Slot1-18_1_1956.d'      # B 6
-      'P18': '20220506_B7_Slot1-19_1_1957.d'      # B 7
-      'P19': '20220506_B8_Slot1-20_1_1958.d'      # B 8
-      'P20': '20220506_B9_Slot1-21_1_1959.d'      # B 9
-      'P21': '20220506_B10_Slot1-22_1_1960.d'     # B10
-      'P22': '20220506_B11_Slot1-23_1_1961.d'     # B11
-      'P23': '20220506_B12_Slot1-24_1_1962.d'     # B12
-      'P24': '20220506_C1_Slot1-25_1_1963.d'      # C 1
-      'P25': '20220506_C2_Slot1-26_1_1964.d'      # C 2
-      'P26': '20220506_C3_Slot1-27_1_1965.d'      # C 3
-      'P27': '20220506_C4_Slot1-28_1_1966.d'      # C 4
-      'P28': '20220506_C5_Slot1-29_1_1967.d'      # C 5
-      'P29': '20220506_C6_Slot1-30_1_1968.d'      # C 6
-      'P30': '20220506_C7_Slot1-31_1_1969.d'      # C 7
-      'P31': '20220506_C8_Slot1-32_1_1970.d'      # C 8
-      'P32': '20220506_C10_Slot1-34_1_1972.d'     # C10
-      #'unknown': '20220506_D1_Slot1-37_1_1975.d'  # D 1
+      "P1": "20220506_A1_Slot1-01_1_1939.d"       # A 1
+      "P2": "20220506_A2_Slot1-02_1_1940.d"       # A 2
+      "P3": "20220506_A3_Slot1-03_1_1941.d"       # A 3
+      "P4": "20220506_A4_Slot1-04_1_1942.d"       # A 4
+      "P5": "20220506_A5_Slot1-05_1_1943.d"       # A 5
+      "P6": "20220506_A6_Slot1-06_1_1944.d"       # A 6
+      "P7": "20220506_A7_Slot1-07_1_1945.d"       # A 7
+      "P8": "20220506_A8_Slot1-08_1_1946.d"       # A 8
+      "P8v2": "20220506_A9_Slot1-09_1_1947.d"     # A 9
+      "P9": "20220506_A10_Slot1-10_1_1948.d"      # A10
+      "P10": "20220506_A11_Slot1-11_1_1949.d"     # A11
+      "P11": "20220506_A12_Slot1-12_1_1950.d"     # A12
+      "P12": "20220506_B1_Slot1-13_1_1951.d"      # B 1
+      "P13": "20220506_B2_Slot1-14_1_1952.d"      # B 2
+      "P14": "20220506_B3_Slot1-15_1_1953.d"      # B 3
+      "P15": "20220506_B4_Slot1-16_1_1954.d"      # B 4
+      "P16": "20220506_B5_Slot1-17_1_1955.d"      # B 5
+      "P17": "20220506_B6_Slot1-18_1_1956.d"      # B 6
+      "P18": "20220506_B7_Slot1-19_1_1957.d"      # B 7
+      "P19": "20220506_B8_Slot1-20_1_1958.d"      # B 8
+      "P20": "20220506_B9_Slot1-21_1_1959.d"      # B 9
+      "P21": "20220506_B10_Slot1-22_1_1960.d"     # B10
+      "P22": "20220506_B11_Slot1-23_1_1961.d"     # B11
+      "P23": "20220506_B12_Slot1-24_1_1962.d"     # B12
+      "P24": "20220506_C1_Slot1-25_1_1963.d"      # C 1
+      "P25": "20220506_C2_Slot1-26_1_1964.d"      # C 2
+      "P26": "20220506_C3_Slot1-27_1_1965.d"      # C 3
+      "P27": "20220506_C4_Slot1-28_1_1966.d"      # C 4
+      "P28": "20220506_C5_Slot1-29_1_1967.d"      # C 5
+      "P29": "20220506_C6_Slot1-30_1_1968.d"      # C 6
+      "P30": "20220506_C7_Slot1-31_1_1969.d"      # C 7
+      "P31": "20220506_C8_Slot1-32_1_1970.d"      # C 8
+      "P32": "20220506_C10_Slot1-34_1_1972.d"     # C10
+      #"unknown": "20220506_D1_Slot1-37_1_1975.d"  # D 1
 
 
 
 
-  "20220926_WnnT6_c6": # Wall alone
+  "220926_WnnT6_c6": # Carl alone Wall
     d_base: "/glittertind/projects/supacow/data/2022-09-26_PEP_timsTOF_LWD_Carl/20220901_Carl"
     database_glob: "/glittertind/projects/supacow/data/aa_databases/10_supacow/concatenate6/*.faa"
     samples:
-      'W25T6R': '20220921_A4_Slot1-04_1_2452.d' # A4
-      'W51T6R': '20220921_A5_Slot1-05_1_2453.d' # A5
-      'W76T6R': '20220921_A6_Slot1-06_1_2454.d' # A6
-      'W21T6R': '20220901_B4_Slot1-16_1_2458.d' # B4
-      'W48T6R': '20220901_B5_Slot1-17_1_2459.d' # B5
-      'W75T6R': '20220901_B6_Slot1-18_1_2460.d' # B6
-      'W16T6R': '20220901_C4_Slot1-28_1_2464.d' # C4
-      'W45T6R': '20220901_C5_Slot1-29_1_2465.d' # C5
-      'W67T6R': '20220901_C6_Slot1-30_1_2466.d' # C6
-      'W15T6R': '20220901_D4_Slot1-40_1_2475.d' # D4
-      'W43T6R': '20220901_D5_Slot1-41_1_2476.d' # D5
-      'W63T6R': '20220901_D6_Slot1-42_1_2477.d' # D6
-      'W08T6R': '20220901_E4_Slot1-52_1_2486.d' # E4
-      'W42T6R': '20220901_E5_Slot1-53_1_2487.d' # E5
-      'W61T6R': '20220901_E6_Slot1-54_1_2488.d' # E6
-      'W06T6R': '20220901_F4_Slot1-64_1_2497.d' # F4
-      'W35T6R': '20220901_F5_Slot1-65_1_2498.d' # F5
-      'W60T6R': '20220901_F6_Slot1-66_1_2499.d' # F6
-      'W02T6R': '20220901_G4_Slot1-76_1_2508.d' # G4
-      'W29T6R': '20220901_G5_Slot1-77_1_2509.d' # G5
-      'W59T6R': '20220901_G6_Slot1-78_1_2510.d' # G6
-      'W01T6R': '20220901_H4_Slot1-88_1_2519.d' # H4
-      'W28T6R': '20220901_H5_Slot1-89_1_2520.d' # H5
-      'W55T6R': '20220901_H6_Slot1-90_1_2521.d' # H6
+      "W25T6R": "20220921_A4_Slot1-04_1_2452.d" # A4
+      "W51T6R": "20220921_A5_Slot1-05_1_2453.d" # A5
+      "W76T6R": "20220921_A6_Slot1-06_1_2454.d" # A6
+      "W21T6R": "20220901_B4_Slot1-16_1_2458.d" # B4
+      "W48T6R": "20220901_B5_Slot1-17_1_2459.d" # B5
+      "W75T6R": "20220901_B6_Slot1-18_1_2460.d" # B6
+      "W16T6R": "20220901_C4_Slot1-28_1_2464.d" # C4
+      "W45T6R": "20220901_C5_Slot1-29_1_2465.d" # C5
+      "W67T6R": "20220901_C6_Slot1-30_1_2466.d" # C6
+      "W15T6R": "20220901_D4_Slot1-40_1_2475.d" # D4
+      "W43T6R": "20220901_D5_Slot1-41_1_2476.d" # D5
+      "W63T6R": "20220901_D6_Slot1-42_1_2477.d" # D6
+      "W08T6R": "20220901_E4_Slot1-52_1_2486.d" # E4
+      "W42T6R": "20220901_E5_Slot1-53_1_2487.d" # E5
+      "W61T6R": "20220901_E6_Slot1-54_1_2488.d" # E6
+      "W06T6R": "20220901_F4_Slot1-64_1_2497.d" # F4
+      "W35T6R": "20220901_F5_Slot1-65_1_2498.d" # F5
+      "W60T6R": "20220901_F6_Slot1-66_1_2499.d" # F6
+      "W02T6R": "20220901_G4_Slot1-76_1_2508.d" # G4
+      "W29T6R": "20220901_G5_Slot1-77_1_2509.d" # G5
+      "W59T6R": "20220901_G6_Slot1-78_1_2510.d" # G6
+      "W01T6R": "20220901_H4_Slot1-88_1_2519.d" # H4
+      "W28T6R": "20220901_H5_Slot1-89_1_2520.d" # H5
+      "W55T6R": "20220901_H6_Slot1-90_1_2521.d" # H6
+
+
 
 
   "220926_LnnT6_dbB2": # Carl alone Liver
     d_base: "/glittertind/projects/supacow/data/2022-09-26_PEP_timsTOF_LWD_Carl/20220901_Carl"
     database_glob: "/glittertind/projects/supacow/data/aa_databases/10_supacow/concatenate6/dbB2.faa"
     samples:
-      'L01T6R': '20220901_H1_Slot1-85_1_2516.d' # H1 H 1   L01
-      'L02T6R': '20220901_G1_Slot1-73_1_2505.d' # G1 G 1   L02
-      'L06T6R': '20220901_F1_Slot1-61_1_2494.d' # F1 F 1   L06
-      'L08T6R': '20220901_E1_Slot1-49_1_2483.d' # E1 E 1   L08
-      'L15T6R': '20220901_D1_Slot1-37_1_2472.d' # D1 D 1   L15
-      'L16T6R': '20220901_C1_Slot1-25_1_2461.d' # C1 C 1   L16
-      'L21T6R': '20220901_B1_Slot1-13_1_2455.d' # B1 B 1   L21
-      'L25T6R': '20220921_A1_Slot1-01_1_2449.d' # A1 A 1   L25
-      'L28T6R': '20220901_H2_Slot1-86_1_2517.d' # H2 H 2   L28
-      'L29T6R': '20220901_G2_Slot1-74_1_2506.d' # G2 G 2   L29
-      'L35T6R': '20220901_F2_Slot1-62_1_2495.d' # F2 F 2   L35
-      'L42T6R': '20220901_E2_Slot1-50_1_2484.d' # E2 E 2   L42
-      'L43T6R': '20220901_D2_Slot1-38_1_2473.d' # D2 D 2   L43
-      'L45T6R': '20220901_C2_Slot1-26_1_2462.d' # C2 C 2   L45
-      'L48T6R': '20220901_B2_Slot1-14_1_2456.d' # B2 B 2   L48
-      'L51T6R': '20220921_A2_Slot1-02_1_2450.d' # A2 A 2   L51
-      'L55T6R': '20220901_H3_Slot1-87_1_2518.d' # H3 H 3   L55
-      'L59T6R': '20220901_G3_Slot1-75_1_2507.d' # G3 G 3   L59
-      'L60T6R': '20220901_F3_Slot1-63_1_2496.d' # F3 F 3   L60
-      'L61T6R': '20220901_E3_Slot1-51_1_2485.d' # E3 E 3   L61
-      'L63T6R': '20220901_D3_Slot1-39_1_2474.d' # D3 D 3   L63
-      'L67T6R': '20220901_C3_Slot1-27_1_2463.d' # C3 C 3   L67
-      'L75T6R': '20220901_B3_Slot1-15_1_2457.d' # B3 B 3   L75
-      'L76T6R': '20220921_A3_Slot1-03_1_2451.d' # A3 A 3   L76
+      "L01T6R": "20220901_H1_Slot1-85_1_2516.d" # H1 H 1   L01
+      "L02T6R": "20220901_G1_Slot1-73_1_2505.d" # G1 G 1   L02
+      "L06T6R": "20220901_F1_Slot1-61_1_2494.d" # F1 F 1   L06
+      "L08T6R": "20220901_E1_Slot1-49_1_2483.d" # E1 E 1   L08
+      "L15T6R": "20220901_D1_Slot1-37_1_2472.d" # D1 D 1   L15
+      "L16T6R": "20220901_C1_Slot1-25_1_2461.d" # C1 C 1   L16
+      "L21T6R": "20220901_B1_Slot1-13_1_2455.d" # B1 B 1   L21
+      "L25T6R": "20220921_A1_Slot1-01_1_2449.d" # A1 A 1   L25
+      "L28T6R": "20220901_H2_Slot1-86_1_2517.d" # H2 H 2   L28
+      "L29T6R": "20220901_G2_Slot1-74_1_2506.d" # G2 G 2   L29
+      "L35T6R": "20220901_F2_Slot1-62_1_2495.d" # F2 F 2   L35
+      "L42T6R": "20220901_E2_Slot1-50_1_2484.d" # E2 E 2   L42
+      "L43T6R": "20220901_D2_Slot1-38_1_2473.d" # D2 D 2   L43
+      "L45T6R": "20220901_C2_Slot1-26_1_2462.d" # C2 C 2   L45
+      "L48T6R": "20220901_B2_Slot1-14_1_2456.d" # B2 B 2   L48
+      "L51T6R": "20220921_A2_Slot1-02_1_2450.d" # A2 A 2   L51
+      "L55T6R": "20220901_H3_Slot1-87_1_2518.d" # H3 H 3   L55
+      "L59T6R": "20220901_G3_Slot1-75_1_2507.d" # G3 G 3   L59
+      "L60T6R": "20220901_F3_Slot1-63_1_2496.d" # F3 F 3   L60
+      "L61T6R": "20220901_E3_Slot1-51_1_2485.d" # E3 E 3   L61
+      "L63T6R": "20220901_D3_Slot1-39_1_2474.d" # D3 D 3   L63
+      "L67T6R": "20220901_C3_Slot1-27_1_2463.d" # C3 C 3   L67
+      "L75T6R": "20220901_B3_Slot1-15_1_2457.d" # B3 B 3   L75
+      "L76T6R": "20220921_A3_Slot1-03_1_2451.d" # A3 A 3   L76
 
 
 
@@ -165,40 +164,54 @@ batch_parameters:
     d_base: "/glittertind/projects/supacow/data/2022-09-26_PEP_timsTOF_LWD_Carl/20220901_Carl"
     database_glob: "/glittertind/projects/supacow/data/aa_databases/10_supacow/concatenate6/*.faa"
     samples:
-      'D01T1S': '20220901_H7_Slot1-91_1_2522.d'  # H7  H7   D01T1S
-      'D01T2S': '20220901_H8_Slot1-92_1_2523.d'  # H8  H8   D01T2S
-      'D01T3S': '20220901_H9_Slot1-93_1_2524.d'  # H9  H9   D01T3S
-      'D01T4S': '20220901_H10_Slot1-94_1_2525.d' # H10 H10  D01T4S
-      'D01T5S': '20220901_H11_Slot1-95_1_2526.d' # H11 H11  D01T5S
-      'D02T1S': '20220901_G7_Slot1-79_1_2511.d'  # G7  G7   D02T1S
-      'D02T2S': '20220901_G8_Slot1-80_1_2512.d'  # G8  G8   D02T2S
-      'D02T3S': '20220901_G9_Slot1-81_1_2513.d'  # G9  G9   D02T3S
-      'D02T4S': '20220901_G10_Slot1-82_1_2514.d' # G10 G10  D02T4S
-      'D02T5S': '20220901_G11_Slot1-83_1_2515.d' # G11 G11  D02T5S
-      'D28T1S': '20220901_F7_Slot1-67_1_2500.d'  # F7  F7   D28T1S
-      'D28T2S': '20220901_F8_Slot1-68_1_2501.d'  # F8  F8   D28T2S
-      'D28T3S': '20220901_F9_Slot1-69_1_2502.d'  # F9  F9   D28T3S
-      'D28T4S': '20220901_F10_Slot1-70_1_2503.d' # F10 F10  D28T4S
-      'D28T5S': '20220901_F11_Slot1-71_1_2504.d' # F11 F11  D28T5S
-      'D51T1S': '20220901_E7_Slot1-55_1_2489.d'  # E7  E7   D51T1S
-      'D51T2S': '20220901_E8_Slot1-56_1_2490.d'  # E8  E8   D51T2S
-      'D51T3S': '20220901_E9_Slot1-57_1_2491.d'  # E9  E9   D51T3S
-      'D51T4S': '20220901_E10_Slot1-58_1_2492.d' # E10 E10  D51T4S
-      'D51T5S': '20220901_E11_Slot1-59_1_2493.d' # E11 E11  D51T5S
-      'D55T1S': '20220901_D7_Slot1-43_1_2478.d'  # D7  D7   D55T1S
-      'D55T2S': '20220901_D8_Slot1-44_1_2479.d'  # D8  D8   D55T2S
-      'D55T3S': '20220901_D9_Slot1-45_1_2480.d'  # D9  D9   D55T3S
-      'D55T4S': '20220901_D10_Slot1-46_1_2481.d' # D10 D10  D55T4S
-      'D55T5S': '20220901_D11_Slot1-47_1_2482.d' # D11 D11  D55T5S
-      'D67T1S': '20220901_C7_Slot1-31_1_2467.d'  # C7  C7   D67T1S
-      'D67T2S': '20220901_C8_Slot1-32_1_2468.d'  # C8  C8   D67T2S
-      'D67T3S': '20220901_C9_Slot1-33_1_2469.d'  # C9  C9   D67T3S
-      'D67T4S': '20220901_C10_Slot1-34_1_2470.d' # C10 C10  D67T4S
-      'D67T5S': '20220901_C11_Slot1-35_1_2471.d' # C11 C11  D67T5S
+      "D01T1S": "20220901_H7_Slot1-91_1_2522.d"  # H7  H7   D01T1S
+      "D01T2S": "20220901_H8_Slot1-92_1_2523.d"  # H8  H8   D01T2S
+      "D01T3S": "20220901_H9_Slot1-93_1_2524.d"  # H9  H9   D01T3S
+      "D01T4S": "20220901_H10_Slot1-94_1_2525.d" # H10 H10  D01T4S
+      "D01T5S": "20220901_H11_Slot1-95_1_2526.d" # H11 H11  D01T5S
+      "D02T1S": "20220901_G7_Slot1-79_1_2511.d"  # G7  G7   D02T1S
+      "D02T2S": "20220901_G8_Slot1-80_1_2512.d"  # G8  G8   D02T2S
+      "D02T3S": "20220901_G9_Slot1-81_1_2513.d"  # G9  G9   D02T3S
+      "D02T4S": "20220901_G10_Slot1-82_1_2514.d" # G10 G10  D02T4S
+      "D02T5S": "20220901_G11_Slot1-83_1_2515.d" # G11 G11  D02T5S
+      "D28T1S": "20220901_F7_Slot1-67_1_2500.d"  # F7  F7   D28T1S
+      "D28T2S": "20220901_F8_Slot1-68_1_2501.d"  # F8  F8   D28T2S
+      "D28T3S": "20220901_F9_Slot1-69_1_2502.d"  # F9  F9   D28T3S
+      "D28T4S": "20220901_F10_Slot1-70_1_2503.d" # F10 F10  D28T4S
+      "D28T5S": "20220901_F11_Slot1-71_1_2504.d" # F11 F11  D28T5S
+      "D51T1S": "20220901_E7_Slot1-55_1_2489.d"  # E7  E7   D51T1S
+      "D51T2S": "20220901_E8_Slot1-56_1_2490.d"  # E8  E8   D51T2S
+      "D51T3S": "20220901_E9_Slot1-57_1_2491.d"  # E9  E9   D51T3S
+      "D51T4S": "20220901_E10_Slot1-58_1_2492.d" # E10 E10  D51T4S
+      "D51T5S": "20220901_E11_Slot1-59_1_2493.d" # E11 E11  D51T5S
+      "D55T1S": "20220901_D7_Slot1-43_1_2478.d"  # D7  D7   D55T1S
+      "D55T2S": "20220901_D8_Slot1-44_1_2479.d"  # D8  D8   D55T2S
+      "D55T3S": "20220901_D9_Slot1-45_1_2480.d"  # D9  D9   D55T3S
+      "D55T4S": "20220901_D10_Slot1-46_1_2481.d" # D10 D10  D55T4S
+      "D55T5S": "20220901_D11_Slot1-47_1_2482.d" # D11 D11  D55T5S
+      "D67T1S": "20220901_C7_Slot1-31_1_2467.d"  # C7  C7   D67T1S
+      "D67T2S": "20220901_C8_Slot1-32_1_2468.d"  # C8  C8   D67T2S
+      "D67T3S": "20220901_C9_Slot1-33_1_2469.d"  # C9  C9   D67T3S
+      "D67T4S": "20220901_C10_Slot1-34_1_2470.d" # C10 C10  D67T4S
+      "D67T5S": "20220901_C11_Slot1-35_1_2471.d" # C11 C11  D67T5S
 
-batch: "minimal"
-batch: "220506_DnnT6S_carl"
-batch: "220506_digesta_puchun" # Rerun with defined experiments
+
+
+
+# batch: "minimal"
+# batch: "220506_DnnT6S_carl"
+# batch: "220506_digesta_puchun" # Rerun with defined experiments
+# batch: "220926_WnnT6_c6"
+# batch: "220926_LnnT6_dbB2"
+# batch: "220926_DnnTnS_c6"
+
+
+
+
+# copied from order.
+
+batch: "220506_digesta_puchun"
 batch: "220926_WnnT6_c6"
 batch: "220926_LnnT6_dbB2"
 batch: "220926_DnnTnS_c6"
+batch: "220506_DnnT6_c6"
