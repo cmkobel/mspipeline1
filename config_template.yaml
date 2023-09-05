@@ -53,11 +53,10 @@ batch_parameters: # Digesta at slaughter - Together with Puchun and Yanna
 
 
 
-
   # Puchuns 32 digesta - Together with Puchun and Yanna - Swap project.
   "220506_digesta_puchun": 
-    d_base: "data_mirror/2022-05-06_PEP_timsTOF_D--T6S_24_andpuchun36" # copy of /trd-project2/NS9864K/datasets/2021_supacow/2022-05-06_PEP_timsTOF_D--T6S_24_andpuchun36/timsTOF/20220525_CMK/*
-    database_glob: "/cluster/projects/nn9864k/cmkobel/02_proteomics/aa_databases/05_puchun/extracted_aas/*.faa"
+    d_base: "/glittertind/projects/supacow/data/2022-05-06_PEP_timsTOF_D--T6S_24_andpuchun36/2022-05-06_PEP_timsTOF_D--T6S_24_andpuchun36/timsTOF/20220525_CMK"
+    database_glob: "/glittertind/projects/supacow/data/aa_databases/10_supacow/c6_puchun"
     samples: 
       "P1": "20220506_A1_Slot1-01_1_1939.d"       # A 1
       "P2": "20220506_A2_Slot1-02_1_1940.d"       # A 2
@@ -96,7 +95,6 @@ batch_parameters: # Digesta at slaughter - Together with Puchun and Yanna
 
 
 
-
   "220926_WnnT6_c6": # Carl alone Wall
     d_base: "/glittertind/projects/supacow/data/2022-09-26_PEP_timsTOF_LWD_Carl/20220901_Carl"
     database_glob: "/glittertind/projects/supacow/data/aa_databases/10_supacow/concatenate6/*.faa"
@@ -125,7 +123,6 @@ batch_parameters: # Digesta at slaughter - Together with Puchun and Yanna
       "W01T6R": "20220901_H4_Slot1-88_1_2519.d" # H4
       "W28T6R": "20220901_H5_Slot1-89_1_2520.d" # H5
       "W55T6R": "20220901_H6_Slot1-90_1_2521.d" # H6
-
 
 
 
@@ -198,20 +195,12 @@ batch_parameters: # Digesta at slaughter - Together with Puchun and Yanna
 
 
 
-# batch: "minimal"
-# batch: "220506_DnnT6S_carl"
-# batch: "220506_digesta_puchun" # Rerun with defined experiments
-# batch: "220926_WnnT6_c6"
-# batch: "220926_LnnT6_dbB2"
-# batch: "220926_DnnTnS_c6"
-
-
 
 
 # copied from order.
 
-batch: "220506_digesta_puchun"
 batch: "220926_WnnT6_c6"
 batch: "220926_LnnT6_dbB2"
 batch: "220926_DnnTnS_c6"
 batch: "220506_DnnT6_c6"
+batch: "220506_digesta_puchun"
