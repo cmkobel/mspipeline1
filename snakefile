@@ -40,7 +40,8 @@ print("                                                                         
 try:
     configfile: "config.yaml"
 except WorkflowError as e:
-    print(e, "Error: Please make sure that the config.yaml file is present and correctly formatted. You can use the config_template.yaml file as a starting point.")
+    print(e, "Please make sure that the config.yaml file is present and correctly formatted. You can use the config_template.yaml file as a starting point.")
+    e
 
 config_batch = config["batch"]
 config_d_base = config["batch_parameters"][config_batch]["d_base"]
@@ -184,7 +185,7 @@ rule make_database:
         ls *-decoys-contam-cat_database_sources.faa.fas
 
         mv *-decoys-contam-cat_database_sources.faa.fas philosopher_database.faa # rename database file.
-        rm cat_database_sources.faa # remove unneccessary .faa file.
+        # rm cat_database_sources.faa # remove unneccessary .faa file. # No, keep it for annotation purposes.
 
         {params.philosopher} workspace --clean
 

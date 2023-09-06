@@ -56,7 +56,7 @@ batch_parameters: # Digesta at slaughter - Together with Puchun and Yanna
   # Puchuns 32 digesta - Together with Puchun and Yanna - Swap project.
   "220506_digesta_puchun": 
     d_base: "/glittertind/projects/supacow/data/2022-05-06_PEP_timsTOF_D--T6S_24_andpuchun36/2022-05-06_PEP_timsTOF_D--T6S_24_andpuchun36/timsTOF/20220525_CMK"
-    database_glob: "/glittertind/projects/supacow/data/aa_databases/10_supacow/c6_puchun"
+    database_glob: "/glittertind/projects/supacow/data/aa_databases/10_supacow/c6_puchun/*.faa"
     samples: 
       "P1": "20220506_A1_Slot1-01_1_1939.d"       # A 1
       "P2": "20220506_A2_Slot1-02_1_1940.d"       # A 2
