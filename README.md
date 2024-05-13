@@ -34,7 +34,7 @@ Because it makes sure that all outputs are updated when you change input-paramet
 ## Installation
 1) Prerequisites:
   - Preferably a HPC system, or a beefy local workstation.
-  - An anaconda or [miniconda3](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) package manager on that system.
+  - An conda package manager on that system. [miniforge](https://github.com/conda-forge/miniforge#install) is recommended.
 
 2) Clone this repo on the HPC/workstation where you want to work.
    ```
