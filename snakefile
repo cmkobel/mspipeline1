@@ -135,7 +135,7 @@ rule metadata:
 rule copy_samples: # Or place_samples, or copy_samples
     output:
         flag = touch("output/{config_batch}/samples/copy_samples.done"), # Used to keep fragpipe waiting.
-        dir = "output/{config_batch}/samples", # Why is this necessary?
+        dir = directory("output/{config_batch}/samples"), # Why is this necessary?
         d_files = "output/{config_batch}/samples/" + df["barcode"], # Bound for fragpipe. Update, but fragpipe uses the flag instead?
     params:
         d_files = (config_d_base + "/" + df["barcode"]).tolist(), # Problem is that snakemake doesn't like directories as inputs, so I think it is better to define it as a param.
